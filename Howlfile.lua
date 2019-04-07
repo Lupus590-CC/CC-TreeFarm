@@ -1,4 +1,4 @@
-Options:Default "trace"
+Options:Default "build"
 
 Tasks:clean()
 
