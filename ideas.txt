@@ -1,13 +1,27 @@
 Computer server
 
-
-
 Incremental construction of farm?
-
-
 
 Request with label
 
-
-
 Lost and found and spare construction material box
+
+if the system runs out of saplings then place more in the sapling chest
+  spalings will get used as fuel for the turtles and furnaces with charcoal as a backup
+
+
+do I need modems?
+two turtles
+  tree chopping turtle
+    drops the logs into the water and builds the place
+  smelting turtle
+    collects logs and saplings from bottom chest and sorts and uses furnaces
+
+low roof prevents branches
+
+size = 14*5*2 = 140
+time taken to cut one tree = 10
+time taken to clear farm = 1400
+30 mins in seconds = 30 * 60 = 1800
+
+max logs per tree = 6

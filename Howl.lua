@@ -374,7 +374,7 @@ function OptionTask:configure(item)
 		if self.optionKeys[k] then
 			self.options[k] = v
 		else
-			-- TODO: Configure filtering
+			-- TO DO: Configure filtering
 			-- error("Unknown option " .. tostring(k), 2)
 		end
 	end
@@ -1398,7 +1398,7 @@ function Manager:require(package, files, force)
 
 	local newData = package:require(cache, force)
 
-	-- TODO: Decent equality checking
+	-- TO DO: Decent equality checking
 	if newData ~= cache then
 		self.context.logger:verbose("Package " .. name .. " updated")
 		if newData == nil then
@@ -1625,7 +1625,7 @@ end\
 	This doesn't have to be too advanced as it is only for Howl's use\
 	The files is a list of paths to file contents, or true if the file\
 	is a directory.\
-	TODO: Override IO\
+	TO DO: Override IO\
 ]]\
 local function makeEnv(root, files)\
 	-- Emulated filesystem (partially based of Oeed's)\
@@ -1686,7 +1686,7 @@ local function makeEnv(root, files)\
 			getFreeSpace = fs.getFreeSpace,\
 			combine = fs.combine,\
 \
-			-- TODO: This should be implemented\
+			-- TO DO: This should be implemented\
 			move = fs.move,\
 			copy = fs.copy,\
 			makeDir = function(dir)\
@@ -1834,7 +1834,7 @@ function PackTask:configure(item)
 	self.sources:configure(item)
 end
 
--- TODO: Add a custom "ouput" mixin
+-- TO DO: Add a custom "ouput" mixin
 function PackTask:output(value)
 	assert.argType(value, "string", "output", 1)
 	if self.options.output then error("Cannot set output multiple times") end
@@ -2372,8 +2372,8 @@ function GistPackage:require(previous, refresh)
 		return previous
 	end
 
-	-- TODO: Fetch gists/:id/commits [1].version first if we have a hash
-	-- TODO: Worth storing individual versions?
+	-- TO DO: Fetch gists/:id/commits [1].version first if we have a hash
+	-- TO DO: Worth storing individual versions?
 	local success, request = platform.http.request("https://api.github.com/gists/" .. id)
 	if not success or not request then
 		self.context.logger:error("Cannot find gist " .. id)
@@ -2584,7 +2584,7 @@ function FileDependency:initialize(task, path)
 end
 
 function FileDependency:setup(context, runner)
-	-- TODO: Check that this can be resolved
+	-- TO DO: Check that this can be resolved
 end
 
 function FileDependency:resolve(context, runner)
@@ -3122,7 +3122,7 @@ function Logger:dump(...)
 			end
 
 			if i > 1 then value = " " .. value end
-			-- TODO: use platformLog too.
+			-- TO DO: use platformLog too.
 			colored.writeColor("lightGray", value)
 		end
 		print()
@@ -3379,7 +3379,7 @@ local createLookup = require("howl.lib.utils").createLookup
 local type, tostring, format = type, tostring, string.format
 local getmetatable, error = getmetatable, error
 
--- TODO: Switch to LuaCP's pprint
+-- TO DO: Switch to LuaCP's pprint
 local function dumpImpl(t, tracking, indent, tupleLength)
 	local objType = type(t)
 	if objType == "table" and not tracking[t] then
@@ -6181,7 +6181,7 @@ function Source:excluded(text)
 	if matches(self.excludes, text) then
 		return true
 	elseif self.parent then
-		-- FIXME: Combine this path
+		-- FIX ME: Combine this path
 		return self.parent:excluded(text)
 	else
 		return false
@@ -6198,8 +6198,8 @@ end
 
 function Source:configure(item)
 	assert.argType(item, "table", "configure", 1)
-	-- TODO: Ensure other keys aren't passed
-	-- TODO: Fix passing other source instances
+	-- TO DO: Ensure other keys aren't passed
+	-- TO DO: Fix passing other source instances
 
 	if item.include ~= nil then self:include(item.include) end
 	if item.exclude ~= nil then self:exclude(item.exclude) end
@@ -6497,7 +6497,7 @@ local colored = require "howl.lib.colored"
 local fs = require "howl.platform".fs
 
 local howlFile, currentDirectory = loader.FindHowl()
--- TODO: Don't pass the error message as the current directory: construct mediator/arg parser another time.
+-- TO DO: Don't pass the error message as the current directory: construct mediator/arg parser another time.
 local context = require "howl.context"(currentDirectory or fs.currentDir(), {...})
 
 local options = context.arguments
@@ -6695,7 +6695,7 @@ mixins.optionGroup = {
 				self.static.options = options
 				local parent = self.super and self.super.static.options
 
-				-- TODO: Copy instead. Also propagate to children below
+				-- TO DO: Copy instead. Also propagate to children below
 				if parent then setmetatable(options, { __index = parent } ) end
 			end
 
@@ -6732,7 +6732,7 @@ mixins.optionGroup = {
 	end,
 
 	__newindex = function(self, key, value)
-		if self.class.options and self.class.options[key] then -- TODO: This is being applied to superclasses
+		if self.class.options and self.class.options[key] then -- TO DO: This is being applied to superclasses
 			self[key](self, value)
 		else
 			rawset(self, key, value)
