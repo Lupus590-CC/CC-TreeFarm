@@ -9,7 +9,7 @@ local saplingChest = {}
 local outputChest = {}
 local inputChest = {}
 
-local reserveFuelLevel = 50 -- if below this then head back to fuel chest
+local reserveFuelLevel = 50 -- if below this then head back to fuel chest now
 local fuelLevelRequiredForOneRound = 2200 -- 27 charcoal or 422 saplings
 
 local nav = (
