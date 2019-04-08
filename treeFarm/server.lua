@@ -1,6 +1,6 @@
-local utils = require("utils")
+local rednetUtils = require("utils.rednetUtils")
 
-rednet.host(utils.protocolName, utils.serverName)
+rednet.host(rednetUtils.protocolName, rednetUtils.serverName)
 
 
 

@@ -1,5 +1,6 @@
 -- build the tree farm
-local utils = require "utils"
+local utils = require("utils")
+local lama = require("lama")
 
 local function placeTreePodium()
   if not (utils.selectItemById(itemIds.dirt) and  utils.selectItemById(itemIds.jackOLantern)) then
@@ -20,5 +21,6 @@ local function placeTreePodium()
     turtle.down()
   end
   turtle.dig()
-  --TODO: send message that location is bult
+  --TODO: send message that location is built
+  utils.rednetutils.sendToServer({messType="build", built="podium", loc=table.pack(lama.getLocation())}
 end

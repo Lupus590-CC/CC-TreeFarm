@@ -1,20 +1,18 @@
-
-local serverName = "lupus590TreeFarm"
-local protocolName = "lupus590TreeFarm"
+local itemIds = require("itemIds")
 
 local function selectItemById(itemId, orEmpty)
   if not type(itemId) == "table" then
-    error("arg[1] exspected table, got"..type(itemId),2)
+    error("arg[1] expected table, got"..type(itemId),2)
   end
   if not type(itemId.name) == "string" then
-    error("arg[1].name exspected string, got"..type(itemId.name),2)
+    error("arg[1].name expected string, got"..type(itemId.name),2)
   end
   if not type(itemId.damage) == "number" then
-    error("arg[1].damage exspected number, got"..type(itemId.damage),2)
+    error("arg[1].damage expected number, got"..type(itemId.damage),2)
   end
 
   if orEmpty and (not type(orEmpty) == "boolean") then
-    error("arg[2] exspected boolean or nil, got"..type(orEmpty),2)
+    error("arg[2] expected boolean or nil, got"..type(orEmpty),2)
   end
 
 
@@ -37,8 +35,10 @@ local function selectItemById(itemId, orEmpty)
   return false
 end
 
-local utils = {
-  selectItemById = selectItemById
+local itemUtils = {
+  selectItemById = selectItemById,
+  itemIds = itemIds,
+  
 }
 
-return utils
+return itemUtils
