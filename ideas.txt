@@ -23,6 +23,7 @@ low roof prevents branches
 TODO: organize this file
 TODO: new screenshots
 TODO: programmatic locations
+TODO: copy world to desktop (put in git?)
 
 
 size = 14*5*2 = 140
