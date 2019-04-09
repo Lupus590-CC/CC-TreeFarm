@@ -9,6 +9,7 @@ Lost and found and spare construction material box
 if the system runs out of saplings then place more in the sapling chest
   spalings will get used as fuel for the turtles and furnaces with charcoal as a backup
 
+if using two turtles then I my not need to have them able to navigate arround eachother as their zones of work won't cross each other. (building may be an exception)
 
 do I need modems?
 two turtles
