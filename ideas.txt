@@ -20,9 +20,26 @@ two turtles
 
 low roof prevents branches
 
+TODO: organize this file
+TODO: new screenshots
+TODO: programmatic locations
+
+
 size = 14*5*2 = 140
 time taken to cut one tree = 10
 time taken to clear farm = 1400
 30 mins in seconds = 30 * 60 = 1800
 
 max logs per tree = 6
+
+item requirements
+  packed ice 1406
+  furnace 14
+  water bucket 2
+  jack o'lantern 140
+  dirt 140
+  chest 10
+  filler block (stone or something) a lot
+  hopper 2
+  torch 12
+  fence post 32
