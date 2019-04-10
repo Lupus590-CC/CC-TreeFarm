@@ -25,6 +25,8 @@ TODO: new screenshots
 TODO: programmatic locations
 TODO: copy world to desktop (put in git?)
 
+lama overrides real gps, if they conflict then lama is used
+
 
 size = 14*5*2 = 140
 time taken to cut one tree = 10
@@ -33,7 +35,7 @@ time taken to clear farm = 1400
 
 max logs per tree = 6
 
-item requirements
+Required items list
   1406 packed ice
   14 furnace
   2 water bucket
@@ -47,5 +49,5 @@ item requirements
   2 turtle
   1 diamond pickaxe
   1 oak sapling (more is better)
-  400 units of fuel for the turtles (200 each after this the turtles should be self sufficient) 
+  A bunch of fuel for the turtles - not sure how much yet
 

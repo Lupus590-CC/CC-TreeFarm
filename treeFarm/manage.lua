@@ -4,9 +4,11 @@ local itemIds = require("utils.itemUtils.itemIds")
 local function chopTree()
   turtle.dig()
   turtle.forward()
-  while turtle.detectUp() do
+  local hasBlock, blockId = turtle.inspect()
+  while blockId.name == itemIds.log.name do
     turtle.digUp()
     turtle.up()
+    hasBlock, blockId = turtle.inspect()
   end
   while turtle.down() do
   end
@@ -27,7 +29,7 @@ local function doTreeLine()
       elseif blockId.name == itemIds.leaves.name then
         turtle.dig()
       else
-        atEndOfLine = true
+        atEndOfLine = true -- TODO: count how far we go (or use a bounding box?)
       end
     end
   until atEndOfLine
