@@ -14,6 +14,8 @@ local function chopTree()
 end
 
 local function doTreeLine()
+  -- TODO: fuel checks and unloading
+  -- TODO: does breaking leaves drop saplings?
   local atEndOfLine = false
   repeat
     while turtle.forward() do

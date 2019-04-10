@@ -34,13 +34,18 @@ time taken to clear farm = 1400
 max logs per tree = 6
 
 item requirements
-  packed ice 1406
-  furnace 14
-  water bucket 2
-  jack o'lantern 140
-  dirt 140
-  chest 10
-  filler block (stone or something) a lot
-  hopper 2
-  torch 12
-  fence post 32
+  1406 packed ice
+  14 furnace
+  2 water bucket
+  140 jack o'lantern
+  140 dirt
+  10c hest
+  9999? filler block (cobblestone is fine)
+  2 hopper
+  12 torch
+  32 fence post
+  2 turtle
+  1 diamond pickaxe
+  1 oak sapling (more is better)
+  400 units of fuel for the turtles (200 each after this the turtles should be self sufficient) 
+

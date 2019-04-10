@@ -8,6 +8,7 @@ Tasks:minify "minify" {
 	output = "build/treeFarm.min.lua",
 }
 
+-- TODO: separate into multiple tasks, farm, build and furnace
 Tasks:require "main" {
 	include = "treeFarm/*.lua",
 	startup = "treeFarm/main.lua",
