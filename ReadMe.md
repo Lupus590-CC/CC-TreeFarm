@@ -1,5 +1,5 @@
 # build instuctions
 
-run Howl.lua in a ComputerCraft computer (or turtle)
+run `Howl.lua` in a ComputerCraft computer (or turtle) to generate files in `/build` directory. Run any of the generated files 
 
-program requires a wireless mining turtle to run
+Program will provide instructions

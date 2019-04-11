@@ -21,9 +21,8 @@ two turtles
 low roof prevents branches
 
 TODO: organize this file
-TODO: new screenshots
 TODO: programmatic locations
-TODO: copy world to desktop (put in git?)
+TODO: put world in git?
 
 lama overrides real gps, if they conflict then lama is used
 
@@ -42,7 +41,7 @@ Required items list
   140 jack o'lantern
   140 dirt
   10c hest
-  9999? filler block (cobblestone is fine)
+  9999? stone or cobblestone (mixing is fine)
   2 hopper
   12 torch
   32 fence post

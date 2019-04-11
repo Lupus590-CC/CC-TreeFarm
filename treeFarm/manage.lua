@@ -1,6 +1,8 @@
 -- general management of the farm
 local itemIds = require("utils.itemUtils.itemIds")
 
+-- TODO: inventory checks
+
 local function chopTree()
   turtle.dig()
   turtle.forward()
@@ -30,6 +32,7 @@ local function doTreeLine()
         turtle.dig()
       else
         atEndOfLine = true -- TODO: count how far we go (or use a bounding box?)
+								-- bounding box is multiple turtle friendly and more efficient
       end
     end
   until atEndOfLine

@@ -15,6 +15,8 @@ local itemIds = {
   diskDrive = { name = "ComputerCraft:CC-Peripheral", damage = 0 },
   advanceComputer = { name = "ComputerCraft:CC-Computer", damage = 16384 },
   computer = { name = "ComputerCraft:CC-Computer", damage = 0 },
+  stone = { name = "minecraft:stone", damage = 0 }, -- TODO: confirm values
+  cobblestone = { name = "minecraft:cobblestone", damage = 0 }, -- TODO: confirm values
 }
 
 return itemIds
