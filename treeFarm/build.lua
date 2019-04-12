@@ -18,7 +18,7 @@ local function placeTreePodium()
   utils.selectItemById(itemIds.jackOLantern)
   turtle.place()
   turtle.down()
-  utils.selectItemById(itemIds.dirt, true)
+  utils.selectItemByIdOrEmptySlot(itemIds.cobblestone)
   turtle.dig
   turtle.up()
   turtle.place()

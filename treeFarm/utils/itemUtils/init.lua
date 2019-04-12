@@ -24,7 +24,7 @@ local function selectItemById(itemId, orEmpty)
         return true
       end
   end
-  if orEmpty then
+  if orEmpty then -- TODO: only select empty if could not find item or item stack was full
     for i = 1, 16 do
         turtle.select(i)
         if turtle.getItemCount() == 0 then
@@ -35,9 +35,14 @@ local function selectItemById(itemId, orEmpty)
   return false
 end
 
+local function selectItemByIdOrEmptySlot(itemId)
+  return selectItemById(selectItemById, true)
+end
+
 local itemUtils = {
-  selectItemById = selectItemById,
   itemIds = itemIds,
+  selectItemById = selectItemById,
+  selectItemByIdOrEmptySlot = selectItemByIdOrEmptySlot,
   
 }
 

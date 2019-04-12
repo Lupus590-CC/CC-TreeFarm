@@ -7,9 +7,9 @@ Request with label
 Lost and found and spare construction material box
 
 if the system runs out of saplings then place more in the sapling chest
-  spalings will get used as fuel for the turtles and furnaces with charcoal as a backup
+  saplings will get used as fuel for the turtles and furnaces with charcoal as a backup
 
-if using two turtles then I my not need to have them able to navigate arround eachother as their zones of work won't cross each other. (building may be an exception)
+if using two turtles then I my not need to have them able to navigate around each other as their zones of work won't cross each other. (building may be an exception)
 
 do I need modems?
 two turtles
@@ -17,7 +17,25 @@ two turtles
     drops the logs into the water and builds the place
   smelting turtle
     collects logs and saplings from bottom chest and sorts and uses furnaces
+	
+logging turtles divide tasks into rows
+	turtle with one row: chop away from chests, wait for regrowth, chop towards chests, restock,  wait for regrowth
 
+waiting for regrowth:
+	use timers?
+		hard to save to file
+		immune to player sleeping
+	use target clock?
+		jumps forward when the player sleeps without actual growth progress
+		easy to save
+	use both
+		save the target clock and use a timer to alert to that, if the clock suddenly changes the update the file
+	use real world time
+		no easy way to access in old CC
+		will jump between world loads (same with others)
+	watch a sapling
+		some others could have grown ages ago, this wastes time
+	
 low roof prevents branches
 
 TODO: organize this file
