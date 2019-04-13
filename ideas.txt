@@ -11,13 +11,13 @@ if the system runs out of saplings then place more in the sapling chest
 
 if using two turtles then I my not need to have them able to navigate around each other as their zones of work won't cross each other. (building may be an exception)
 
-do I need modems?
+do I need modems? NOTE: modems are cheap
 two turtles
   tree chopping turtle
     drops the logs into the water and builds the place
   smelting turtle
     collects logs and saplings from bottom chest and sorts and uses furnaces
-	
+
 logging turtles divide tasks into rows
 	turtle with one row: chop away from chests, wait for regrowth, chop towards chests, restock,  wait for regrowth
 
@@ -35,7 +35,7 @@ waiting for regrowth:
 		will jump between world loads (same with others)
 	watch a sapling
 		some others could have grown ages ago, this wastes time
-	
+
 low roof prevents branches
 
 TODO: organize this file
@@ -67,4 +67,3 @@ Required items list
   1 diamond pickaxe
   1 oak sapling (more is better)
   A bunch of fuel for the turtles - not sure how much yet
-
