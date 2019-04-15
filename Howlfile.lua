@@ -9,6 +9,9 @@ Tasks:minify "minify" {
 }
 
 -- TODO: separate into multiple tasks, farm, build, furnace, remote, combine
+-- they may be best to put in separate folders, in which case it may be a good idea to
+-- add another task which copies the shared folder into these separate
+-- project folders since require can't go up directories
 Tasks:require "main" {
 	include = "treeFarm/*.lua",
 	startup = "treeFarm/main.lua",
