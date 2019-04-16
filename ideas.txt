@@ -2,6 +2,9 @@ TODO: organise this file
 
 TODO: check indents for all files
 
+NOT: can we have too much wood to smelt?
+	could we be unable to catch up?
+
 Computer server
 
 has advanced pocket computer
