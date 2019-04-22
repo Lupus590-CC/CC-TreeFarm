@@ -1,4 +1,4 @@
-local _ = require or dofile(shell.dir().."require.lua"")
+local _ = require or dofile(shell.dir().."require.lua)
 
 
 function chopTree()
