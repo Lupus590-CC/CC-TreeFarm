@@ -12,12 +12,12 @@ Tasks:minify "minify" { -- TODO: can I wildcard this?
 Tasks:Task "license" (function(_, _, file, dest)
 		local fs = require "howl.platform".fs
 		local contents = table.concat {
-		"--[[\n"]],
+		"--[[\n",
 		fs.read(File "License.txt"),
 		"\n]]\n",
 		fs.read(File(file)),
 		}
-		
+
 		fs.write(File(dest), contents)
 		end)
 		:maps("wild:build/*.un.lua", "wild:build/*.lua")
