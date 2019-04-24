@@ -7,7 +7,7 @@ for k, v in pairs(itemIds) do
   reverseItemLookup[v.name..":"..tostring(v.damage)] = {name = k, fuelValue = v.fuelValue}
 end
 setmetatable(reverseItemLookup, {
-  __call = function(itemId)
+  __call = function(self, itemId)
     if not type(itemId) == "table" then
       error("arg[1] expected table, got"..type(itemId),2)
     end
