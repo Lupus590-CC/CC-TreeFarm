@@ -5,11 +5,14 @@ local nav = require("nav")
 -- tODO: move to nav?
 local function fuelCheck() -- TODO: fuel check
 	-- if fuel is low
-		-- find fuel in inventory
+		if itemUtils.selectBestFuel() then -- find fuel in inventory
 		-- refuel
 		-- if fuel still low
 			-- get more fuel
-	
+		else
+			-- go to fuel chest
+		end
+
 end
 
 
