@@ -1,5 +1,7 @@
 TODO: organise this file
 
+update detector?
+
 TODO: check indents for all files
 
 NOT: can we have too much wood to smelt?

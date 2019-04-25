@@ -7,11 +7,11 @@ for k, v in pairs(itemIds) do
   reverseItemLookup[v.name..":"..tostring(v.damage)] = {name = k, fuelValue = v.fuelValue}
 end
 setmetatable(reverseItemLookup, {
-  __call = function(self, itemId)
+  __call = function(_self, itemId)
     if not type(itemId) == "table" then
       error("arg[1] expected table, got"..type(itemId),2)
     end
-    if not type(itemId.name) == "string" then
+    if not type(itemId.name) == "string" then -- NOTE: this didn't error when I had the args in the wrong place, why?
       error("arg[1].name expected string, got"..type(itemId.name),2)
     end
     if not type(itemId.damage) == "number" then

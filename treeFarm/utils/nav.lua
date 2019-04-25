@@ -11,6 +11,7 @@ local inputChest = {}
 
 local reserveFuelLevel = 50 -- if below this then head back to fuel chest now
 local fuelLevelRequiredForOneRound = 2200 -- 27 charcoal or 422 saplings
+-- max fuel for a normal turtle is 20,000
 
 local nav = (
 

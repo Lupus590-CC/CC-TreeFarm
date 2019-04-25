@@ -2,7 +2,7 @@ local rednetUtils = require("rednetUtils")
 local itemUtils = require("itemUtils")
 local nav = require("nav")
 
--- tODO: move to nav?
+-- TODO: move to nav?
 local function fuelCheck() -- TODO: fuel check
 	-- if fuel is low
 		if itemUtils.selectBestFuel() then -- find fuel in inventory
