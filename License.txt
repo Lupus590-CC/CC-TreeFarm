@@ -1,3 +1,6 @@
+If you are reading this code you will have an easier time on github:
+https://github.com/lupus590/CC-TreeFarm
+
 Treefarm
 --------
 

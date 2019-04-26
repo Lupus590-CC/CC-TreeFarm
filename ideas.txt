@@ -4,8 +4,12 @@ update detector?
 
 TODO: check indents for all files
 
-NOT: can we have too much wood to smelt?
+NOTE: can we have too much wood to smelt?
 	could we be unable to catch up?
+	
+make the whole farm stackable?
+	only need to put jack o'lantern and dirt
+	  jack o'lantern can act as tree height capping block
 
 Computer server
 

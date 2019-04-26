@@ -8,7 +8,7 @@ Tasks:minify "minify" { -- TODO: can I wildcard this?
 	output = "build/treeFarm.min.un.lua",
 }
 
--- TODO: find out how to add license to start of output file (link sent to desktop)
+-- add license to start of output file
 Tasks:Task "license" (function(_, _, file, dest)
 		local fs = require "howl.platform".fs
 		local contents = table.concat {
@@ -25,9 +25,10 @@ Tasks:Task "license" (function(_, _, file, dest)
 
 
 -- TODO: separate into multiple tasks, farm, build, furnace, remote, combine
--- they may be best to put in separate folders, in which case it may be a good idea to
--- add another task which copies the shared folder into these separate
+-- they may be best to put in separate folders, in which case it may be a good
+-- idea to add another task which copies the shared folder into these separate
 -- project folders since require can't go up directories
+-- wouldn't the above duplicate stuff as things become nested?
 Tasks:require "main" {
 	include = "treeFarm/*.lua",
 	startup = "treeFarm/main.lua",
