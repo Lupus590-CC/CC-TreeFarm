@@ -76,7 +76,7 @@ local function selectEmptySlot()
   return false
 end
 
-local function selectItemByIdOrEmptySlot(itemId, vetoFullSlots)
+local function selectItemByIdOrEmptySlot(itemId, allowFullSlots) -- full slots are not deemed valid for selection
   do -- selectItemById checks (copied so that blame value in error() gets elevated correctly)
     if not type(itemId) == "table" then
       error("arg[1] expected table, got"..type(itemId),2)
@@ -89,14 +89,20 @@ local function selectItemByIdOrEmptySlot(itemId, vetoFullSlots)
     end
   end
   
-  if vetoFullSlots and type(vetoFullSlots) ~= "boolean" then
-    error("arg[2] expected boolean or nil, got"..type(vetoFullSlots),2)
+  if allowFullSlots and not type(allowFullSlots) == "boolean" then
+    error("arg[2] expected boolean or nil, got"..type(allowFullSlots),2)
   end
-
+  
+  local vetoFullSlots = nil
+  
   -- if the stack is full then don't select it (when we call selectItemByIdOrEmptySlot we are likely wanting to dig something)
   local function vetoFullSlotsFunc(currentItem)
     return not reverseItemLookup(currentItem).maxStackSize == currentItem.count
   end 
+  
+  if allowFullSlots then
+    vetoFullSlotsFunc = nil
+  end
 
   return selectItemById(selectItemById, vetoFullSlotsFunc) or selectEmptySlot()
 end

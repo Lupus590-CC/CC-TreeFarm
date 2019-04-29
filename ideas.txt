@@ -2,6 +2,8 @@ TODO: organise this file
 
 update detector?
 
+can I make it so that there are multiple furnace managing turtles?
+
 TODO: check indents for all files
 
 NOTE: can we have too much wood to smelt?
@@ -21,14 +23,17 @@ Incremental construction of farm?
 
 Request with label
 
-Lost and found and spare construction material box
+Lost and found(apples) and spare construction material chests
 
 if the system runs out of saplings then place more in the sapling chest
-  saplings will get used as fuel for the turtles and furnaces with charcoal as a backup
+  saplings will get used as fuel for the turtles and furnaces with charcoal as a backup -- NOT: this is not currently true
+	what to do when the chests are full?
 
 if using two turtles then I my not need to have them able to navigate around each other as their zones of work won't cross each other. (building may be an exception)
+	with modems, turtles may be able to negotiate navigating around each other
+		can I get polite navigation with redstone only?
 
-do I need modems? NOTE: modems are cheap
+
 two turtles
   tree chopping turtle
     drops the logs into the water and builds the place
@@ -38,7 +43,7 @@ two turtles
 logging turtles divide tasks into rows
 	turtle with one row: chop away from chests, wait for regrowth, chop towards chests, restock,  wait for regrowth
 
-waiting for regrowth:
+waiting for regrowth: -- hive will need this for tasks anyways -- depends on the task, trees don't grow unless the chunk is loaded.
 	use timers?
 		hard to save to file
 		immune to player sleeping
@@ -55,7 +60,6 @@ waiting for regrowth:
 
 low roof prevents branches
 
-TODO: organize this file
 TODO: programmatic locations
 TODO: put world in git?
 
@@ -75,11 +79,12 @@ Required items list
   2 water bucket
   140 jack o'lantern
   140 dirt
-  10c hest
+  10 chest
   9999? stone or cobblestone (mixing is fine)
   2 hopper
   12 torch
   32 fence post
+  2 wireless modem
   2 turtle
   1 diamond pickaxe
   1 oak sapling (more is better)
