@@ -8,7 +8,7 @@ TODO: check indents for all files
 
 NOTE: can we have too much wood to smelt?
 	could we be unable to catch up?
-	
+
 make the whole farm stackable?
 	only need to put jack o'lantern and dirt
 	  jack o'lantern can act as tree height capping block
@@ -57,6 +57,9 @@ waiting for regrowth: -- hive will need this for tasks anyways -- depends on the
 		will jump between world loads (same with others)
 	watch a sapling
 		some others could have grown ages ago, this wastes time
+	have a file with seconds to wait
+		update the file every 5 seconds
+		if the chunk is unloaded then the computer won't be able to update the file, when the chunk is loaded again then the trees will resume growing and the computer will resume the count down
 
 low roof prevents branches
 
