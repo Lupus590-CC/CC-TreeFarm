@@ -1,5 +1,6 @@
 local checkpoint = require("checkpoint")
 local lama = require("lama")
+local utils = require("utils")
 
 local furnaceStates = { -- TODO: persist this table on the file system
 	[1] = {
@@ -8,6 +9,7 @@ local furnaceStates = { -- TODO: persist this table on the file system
 }
 
 -- TODO: do I want to load one furnace or all of them?
+  -- one at a time is easier if less (turtle) fuel efficient
 
 -- NOTE: have a task list?
 	-- check wood chest
@@ -17,7 +19,8 @@ local furnaceStates = { -- TODO: persist this table on the file system
 
 -- NOTE: furnace turtle could be the server
 
--- TODO: if it's not a log move it to the sapling/junk chest
+-- TODO: if it's not a log move it to the sapling or junk chest
+
 
 
 

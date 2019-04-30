@@ -1,7 +1,26 @@
 local itemIds = require("itemIds")
 
--- TODO: how to do user config support for this?
--- reverse lookup
+-- internal utility
+local function itemIdArgCheck(itemIdArg, argPosition)
+  if not type(argPosition) == "number" then
+    error("arg[2] expected number got "..type(argPosition),2)
+  end
+
+
+  if not type(itemId) == "table" then
+    error("arg["..argPosition.."] expected table, got "..type(itemId),3)
+  end
+  if not type(itemId.name) == "string" then
+    error("arg["..argPosition.."].name expected string, got "..type(itemId.name),3)
+  end
+  if not type(itemId.damage) == "number" then
+    error("arg["..argPosition.."].damage expected number, got "..type(itemId.damage),3)
+  end
+end
+  
+
+-- allows finding item info from the itemIds table using the details
+  -- provided by turtle.getItemDetail
 local reverseItemLookup = {}
 for k, v in pairs(itemIds) do
   reverseItemLookup[v.name..":"..tostring(v.damage)] = 
@@ -9,32 +28,18 @@ for k, v in pairs(itemIds) do
 end
 setmetatable(reverseItemLookup, {
   __call = function(_self, itemId)
-    if not type(itemId) == "table" then
-      error("arg[1] expected table, got"..type(itemId),2)
-    end
-    if not type(itemId.name) == "string" then -- NOTE: this didn't error when I had the args in the wrong place, why?
-      error("arg[1].name expected string, got"..type(itemId.name),2)
-    end
-    if not type(itemId.damage) == "number" then
-      error("arg[1].damage expected number, got"..type(itemId.damage),2)
-    end
-
+    itemIdArgCheck(itemId, 1)
+   
     return reverseItemLookup[itemId.name..":"..tostring(itemId.damage)]
-  end})
+  end
+})
 
 local function selectItemById(itemId, extentionCriteria)
-  if not type(itemId) == "table" then
-    error("arg[1] expected table, got"..type(itemId),2)
-  end
-  if not type(itemId.name) == "string" then
-    error("arg[1].name expected string, got"..type(itemId.name),2)
-  end
-  if not type(itemId.damage) == "number" then
-    error("arg[1].damage expected number, got"..type(itemId.damage),2)
-  end
+  itemIdArgCheck(itemId,1)
+  
   extentionCriteria = extentionCriteria or function() return true end
   if not type(extentionCriteria) == "function" then
-    error("arg[2] expected function or nil, got"..type(extentionCriteria), 2)
+    error("arg[2] expected function or nil, got "..type(extentionCriteria), 2)
   end
   
   local function checkCurrectItem()
@@ -76,26 +81,18 @@ local function selectEmptySlot()
   return false
 end
 
-local function selectItemByIdOrEmptySlot(itemId, allowFullSlots) -- full slots are not deemed valid for selection
-  do -- selectItemById checks (copied so that blame value in error() gets elevated correctly)
-    if not type(itemId) == "table" then
-      error("arg[1] expected table, got"..type(itemId),2)
-    end
-    if not type(itemId.name) == "string" then
-      error("arg[1].name expected string, got"..type(itemId.name),2)
-    end
-    if not type(itemId.damage) == "number" then
-      error("arg[1].damage expected number, got"..type(itemId.damage),2)
-    end
-  end
+ -- by default full slots are not deemed valid for selection
+local function selectItemByIdWithFreeSpaceOrEmptySlot(itemId, allowFullSlots)
+  itemIdArgCheck(itemId,1)
   
   if allowFullSlots and not type(allowFullSlots) == "boolean" then
-    error("arg[2] expected boolean or nil, got"..type(allowFullSlots),2)
+    error("arg[2] expected boolean or nil, got "..type(allowFullSlots),2)
   end
   
   local vetoFullSlots = nil
   
-  -- if the stack is full then don't select it (when we call selectItemByIdOrEmptySlot we are likely wanting to dig something)
+  -- if the stack is full then don't select it (when we call
+      -- selectItemByIdOrEmptySlot we are likely wanting to dig something)
   local function vetoFullSlotsFunc(currentItem)
     return not reverseItemLookup(currentItem).maxStackSize == currentItem.count
   end 
@@ -107,7 +104,13 @@ local function selectItemByIdOrEmptySlot(itemId, allowFullSlots) -- full slots a
   return selectItemById(selectItemById, vetoFullSlotsFunc) or selectEmptySlot()
 end
 
-local function selectBestFuel(targetFuelGain) -- TODO: targetFuelGain error above or below? allow external criteria?
+-- items which give more fuel than targetFuelValue are not eligible
+local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue
+  targetFuelValue = targetFuelValue or math.huge
+  if not type(targetFuelValue) == "number" then
+      error("arg[1] expected number or nil, got "..type(targetFuelValue),2)
+  end
+  
   local bestFuelSlot
   local bestFuelValue = 0
   for i = 1, 16 do
@@ -115,7 +118,7 @@ local function selectBestFuel(targetFuelGain) -- TODO: targetFuelGain error abov
       local currentItem = turtle.getItemDetail()
       if type(currentItem) == "table"
       and reverseItemLookup(currentItem).fuelValue
-      and reverseItemLookup(currentItem).fuelValue > bestFuelValue then
+      and reverseItemLookup(currentItem).fuelValue > bestFuelValue and reverseItemLookup(currentItem).fuelValue =< targetFuelValue then
         bestFuelSlot = i
         bestFuelValue = reverseItemLookup(currentItem).fuelValue
       end
@@ -129,13 +132,38 @@ local function selectBestFuel(targetFuelGain) -- TODO: targetFuelGain error abov
   return false
 end
 
+-- if quantityToDrop is negative then that is quantity to keep
+local function dropItemsById(itemId, quantityToDrop) -- TODO: discard this? just use selectById and turtle.drop?
+  itemIdArgCheck(itemId,1)
+  
+  quantityToDrop = quantityToDrop or 1 -- TODO: check turtle.drop behaviour, I think it does the whole stack when without a number
+  if not type(quantityToDrop) == "number" then
+    error("arg[2] expected number or nil, got "..type(quantityToDrop))
+  end
+  
+  
+  local quantityToKeep = 0
+  if quantityToDrop < 0 then 
+    quantityToKeep = -quantityToDrop
+    quantityToDrop = math.huge
+  end
+  
+  -- TODO: what does turtle.drop do?
+  -- TODO: if not enough items to drop then drop anyway but return false and a reason string
+  -- TODO: if not enough items to keep then return false and a reason string
+  
+  
+  
+end
+
 local itemUtils = {
   itemIds = itemIds,
   reverseItemLookup = reverseItemLookup,
   selectItemById = selectItemById,
   selectEmptySlot = selectEmptySlot,
-  selectItemByIdOrEmptySlot = selectItemByIdOrEmptySlot,
+  selectItemByIdWithFreeSpaceOrEmptySlot = selectItemByIdWithFreeSpaceOrEmptySlot,
   selectBestFuel = selectBestFuel,
+  dropItemsById = dropItemsById
 
 }
 

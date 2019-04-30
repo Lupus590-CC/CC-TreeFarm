@@ -1,5 +1,7 @@
 -- relative coordinates
 
+-- TODO: remove nav?
+
 local walkwayHight = {0, 0, 0}
 local rootCorner = {1, 1, 1}
 local oppositeCorner = {48,1,32}

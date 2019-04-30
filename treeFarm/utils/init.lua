@@ -3,14 +3,16 @@ local itemUtils = require("itemUtils")
 local nav = require("nav")
 
 -- TODO: move to nav?
-local function fuelCheck() -- TODO: fuel check
+-- TODO: overwrite turtle api to do automatic refuelling?
+-- fuelRequiredForAction is the amount of fuel that the caller wants us to have as that is what they expect to use
+local function fuelCheck(fuelRequiredForAction) -- TODO: fuel check
 	-- if fuel is low
 		if itemUtils.selectBestFuel() then -- find fuel in inventory
 		-- refuel
 		-- if fuel still low
 			-- get more fuel
 		else
-			-- go to fuel chest
+			-- go to fuel chest -- NOTE: should this go get fuel?
 		end
 
 end

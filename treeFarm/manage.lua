@@ -3,7 +3,7 @@ local itemIds = require("utils.itemUtils.itemIds")
 
 -- TODO: inventory checks
 
-local function chopTree()
+local function chopTree() -- DODO: fuel checks
   turtle.dig()
   turtle.forward()
   local hasBlock, blockId = turtle.inspect()
@@ -19,7 +19,7 @@ end
 
 local function doTreeLine()
   -- TODO: fuel checks and unloading
-  -- TODO: does breaking leaves drop saplings?
+  -- TODO: does breaking leaves put saplings into the turtle?
   local atEndOfLine = false
   repeat
     while turtle.forward() do
@@ -31,8 +31,7 @@ local function doTreeLine()
       elseif blockId.name == itemIds.leaves.name then
         turtle.dig()
       else
-        atEndOfLine = true -- TODO: count how far we go (or use a bounding box?)
-								-- bounding box is multiple turtle friendly and more efficient
+        atEndOfLine = true -- TODO: use a bounding box
       end
     end
   until atEndOfLine

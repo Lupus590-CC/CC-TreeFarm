@@ -2,8 +2,9 @@
 local utils = require("utils")
 local lama = require("lama")
 
-local function placeTreePodium()
-	
+local function placeTreePodium() -- TODO: fuel checks
+	-- if fuel level is less than 18 + reserve then abort
+  
   -- move check to before? this func is called?
   if not (utils.selectItemById(itemIds.dirt)
   and  utils.selectItemById(itemIds.jackOLantern)
