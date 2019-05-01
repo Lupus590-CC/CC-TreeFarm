@@ -22,6 +22,10 @@ local itemIds = {
   coalBlock = { name= "minecraft:coal_block", damage = 0, fuelValue = 800, maxStackSize = 64 },
 }
 
+for k, v in pairs(itemIds) do
+  itemIds[k].internalName = k
+end
+
   
 
 return itemIds

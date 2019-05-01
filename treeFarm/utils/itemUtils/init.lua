@@ -17,19 +17,16 @@ local function itemIdArgCheck(itemIdArg, argPosition)
     error("arg["..argPosition.."].damage expected number, got "..type(itemId.damage),3)
   end
 end
-  
 
 -- allows finding item info from the itemIds table using the details
   -- provided by turtle.getItemDetail
 local reverseItemLookup = {}
 for k, v in pairs(itemIds) do
-  reverseItemLookup[v.name..":"..tostring(v.damage)] = 
-    {name = k, fuelValue = v.fuelValue}
+  reverseItemLookup[v.name..":"..tostring(v.damage)] = itemIds[k]
 end
 setmetatable(reverseItemLookup, {
   __call = function(_self, itemId)
     itemIdArgCheck(itemId, 1)
-   
     return reverseItemLookup[itemId.name..":"..tostring(itemId.damage)]
   end
 })
@@ -132,9 +129,19 @@ local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue
   return false
 end
 
+local function mergeItemStacks() -- TODO: implement
+  local currentSlot = 1
+end
+
+local countItemQuantityById(itemId) -- TODO: implement
+  itemIdArgCheck(itemId,1)
+  for 
+end
+
 -- if quantityToDrop is negative then that is quantity to keep
 local function dropItemsById(itemId, quantityToDrop) -- TODO: discard this? just use selectById and turtle.drop?
   itemIdArgCheck(itemId,1)
+  
   
   quantityToDrop = quantityToDrop or 1 -- TODO: check turtle.drop behaviour, I think it does the whole stack when without a number
   if not type(quantityToDrop) == "number" then
@@ -142,10 +149,9 @@ local function dropItemsById(itemId, quantityToDrop) -- TODO: discard this? just
   end
   
   
-  local quantityToKeep = 0
+  -- if quantityToDrop is negative then that is quantity to keep
   if quantityToDrop < 0 then 
-    quantityToKeep = -quantityToDrop
-    quantityToDrop = math.huge
+    quantityToDrop = countItemQuantityById(itemId) - quantityToDrop
   end
   
   -- TODO: what does turtle.drop do?
@@ -163,6 +169,7 @@ local itemUtils = {
   selectEmptySlot = selectEmptySlot,
   selectItemByIdWithFreeSpaceOrEmptySlot = selectItemByIdWithFreeSpaceOrEmptySlot,
   selectBestFuel = selectBestFuel,
+  mergeItemStacks = mergeItemStacks,
   dropItemsById = dropItemsById
 
 }
