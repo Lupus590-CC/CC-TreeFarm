@@ -1,6 +1,3 @@
-
--- LAMA API available under the MIT license from "https://raw.githubusercontent.com/KingofGamesYami/LAMA/master/lama.lua"
-
 --[[ The MIT License (MIT)
 
 -- Copyright (c) 2015 KingofGamesYami
