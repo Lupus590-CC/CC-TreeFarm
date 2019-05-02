@@ -11,6 +11,19 @@ local furnaceStates = { -- TODO: persist this table on the file system
 -- TODO: do I want to load one furnace or all of them?
   -- one at a time is easier if less (turtle) fuel efficient
 
+local function loadFurnace()
+  -- go to top of furnace
+  -- select wood
+  -- place in furnace
+  
+  -- go to side of furnace
+  -- select and place fuel
+  
+  -- go to bottom
+  -- suck everything
+end
+  
+
 -- NOTE: have a task list?
 	-- check wood chest
 	-- empty this furnace

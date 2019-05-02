@@ -131,11 +131,21 @@ end
 
 local function mergeItemStacks() -- TODO: implement
   local currentSlot = 1
+  -- can we just try to move everything to the first slot and 'magic' will take care of the details of merging stacks?
 end
 
-local countItemQuantityById(itemId) -- TODO: implement
+local function countItemQuantityById(itemId)
   itemIdArgCheck(itemId,1)
-  for 
+  local count = 0
+  for i = 1, 16 do
+    turtle.select(i)
+    local currentItem = turtle.getItemDetail()
+    if currentItem and currentItem.name == itemId.name
+    and currentItem.damage == itemId.damage then
+      count = count + currentItem.count
+    end
+  end
+  return count
 end
 
 -- if quantityToDrop is negative then that is quantity to keep
@@ -143,7 +153,7 @@ local function dropItemsById(itemId, quantityToDrop) -- TODO: discard this? just
   itemIdArgCheck(itemId,1)
   
   
-  quantityToDrop = quantityToDrop or 1 -- TODO: check turtle.drop behaviour, I think it does the whole stack when without a number
+  quantityToDrop = quantityToDrop or 1 -- TODO: built in turtle.drop behaviour is to do a full stack by default
   if not type(quantityToDrop) == "number" then
     error("arg[2] expected number or nil, got "..type(quantityToDrop))
   end
@@ -162,6 +172,9 @@ local function dropItemsById(itemId, quantityToDrop) -- TODO: discard this? just
   
 end
 
+local function getSpace() -- TODO: name better
+end
+
 local itemUtils = {
   itemIds = itemIds,
   reverseItemLookup = reverseItemLookup,
@@ -170,7 +183,8 @@ local itemUtils = {
   selectItemByIdWithFreeSpaceOrEmptySlot = selectItemByIdWithFreeSpaceOrEmptySlot,
   selectBestFuel = selectBestFuel,
   mergeItemStacks = mergeItemStacks,
-  dropItemsById = dropItemsById
+  countItemQuantityById = countItemQuantityById,
+  dropItemsById = dropItemsById,
 
 }
 
