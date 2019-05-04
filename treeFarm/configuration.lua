@@ -38,7 +38,7 @@ function configuration.load(path, _env)
 	end
 	local fn, err = loadfile(path)
 	if fn then
-		setfenv(fn, env)
+		setfenv(fn, env) -- TODO: does this still work?
 		local success, err = pcall(fn)
 		if success then
 			--strip the metatable from the environment before returning it.

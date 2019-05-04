@@ -19,11 +19,31 @@ local function loadFurnace()
   -- go to side of furnace
   -- select and place fuel
   
+  -- start countdown
+  
   -- go to bottom
   -- suck everything
 end
-  
 
+local function getResources() -- empty the bottom chest
+  -- go to the exit
+  -- go down to the chest
+  -- suck as much as there is inventory space -- TODO: if there is only wood in the turtles and the first slot in the chest is not wood what happens?
+  -- go back up to furnace room
+end
+  
+local function putAwayNotWood()
+  -- go to sapling chest
+  -- put all saplings into chest
+  
+  -- NOTE: is this needed?
+  -- go to fuel chest
+  -- put spare charcoal in chest
+  
+  -- go to junk chest
+  -- put in everything but the wood and fuel
+end
+  
 -- NOTE: have a task list?
 	-- check wood chest
 	-- empty this furnace

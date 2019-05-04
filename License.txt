@@ -84,7 +84,7 @@ SOFTWARE.
 
 ===============================================================================
 
-MBS (Used by checkpoint)
+MBS (Error tracing used by checkpoint)
 ---
 
 The MIT License (MIT)
@@ -172,7 +172,7 @@ TODO: daemon manager - do I actually use this?
 
 ===============================================================================
 
-Configuration
+TODO: Configuration do I actually use this? does it work with modern CC?
 -------------
 
 The MIT License (MIT)

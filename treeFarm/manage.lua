@@ -36,3 +36,9 @@ local function doTreeLine()
     end
   until atEndOfLine
 end
+
+-- TODO: move to next line
+
+-- TODO: detect full inventory and dropoff
+
+-- TODO: restock

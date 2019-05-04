@@ -2,6 +2,8 @@ TODO: organise this file
 
 update detector?
 
+how to init config
+
 can I make it so that there are multiple furnace managing turtles?
 
 TODO: check indents for all files
@@ -13,13 +15,14 @@ make the whole farm stackable?
 	only need to put jack o'lantern and dirt
 	  jack o'lantern can act as tree height capping block
 
-Computer server
+Computer server?
 
 has advanced pocket computer
 
 wireless modems are cheap
 
 Incremental construction of farm?
+	farming turtle need to hang onto the water bucket but ideally should not be programmed to know of the bucket
 
 Request with label
 
@@ -75,6 +78,9 @@ time taken to clear farm = 1400
 30 mins in seconds = 30 * 60 = 1800
 
 max logs per tree = 6
+
+Allow a chest for placing build items
+	may need two so that the turtle can sort
 
 Required items list
   1406 packed ice

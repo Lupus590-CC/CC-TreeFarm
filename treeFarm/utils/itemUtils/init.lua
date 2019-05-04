@@ -7,14 +7,14 @@ local function itemIdArgCheck(itemIdArg, argPosition)
   end
 
 
-  if not type(itemId) == "table" then
-    error("arg["..argPosition.."] expected table, got "..type(itemId),3)
+  if not type(itemIdArg) == "table" then
+    error("arg["..argPosition.."] expected table, got "..type(itemIdArg),3)
   end
-  if not type(itemId.name) == "string" then
-    error("arg["..argPosition.."].name expected string, got "..type(itemId.name),3)
+  if not type(itemIdArg.name) == "string" then
+    error("arg["..argPosition.."].name expected string, got "..type(itemIdArg.name),3)
   end
-  if not type(itemId.damage) == "number" then
-    error("arg["..argPosition.."].damage expected number, got "..type(itemId.damage),3)
+  if not type(itemIdArg.damage) == "number" then
+    error("arg["..argPosition.."].damage expected number, got "..type(itemIdArg.damage),3)
   end
 end
 

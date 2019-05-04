@@ -9,8 +9,8 @@ local function placeTreePodium() -- TODO: fuel checks
   if not (utils.selectItemById(itemIds.dirt)
   and  utils.selectItemById(itemIds.jackOLantern)
   and (utils.selectItemById(itemIds.cobblestone)
-  or utils.selectItemById(itemIds.stone)) then
-    restock()
+  or utils.selectItemById(itemIds.stone))) then
+    return false, "need more stuff" -- TODO: let caller sort out stocking?
   end
   
   -- TODO: figure out how to best place several of these podiums
@@ -33,7 +33,7 @@ local function placeTreePodium() -- TODO: fuel checks
   for i = 1, 6 do
     turtle.up()
   end
-  local _ = utils.selectItemById(itemIds.cobblestone) 
+  local _ = utils.selectItemById(itemIds.cobblestone) -- TODO: stone then cobble?
     or utils.selectItemById(itemIds.stone)
   turtle.place()
   
@@ -47,3 +47,6 @@ local function placeTreePodium() -- TODO: fuel checks
   utils.rednetutils.sendToServer({messType="build", built="podium", 
     loc=table.pack(lama.getLocation())}
 end
+
+
+
