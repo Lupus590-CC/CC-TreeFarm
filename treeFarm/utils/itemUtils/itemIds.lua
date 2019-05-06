@@ -1,11 +1,11 @@
-local itemIds = { 
+local itemIds = {
   dirt = { name = "minecraft:dirt", damage = 0, maxStackSize = 64 },
   jackOLantern = { name = "minecraft:lit_pumpkin", damage = 0, maxStackSize = 64 },
   charcoal = { name= "minecraft:coal", damage = 1, fuelValue = 80, maxStackSize = 64 },
   coal = { name= "minecraft:coal", damage = 0, fuelValue = 80, maxStackSize = 64 },
   log = { name = "minecraft:log", damage = 0, fuelValue = 15, maxStackSize = 64 },
   wirelessModem = { name = "ComputerCraft:CC-Peripheral", damage = 1, maxStackSize = 64 },
-  diamondPickaxe = { name = "minecraft:diamond_pickaxe", damage = 0, maxStackSize = 1 }, -- TODO: check that this is correct
+  diamondPickaxe = { name = "minecraft:diamond_pickaxe", damage = 0, maxStackSize = 1 },
   chest = { name = "minecraft:chest", damage = 0, maxStackSize = 64 },
   torch = { name = "minecraft:torch", damage = 0, maxStackSize = 64 },
   furnace = { name = "minecraft:furnace", damage = 0, maxStackSize = 64 },
@@ -26,6 +26,6 @@ for k, v in pairs(itemIds) do
   itemIds[k].internalName = k
 end
 
-  
+
 
 return itemIds

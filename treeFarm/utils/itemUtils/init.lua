@@ -33,12 +33,12 @@ setmetatable(reverseItemLookup, {
 
 local function selectItemById(itemId, extentionCriteria)
   itemIdArgCheck(itemId,1)
-  
+
   extentionCriteria = extentionCriteria or function() return true end
   if not type(extentionCriteria) == "function" then
     error("arg[2] expected function or nil, got "..type(extentionCriteria), 2)
   end
-  
+
   local function checkCurrectItem()
     local currentItem = turtle.getItemDetail()
     if type(currentItem) == "table" and currentItem.name == itemId.name
@@ -47,13 +47,13 @@ local function selectItemById(itemId, extentionCriteria)
     end
     return false
   end
-  
+
 
   -- if the current slot has it don't bother searching
   if checkCurrectItem() then
     return true
   end
-  
+
   for i = 1, 16 do
     turtle.select(i)
     if checkCurrectItem() then
@@ -68,7 +68,7 @@ local function selectEmptySlot()
   if turtle.getItemCount() == 0 then
     return true
   end
-  
+
   for i = 1, 16 do
       turtle.select(i)
       if turtle.getItemCount() == 0 then
@@ -81,19 +81,19 @@ end
  -- by default full slots are not deemed valid for selection
 local function selectItemByIdWithFreeSpaceOrEmptySlot(itemId, allowFullSlots)
   itemIdArgCheck(itemId,1)
-  
+
   if allowFullSlots and not type(allowFullSlots) == "boolean" then
     error("arg[2] expected boolean or nil, got "..type(allowFullSlots),2)
   end
-  
+
   local vetoFullSlots = nil
-  
+
   -- if the stack is full then don't select it (when we call
       -- selectItemByIdOrEmptySlot we are likely wanting to dig something)
   local function vetoFullSlotsFunc(currentItem)
     return not reverseItemLookup(currentItem).maxStackSize == currentItem.count
-  end 
-  
+  end
+
   if allowFullSlots then
     vetoFullSlotsFunc = nil
   end
@@ -107,7 +107,7 @@ local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue
   if not type(targetFuelValue) == "number" then
       error("arg[1] expected number or nil, got "..type(targetFuelValue),2)
   end
-  
+
   local bestFuelSlot
   local bestFuelValue = 0
   for i = 1, 16 do
@@ -151,25 +151,31 @@ end
 -- if quantityToDrop is negative then that is quantity to keep
 local function dropItemsById(itemId, quantityToDrop) -- TODO: discard this? just use selectById and turtle.drop?
   itemIdArgCheck(itemId,1)
-  
-  
+
+
   quantityToDrop = quantityToDrop or 1 -- TODO: built in turtle.drop behaviour is to do a full stack by default
   if not type(quantityToDrop) == "number" then
     error("arg[2] expected number or nil, got "..type(quantityToDrop))
   end
-  
-  
+
+
   -- if quantityToDrop is negative then that is quantity to keep
-  if quantityToDrop < 0 then 
+  if quantityToDrop < 0 then
     quantityToDrop = countItemQuantityById(itemId) - quantityToDrop
   end
-  
-  -- TODO: what does turtle.drop do?
-  -- TODO: if not enough items to drop then drop anyway but return false and a reason string
-  -- TODO: if not enough items to keep then return false and a reason string
-  
-  
-  
+
+  -- NOTE: what does turtle.drop do? (into air)
+    -- if amountToDrop > itemCount then drop stack and return true
+    -- if amountToDrop < itemCount then drop that amount and return true
+    -- if amountToDrop == 0 then drop none and return true
+    -- if amountToDrop < 0 then error
+  -- NOTE: what does turtle.drop do? (into inventory)
+    -- with no arg and not enough space then return true and drop until full
+    -- with no arg and no space then don't drop any and return false and error message
+    -- if amountToDrop > space then drop to limit and return true
+
+
+
 end
 
 local function getSpace() -- TODO: name better

@@ -19,7 +19,7 @@ end
 
 local function doTreeLine()
   -- TODO: fuel checks and unloading
-  -- TODO: does breaking leaves put saplings into the turtle?
+  -- NOTE:breaking leaves can put saplings into the turtle
   local atEndOfLine = false
   repeat
     while turtle.forward() do

@@ -1,4 +1,4 @@
-do -- require setup 
+do -- require setup
 local _ = require or dofile("require.lua")
 
 _G.package.path = table.concat({
