@@ -3,7 +3,7 @@ local utils = require("utils")
 local lama = require("lama")
 
 local function placeTreePodium() -- TODO: fuel checks
-	-- if fuel level is less than 18 + reserve then abort
+	-- if fuel level is less than 20 + reserve then abort
 
   -- move check to before? this func is called?
   if not (utils.selectItemById(itemIds.dirt)
@@ -12,9 +12,10 @@ local function placeTreePodium() -- TODO: fuel checks
   or utils.selectItemById(itemIds.stone))) then
     return false, "need more stuff" -- TODO: let caller sort out stocking?
   end
-
-  -- TODO: figure out how to best place several of these podiums
-  -- face south
+  
+  -- TODO: check that where we are is the correct location
+  
+  turtle.back() -- current location is where we need to build
 
 
   local _ = utils.selectItemById(itemIds.cobblestone)
@@ -43,7 +44,18 @@ local function placeTreePodium() -- TODO: fuel checks
   utils.selectItemByIdOrEmptySlot(itemIds.cobblestone)
     -- even if we placed stone it will be cobble when we dig it
   turtle.dig()
+  
+  
+  turtle.forwards() -- go back to where we started
+  
+  
   --TODO: send message that location is built
   utils.rednetutils.sendToServer({messType="build", built="podium",
     loc=table.pack(lama.getLocation())}
+    
+  -- TODO: update bounding box
+    
 end
+
+-- TODO: build while waiting for things to grow
+  -- arguably maintaining the farm and building a podium are different Hive tasks

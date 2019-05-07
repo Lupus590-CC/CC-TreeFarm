@@ -14,8 +14,15 @@ NOTE: can we have too much wood to smelt?
 make the whole farm stackable?
 	only need to put jack o'lantern and dirt
 	  jack o'lantern can act as tree height capping block
+	  
+don't bother with a peer to peer system or a server?
+	can only have one farming turtle then
+	peer to peer could be useful to hive?
+		how to handle desync?
 
 Computer server?
+	arguably more useful to hive
+	if desync then server is right (even if it isn't)
 
 has advanced pocket computer
 
@@ -60,7 +67,7 @@ waiting for regrowth: -- hive will need this for tasks anyways -- depends on the
 		will jump between world loads (same with others)
 	watch a sapling
 		some others could have grown ages ago, this wastes time
-	have a file with seconds to wait
+	TODO: have a file with seconds to wait
 		update the file every 5 seconds
 		if the chunk is unloaded then the computer won't be able to update the file, when the chunk is loaded again then the trees will resume growing and the computer will resume the count down
 

@@ -13,6 +13,7 @@ local function fuelCheck(fuelRequiredForAction) -- TODO: fuel check
 			-- get more fuel
 		else
 			-- go to fuel chest -- NOTE: should this go get fuel?
+        -- NOTE: turtle state system? just use the Hive task system with restocking for fuel being a top priority task
 		end
 
 end
