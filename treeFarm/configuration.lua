@@ -25,10 +25,9 @@ THE SOFTWARE.
 -- Converted to be Require compatible by Lupus590 and released under the same MIT license.
 local configuration = shell and {} or (_ENV or getfenv()) -- see https://github.com/lupus590/CC-Random-Code/blob/8cb3bd9b6e54c0176ff3e9418fc96b7866d3c963/src/dofile%20and%20loadAPI%20compatable%20API's.lua#L3
 
-
 function configuration.load(path, _env)
 	--load a configuration file, given a fully-resolved path and an optional environment.
-	if not fs.exists(path) or fs.isDir(path) then return nil, "not a file" end
+	if not fs.exists(path) or fs.isDir(path) then return false, "not a file" end
 	local env
 	if not _env then
 		--if we were not provided an environment, create one.
@@ -44,26 +43,30 @@ function configuration.load(path, _env)
 			--strip the metatable from the environment before returning it.
 			return setmetatable(env, {})
 		else
-			return nil, err
+			return false, err
 		end
 	else
-		return nil, err
+		return false, err
 	end
 end
 
 function configuration.save(path, config)
-	if not config or type(config) ~= "table" then return nil, "Not a configuration" end
+	if not config or type(config) ~= "table" then return false, "not a configuration" end
 	local handle = io.open(path, "w")
 	if handle then
 		for k, v in pairs(config) do
 			local success, str = pcall(textutils.serialize, v)
 			if success then
 				handle:write(k.." = "..str.."\n\n")
+      else
+        handle:close()
+        return false, "could not serialize value with key "..k
 			end
 		end
 		handle:close()
+    return true
 	else
-		return nil, "Could not write configuration."
+		return false, "could not write configuration."
 	end
 end
 

@@ -53,23 +53,6 @@ two turtles
 logging turtles divide tasks into rows
 	turtle with one row: chop away from chests, wait for regrowth, chop towards chests, restock,  wait for regrowth
 
-waiting for regrowth: -- hive will need this for tasks anyways -- depends on the task, trees don't grow unless the chunk is loaded.
-	use timers?
-		hard to save to file
-		immune to player sleeping
-	use target clock?
-		jumps forward when the player sleeps without actual growth progress
-		easy to save
-	use both
-		save the target clock and use a timer to alert to that, if the clock suddenly changes the update the file
-	use real world time
-		no easy way to access in old CC
-		will jump between world loads (same with others)
-	watch a sapling
-		some others could have grown ages ago, this wastes time
-	TODO: have a file with seconds to wait
-		update the file every 5 seconds
-		if the chunk is unloaded then the computer won't be able to update the file, when the chunk is loaded again then the trees will resume growing and the computer will resume the count down
 
 low roof prevents branches
 

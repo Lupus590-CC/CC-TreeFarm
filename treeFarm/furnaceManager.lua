@@ -25,6 +25,7 @@ local function loadFurnace()
   -- suck everything
 end
 
+-- #NOTE: if farmer rednets that it has dropped stuff then how long do we wait for the items to get to the chest?
 local function getResources() -- empty the bottom chest
   -- go to the exit
   -- go down to the chest
@@ -53,7 +54,6 @@ end
 -- NOTE: furnace turtle could be the server
 
 -- TODO: if it's not a log move it to the sapling or junk chest
-
 
 
 

@@ -9,7 +9,18 @@ _G.package.path = table.concat({
 }, ";")
 end
 
+-- TODO: what happens
 
-local v = selectBestFuel()
+local function move()
+  while true do
+    turtle.up()
+  end
+end
 
-print(tostring(v))
+local function suck()
+  while true do
+    turtle.suck()
+  end
+end
+
+parallel.waitforany(move,suck)
