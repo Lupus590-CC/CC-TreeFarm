@@ -2,18 +2,18 @@ local itemIds = require("itemIds")
 
 -- internal utility
 local function itemIdArgCheck(itemIdArg, argPosition)
-  if not type(argPosition) == "number" then
+  if type(argPosition) ~= "number" then
     error("arg[2] expected number got "..type(argPosition),2)
   end
 
 
-  if not type(itemIdArg) == "table" then
+  if type(itemIdArg) ~= "table" then
     error("arg["..argPosition.."] expected table, got "..type(itemIdArg),3)
   end
-  if not type(itemIdArg.name) == "string" then
+  if type(itemIdArg.name) ~= "string" then
     error("arg["..argPosition.."].name expected string, got "..type(itemIdArg.name),3)
   end
-  if not type(itemIdArg.damage) == "number" then
+  if type(itemIdArg.damage) ~= "number" then
     error("arg["..argPosition.."].damage expected number, got "..type(itemIdArg.damage),3)
   end
 end
@@ -35,7 +35,7 @@ local function selectItemById(itemId, extentionCriteria)
   itemIdArgCheck(itemId,1)
 
   extentionCriteria = extentionCriteria or function() return true end
-  if not type(extentionCriteria) == "function" then
+  if type(extentionCriteria) ~= "function" then
     error("arg[2] expected function or nil, got "..type(extentionCriteria), 2)
   end
 
@@ -82,7 +82,7 @@ end
 local function selectItemByIdWithFreeSpaceOrEmptySlot(itemId, allowFullSlots)
   itemIdArgCheck(itemId,1)
 
-  if allowFullSlots and not type(allowFullSlots) == "boolean" then
+  if allowFullSlots and type(allowFullSlots) ~= "boolean" then
     error("arg[2] expected boolean or nil, got "..type(allowFullSlots),2)
   end
 
@@ -104,7 +104,7 @@ end
 -- items which give more fuel than targetFuelValue are not eligible
 local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue
   targetFuelValue = targetFuelValue or math.huge
-  if not type(targetFuelValue) == "number" then
+  if type(targetFuelValue) ~= "number" then
       error("arg[1] expected number or nil, got "..type(targetFuelValue),2)
   end
 
@@ -154,8 +154,8 @@ local function dropItemsById(itemId, quantityToDrop) -- TODO: discard this? just
 
 
   quantityToDrop = quantityToDrop or 1 -- TODO: built in turtle.drop behaviour is to do a full stack by default
-  if not type(quantityToDrop) == "number" then
-    error("arg[2] expected number or nil, got "..type(quantityToDrop))
+  if type(quantityToDrop) ~= "number" then
+    error("arg[2] expected number or nil, got "..type(quantityToDrop),2)
   end
 
 

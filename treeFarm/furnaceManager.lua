@@ -1,31 +1,55 @@
 local checkpoint = require("checkpoint")
 local lama = require("lama")
 local utils = require("utils")
+local patience = require("patience")
+local daemonManager = require("daemonManager")
+local config = require("configuration")
 
-local furnaceStates = { -- TODO: persist this table on the file system
-	[1] = {
-		started = -- time when it was started, can be used to check when it's finished
+local furnaceStatesFile = ".furnaceStates"
+--[[
+local furnaceStates = {
+	[timerId] = {
+		furnaceId -- use position instead?
 	}
 }
+]]
 
--- TODO: do I want to load one furnace or all of them?
-  -- one at a time is easier if less (turtle) fuel efficient
-
-local function loadFurnace()
-  -- go to top of furnace
-  -- select wood
-  -- place in furnace
-
-  -- go to side of furnace
-  -- select and place fuel
-
-  -- start countdown
-
-  -- go to bottom
-  -- suck everything
+local furnaceStates, err = config.load(furnaceStatesFile)
+if not furnaceStates then
+  error("Error loading furnace states: "..err)
 end
 
--- #NOTE: if farmer rednets that it has dropped stuff then how long do we wait for the items to get to the chest?
+local function fuelValueForFurnace(turtleFuelValue)
+  if type(turtleFuelValue) ~= "number" then
+    error("arg[1] expected number got "..type(turtleFuelValue),2)
+  end
+  return turtleFuelValue/10
+end
+
+
+local function loadThisFurnace() -- TODO: empty the furnace first?
+  -- Assumption, facing the furnace on the same level as it
+  emptyThisFurnace()
+  
+  -- go to top of furnace
+  turtle.up()
+  turtle.forwards()
+  -- select wood
+  -- place in furnace -- what if there is stuff in there? -- can turtles take from the input/fuel slots?
+
+  -- go to side of furnace
+  turtle.back()
+  turtle.down()
+  -- select and place fuel
+
+  -- update furnaceStates
+  local ok, err = config.save(furnaceStatesFile, furnaceStates)
+  if not ok then
+    error("Error saving furnace state: "..err)
+  end
+end
+
+-- NOTE: if farmer rednets that it has dropped stuff then how long do we wait for the items to get to the chest? -- TODO: investigate how long it takes for items to drift
 local function getResources() -- empty the bottom chest
   -- go to the exit
   -- go down to the chest

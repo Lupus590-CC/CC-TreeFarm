@@ -4,6 +4,9 @@ update detector?
 
 how to init config
 
+TODO: is the farm small enough that a rednet repeater is not needed?
+	test near bedrock during a thunderstorm
+
 can I make it so that there are multiple furnace managing turtles?
 
 TODO: check indents for all files
