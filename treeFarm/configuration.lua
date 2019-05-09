@@ -58,13 +58,13 @@ function configuration.save(path, config)
 			local success, str = pcall(textutils.serialize, v)
 			if success then
 				handle:write(k.." = "..str.."\n\n")
-      else
-        handle:close()
-        return false, "could not serialize value with key "..k
+			else
+				handle:close()
+				return false, "could not serialize value with key "..k
 			end
 		end
 		handle:close()
-    return true
+		return true
 	else
 		return false, "could not write configuration."
 	end

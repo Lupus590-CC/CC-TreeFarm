@@ -1,8 +1,8 @@
 -- TODO: convert to API?
-	-- once converted copy to hive
-		-- add encryption or replace with better authentication method
-			-- encrypt the whole pipeline?
-				-- use encryption over rednet API
+  -- once converted copy to hive
+    -- add encryption or replace with better authentication method
+      -- encrypt the whole pipeline?
+        -- use encryption over rednet API
 
 --[[
 Copyright (c) 2012 Christopher Beach

@@ -5,34 +5,34 @@ update detector?
 how to init config
 
 TODO: is the farm small enough that a rednet repeater is not needed?
-	test near bedrock during a thunderstorm
+  test near bedrock during a thunderstorm
 
 can I make it so that there are multiple furnace managing turtles?
 
-TODO: check indents for all files
+TODO: fix whitespace and indentation
 
 NOTE: can we have too much wood to smelt?
-	could we be unable to catch up?
+  could we be unable to catch up?
 
 make the whole farm stackable?
-	only need to put jack o'lantern and dirt
-	  jack o'lantern can act as tree height capping block
-	  
+  only need to put jack o'lantern and dirt
+    jack o'lantern can act as tree height capping block
+
 don't bother with a peer to peer system or a server?
-	can only have one farming turtle then
-	peer to peer could be useful to hive?
-		how to handle desync?
+  can only have one farming turtle then
+  peer to peer could be useful to hive?
+  how to handle desync?
 
 Computer server?
-	arguably more useful to hive
-	if desync then server is right (even if it isn't)
+  arguably more useful to hive
+  if desync then server is right (even if it isn't)
 
 has advanced pocket computer
 
 wireless modems are cheap
 
 Incremental construction of farm?
-	farming turtle need to hang onto the water bucket but ideally should not be programmed to know of the bucket
+  farming turtle need to hang onto the water bucket but ideally should not be programmed to know of the bucket
 
 Request with label
 
@@ -40,11 +40,11 @@ Lost and found(apples) and spare construction material chests
 
 if the system runs out of saplings then place more in the sapling chest
   saplings will get used as fuel for the turtles and furnaces with charcoal as a backup -- NOT: this is not currently true
-	what to do when the chests are full?
+  what to do when the chests are full?
 
 if using two turtles then I my not need to have them able to navigate around each other as their zones of work won't cross each other. (building may be an exception)
-	with modems, turtles may be able to negotiate navigating around each other
-		can I get polite navigation with redstone only?
+  with modems, turtles may be able to negotiate navigating around each other
+  can I get polite navigation with redstone only?
 
 
 two turtles
@@ -54,7 +54,7 @@ two turtles
     collects logs and saplings from bottom chest and sorts and uses furnaces
 
 logging turtles divide tasks into rows
-	turtle with one row: chop away from chests, wait for regrowth, chop towards chests, restock,  wait for regrowth
+  turtle with one row: chop away from chests, wait for regrowth, chop towards chests, restock,  wait for regrowth
 
 
 low roof prevents branches
@@ -73,7 +73,7 @@ time taken to clear farm = 1400
 max logs per tree = 6
 
 Allow a chest for placing build items
-	may need two so that the turtle can sort
+  may need two so that the turtle can sort
 
 Required items list
   1406 packed ice

@@ -174,7 +174,7 @@ while coroutine.status(co.thread) ~= "dead" do
 					--close connection
 				end
 			elseif packetType ~= "query" then
-				--usually, we would send a disconnect here, but this prevents one from hosting nsh and connecting to other computers.  Pass these to all shells as well.
+				--usually, we would send a disconnect here, but this prevents one from hosting nsh and connecting to other computers. Pass these to all shells as well.
 				resumeThread(co, event)
 			else
 				--open new connection
