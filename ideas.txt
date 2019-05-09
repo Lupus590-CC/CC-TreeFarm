@@ -77,7 +77,7 @@ Allow a chest for placing build items
 
 Required items list
   1406 packed ice
-  14 furnace
+  8 furnace
   2 water bucket
   140 jack o'lantern
   140 dirt

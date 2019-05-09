@@ -1,9 +1,14 @@
--- TODO: add license here and to license file
+--
+-- Copyright 2019 Lupus590
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+--
 
--- make part of checkpoint?
-  
+local configuration = require("configuration")
 
-local subscribers
+local timers
 local running = false
 local function startTimer(secondsToWait)
   if type(secondsToWait) ~= "number" then
@@ -12,12 +17,23 @@ local function startTimer(secondsToWait)
   if not running then
     error("patience is not running yet, have you called enterLoop?")
   end
-  
+
   -- add to list
-  local subscriptionId = {}
-  subscribers[subscriptionId] = secondsToWait
-  
-  return subscriptionId
+  local timerId = {}
+  timers[timerId] = secondsToWait
+
+  return timerId
+end
+
+local function cancelTimer(timerId)
+  if type(timerId) ~= "number" then
+    error("arg[1] expected number got "..type(timerId),2)
+  end
+  if not running then
+    error("patience is not running yet, have you called enterLoop?")
+  end
+
+  timers[timerId] = nil
 end
 
 local doLoop = true
@@ -31,8 +47,10 @@ local function enterLoop(patienceFile, updateInterval)
     return false, "already running"
   end
   running = true;
-  
-  patienceFile = patienceFile or ".patience" 
+
+  print("patience started")
+
+  patienceFile = patienceFile or ".patience"
   if type(patienceFile) ~= "string" then
     error("arg[1] expected string or nil got "..type(patienceFile),2)
   end
@@ -40,29 +58,29 @@ local function enterLoop(patienceFile, updateInterval)
   if type(updateInterval) ~= "number" then
     error("arg[2] expected number or nil got "..type(updateInterval),2)
   end
-  
+
   -- read the file
-  local file, err = config.load(patienceFile)
+  local file, err = configuration.load(patienceFile)
   if not file then
     if err == "not a file" then
-      subscribers = {}
+      timers = {}
     else
       error("patience couldn't load file with name: "..patienceFile.."\ngot error: "..err,2)
-    end    
+    end
   end
   while doLoop do
-    for subscriptionId, timeRemaining in pairs(subscribers) do
+    for timerId, timeRemaining in pairs(timers) do
       -- queue events if expired
       if timeRemaining <= 0 then
-        os.queueEvent("patienceTimer", subscriptionId) -- Can we merge subscriptionIds if multiple subs want it?
-        subscribers[subscriptionId] = nil
+        os.queueEvent("patienceTimer", timerId)
+        timers[timerId] = nil
       end
     end
     -- decrement the timeRemaining
-    for _, timeRemaining in pairs(subscribers) do
+    for _, timeRemaining in pairs(timers) do
       timeRemaining = timeRemaining - updateInterval
     end
-    local ok, err = config.save(patienceFile, subscribers)
+    local ok, err = configuration.save(patienceFile, timers)
     if not ok then
       error("patience couldn't save file, got error: "..err)
     end
@@ -81,8 +99,9 @@ end
 
 local patience = {
   startTimer = startTimer,
-  exitLoop=exitLoop,
-  enterLoop=enterLoop,
+  cancelTimer = cancelTimer,
+  exitLoop = exitLoop,
+  enterLoop = enterLoop,
   run = enterLoop,
   start = enterLoop,
   stop = exitLoop,
