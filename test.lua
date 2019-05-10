@@ -28,5 +28,8 @@ end)
 
 print(temp)
 
+-- TODO: post to forums #high
 -- Why is only a new line being printed?
 -- and why did nothing print when I had the prints in the waitForAny?
+
+-- TODO: is the issue still present when config is stubbed? #high

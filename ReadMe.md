@@ -1,4 +1,4 @@
-# build instuctions
+# build instructions
 
 TODO: build instructions
 

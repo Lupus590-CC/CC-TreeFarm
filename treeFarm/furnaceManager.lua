@@ -8,9 +8,9 @@ local config = require("configuration")
 local furnaceStatesFile = ".furnaceStates"
 --[[
 local furnaceStates = {
-	[timerId] = {
-		furnaceId -- use position instead?
-	}
+  [timerId] = {
+    furnaceId -- use position instead?
+  }
 }
 ]]
 
@@ -30,10 +30,10 @@ end
 local function loadThisFurnace() -- TODO: empty the furnace first?
   -- Assumption, facing the furnace on the same level as it
   emptyThisFurnace()
-  
+
   -- go to top of furnace
   turtle.up()
-  turtle.forwards()
+  turtle.forward()
   -- select wood
   -- place in furnace -- what if there is stuff in there? -- can turtles take from the input/fuel slots?
 
@@ -70,8 +70,8 @@ local function putAwayNotWood()
 end
 
 -- NOTE: have a task list?
-	-- check wood chest
-	-- empty this furnace
+  -- check wood chest
+  -- empty this furnace
 
 -- NOTE: the logging turtle could message the furnace turtle that it's dropped off more wood
 
@@ -84,8 +84,8 @@ end
 -- collect from input
 -- put sapligs away
 -- put half of wood away -- TODO: furnaces take 8 wood at a time, what to do if half of the wood doesn't divide nicely like that?
-                         -- slit the inventory, there is a slot for wood that should be burned and any wood outside of that is not sorted yet
-                         -- will that mean that there needs to be another wood chest, one for burning and another for keep
+ -- split the inventory? there is a slot for wood that should be burned and any wood outside of that is not sorted yet
+ -- will that mean that there needs to be another wood chest, one for burning and another for keep
 -- load up furnaces
 -- collect from furnaces -- TODO: how to divide up fuel?
 -- put some (ow much) charcoal back into furnace

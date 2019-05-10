@@ -1853,7 +1853,7 @@ function PackTask:setup(context, runner)
 
   if not self.options.output then
   context.logger:error("Task '%s': No output file", self.name)
- 	end
+   end
 end
 
 function PackTask:runAction(context)

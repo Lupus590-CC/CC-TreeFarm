@@ -153,15 +153,9 @@ local function dropItemsById(itemId, quantityToDrop) -- TODO: discard this? just
   itemIdArgCheck(itemId,1)
 
 
-  quantityToDrop = quantityToDrop or 1 -- TODO: built in turtle.drop behaviour is to do a full stack by default
+  quantityToDrop = quantityToDrop or Math.huge -- built in turtle.drop behaviour is to do a full stack by default, this mimics that
   if type(quantityToDrop) ~= "number" then
     error("arg[2] expected number or nil, got "..type(quantityToDrop),2)
-  end
-
-
-  -- if quantityToDrop is negative then that is quantity to keep
-  if quantityToDrop < 0 then
-    quantityToDrop = countItemQuantityById(itemId) - quantityToDrop
   end
 
   -- NOTE: what does turtle.drop do? (into air)
@@ -176,6 +170,11 @@ local function dropItemsById(itemId, quantityToDrop) -- TODO: discard this? just
 
 
 
+end
+
+local function dropItemsByIdKeepingQuantity(itemId, quantityToDrop) -- TODO: discard this? just use selectById and turtle.drop?
+  itemIdArgCheck(itemId,1)
+  
 end
 
 local function getSpace() -- TODO: name better

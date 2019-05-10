@@ -4,7 +4,7 @@
 --
 -- Licence: MIT Lupus590
 
--- TODO: proper license header
+-- TODO: proper license header #high
 
 
 -- TO DO: messaging system

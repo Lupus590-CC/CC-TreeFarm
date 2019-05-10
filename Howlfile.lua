@@ -3,10 +3,8 @@ Tasks:Default "build"
 
 Tasks:clean()
 
-Tasks:minify "minify" { -- TODO: can I wildcard this?
-  input = "build/treeFarm.un.lua",
-  output = "build/treeFarm.min.un.lua",
-}
+Tasks:minify "minify"
+  :maps("wild:build/*.un.lua", "wild:build/*.min.un.lua")
 
 -- add license to start of output file
 Tasks:Task "license" (function(_, _, file, dest)

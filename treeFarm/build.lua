@@ -1,16 +1,19 @@
 -- build the tree farm
 local utils = require("utils")
 local lama = require("lama")
+local task = require("taskManager")
+
+-- TODO: first pair with remote and then mark out farm
 
 local function placeTreePodium() -- TODO: fuel checks
   -- if fuel level is less than 20 + reserve then abort
 
   -- move check to before? this func is called?
-  if not (utils.selectItemById(itemIds.dirt)
-  and utils.selectItemById(itemIds.jackOLantern)
-  and (utils.selectItemById(itemIds.cobblestone)
-  or utils.selectItemById(itemIds.stone))) then
-    return false, "need more stuff" -- TODO: let caller sort out stocking?
+  if not (utils.itemUtils.selectItemById(itemIds.dirt)
+  and utils.itemUtils.selectItemById(itemIds.jackOLantern)
+  and (utils.itemUtils.selectItemById(itemIds.cobblestone)
+  or utils.itemUtils.selectItemById(itemIds.stone) and utils.itemUtils.selectEmptySlot())) then
+    return false, "bad inventory" -- TODO: let caller sort out stocking?
   end
 
   -- TODO: check that where we are is the correct location
@@ -18,39 +21,40 @@ local function placeTreePodium() -- TODO: fuel checks
   turtle.back() -- current location is where we need to build
 
 
-  local _ = utils.selectItemById(itemIds.cobblestone)
-    or utils.selectItemById(itemIds.stone)
+  local _ = utils.itemUtils.selectItemById(itemIds.cobblestone)
+    or utils.itemUtils.selectItemById(itemIds.stone)
   turtle.place()
 
   turtle.up()
-  utils.selectItemById(itemIds.jackOLantern)
+  utils.itemUtils.selectItemById(itemIds.jackOLantern)
   turtle.place()
 
   turtle.up()
-  utils.selectItemByIdOrEmptySlot(itemIds.dirt)
+  utils.itemUtils.selectItemByIdOrEmptySlot(itemIds.dirt)
   turtle.place()
 
   -- place height cap (prevent trees growing too big)
   for i = 1, 6 do
     turtle.up()
   end
-  local _ = utils.selectItemById(itemIds.cobblestone) -- TODO: stone then cobble?
-    or utils.selectItemById(itemIds.stone)
+  local _ = utils.itemUtils.selectItemById(itemIds.cobblestone) -- TODO: stone then cobble?
+    or utils.itemUtils.selectItemById(itemIds.stone)
   turtle.place()
 
   for i = 1, 8 do
     turtle.down()
   end
-  utils.selectItemByIdOrEmptySlot(itemIds.cobblestone)
+  utils.itemUtils.selectItemByIdOrEmptySlot(itemIds.cobblestone)
     -- even if we placed stone it will be cobble when we dig it
   turtle.dig()
 
 
-  turtle.forwards() -- go back to where we started
+  turtle.forward() -- go back to where we started
 
 
   --TODO: send message that location is built
-  utils.rednetutils.sendToServer({messType="build", built="podium",
+    -- not needed if single turtle (which is starting to sound like the better idea)
+  utils.rednetutils.sendToServer({messageType="build", built="podium",
     loc=table.pack(lama.getLocation())}
 
   -- TODO: update bounding box
@@ -59,3 +63,5 @@ end
 
 -- TODO: build while waiting for things to grow
   -- arguably maintaining the farm and building a podium are different Hive tasks
+
+-- when building the water ways, make sure that the boundry has a wall, we don't want the water flowing the wrong way

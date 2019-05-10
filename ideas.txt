@@ -1,17 +1,18 @@
 TODO: organise this file
 
+TODO: set todo show to use #tags
+  also, check atom settings is using soft tabs and spaces for tabs
+
 update detector?
 
 how to init config
 
-TODO: is the farm small enough that a rednet repeater is not needed?
+TODO: is the farm small enough that a rednet repeater is not needed? #high
   test near bedrock during a thunderstorm
 
-can I make it so that there are multiple furnace managing turtles?
+TODO: check and fix indentation #high
 
-TODO: fix whitespace and indentation
-
-NOTE: can we have too much wood to smelt?
+can we have too much wood to smelt?
   could we be unable to catch up?
 
 make the whole farm stackable?
@@ -34,7 +35,7 @@ wireless modems are cheap
 Incremental construction of farm?
   farming turtle need to hang onto the water bucket but ideally should not be programmed to know of the bucket
 
-Request with label
+Request building equipment with label
 
 Lost and found(apples) and spare construction material chests
 
