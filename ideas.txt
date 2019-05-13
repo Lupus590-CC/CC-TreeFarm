@@ -28,6 +28,8 @@ Computer server?
 has advanced pocket computer
 
 wireless modems are cheap
+  rednet range during thunder, about 19
+    during ideal conditions, about 67
 
 Incremental construction of farm?
   farming turtle need to hang onto the water bucket but ideally should not be programmed to know of the bucket

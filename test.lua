@@ -15,6 +15,7 @@ local temp = ""
 
 
 parallel.waitForAny(p.run, function()
+print("hello world")
 temp = temp..tostring(p.isRunning()).."\n"
 local t = p.startTimer(5)
 
@@ -32,4 +33,5 @@ print(temp)
 -- Why is only a new line being printed?
 -- and why did nothing print when I had the prints in the waitForAny?
 
--- TODO: is the issue still present when config is stubbed? #high
+-- is the issue still present when config is stubbed?
+  -- yes

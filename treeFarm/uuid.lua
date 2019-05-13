@@ -7,5 +7,5 @@
   -- can I find a way to identify servers?
   -- old CC will be hard
 
--- no license :()
+-- no license :(
 -- https://gist.github.com/jrus/3197011
