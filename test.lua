@@ -15,7 +15,12 @@ local temp = ""
 
 
 parallel.waitForAny(p.run, function()
+error() -- BUG: this doesn't run. p.run probably finishes to quickly, why/how?
 print("hello world")
+local f = fs.open("hello", "w")
+f.write("world")
+f.close()
+
 temp = temp..tostring(p.isRunning()).."\n"
 local t = p.startTimer(5)
 
