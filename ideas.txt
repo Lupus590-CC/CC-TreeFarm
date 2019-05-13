@@ -1,10 +1,5 @@
 TODO: organise this file
 
-TODO: set todo show to use #tags
-  also, check atom settings is using soft tabs and spaces for tabs
-
-TODO: update screenshots
-
 update detector?
 
 how to init config
