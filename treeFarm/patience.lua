@@ -19,7 +19,7 @@ local function startTimer(secondsToWait)
   end
 
   -- add to list
-  local timerId = {}
+  local timerId = {} -- TODO: This is bad
   timers[timerId] = secondsToWait
 
   return timerId
