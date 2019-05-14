@@ -45,10 +45,11 @@ end
 
 local function enterLoop(patienceFile, updateInterval)
   if running then
+    error("two instances of patience") -- TODO: test and remove #high
     return false, "already running"
   end
   running = true;
-
+  error("first instance of patience") -- TODO: test and remove #high
   print("patience started")
 
   patienceFile = patienceFile or ".patience"
