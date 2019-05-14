@@ -13,6 +13,7 @@ local p = require("patience")
 
 local temp = ""
 
+p.stop()
 
 parallel.waitForAny(p.run, function()
 error() -- BUG: this doesn't run. p.run probably finishes to quickly, why/how?
@@ -31,6 +32,8 @@ temp = temp..tostring(e).."\n"
 temp = temp..tostring(e1).."\n"
 
 end)
+
+p.stop()
 
 print(temp)
 

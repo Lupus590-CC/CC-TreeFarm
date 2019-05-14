@@ -14,7 +14,12 @@
 
 local daemons = {}
 local raiseErrorsInDaemons = false
-
+local running = false
+local oldError = error
+local function error(mess, level)
+  running = false
+  return oldError(mess, (level or 0) +1)
+end
 local function resumeDaemon(daemonName,event)
   if type(daemonName) ~= "string" then
     error("Arg[1] expected string, got "..type(daemonName), 2)
@@ -121,7 +126,6 @@ local function exitLoop()
   doLoop = false
 end
 
-local running = false
 local function enterLoop(raiseErrors)
   running = true
   raiseErrorsInDaemons = raiseErrors

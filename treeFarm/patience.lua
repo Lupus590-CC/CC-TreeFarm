@@ -8,7 +8,12 @@
 -- TODO: line wrap license
 
 local configuration = require("configuration")
-
+local running = false
+local oldError = error
+local function error(mess, level)
+  running = false
+  return oldError(mess, (level or 0) +1)
+end
 local timers
 local running = false
 local function startTimer(secondsToWait)
@@ -42,15 +47,11 @@ local function exitLoop()
   doLoop = false
 end
 
-
 local function enterLoop(patienceFile, updateInterval)
   if running then
-    error("two instances of patience") -- TODO: test and remove #high
     return false, "already running"
   end
   running = true;
-  error("first instance of patience") -- TODO: test and remove #high
-  print("patience started")
 
   patienceFile = patienceFile or ".patience"
   if type(patienceFile) ~= "string" then
