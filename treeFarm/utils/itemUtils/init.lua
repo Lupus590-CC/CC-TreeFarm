@@ -102,7 +102,7 @@ local function selectItemByIdWithFreeSpaceOrEmptySlot(itemId, allowFullSlots)
 end
 
 -- items which give more fuel than targetFuelValue are not eligible
-local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue
+local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #testThis
   targetFuelValue = targetFuelValue or math.huge
   if type(targetFuelValue) ~= "number" then
       error("arg[1] expected number or nil, got "..type(targetFuelValue),2)
@@ -174,7 +174,7 @@ end
 
 local function dropItemsByIdKeepingQuantity(itemId, quantityToDrop) -- TODO: discard this? just use selectById and turtle.drop?
   itemIdArgCheck(itemId,1)
-  
+
 end
 
 local function getSpace() -- TODO: name better

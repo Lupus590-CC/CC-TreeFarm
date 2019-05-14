@@ -49,7 +49,7 @@ local function loadThisFurnace() -- TODO: empty the furnace first?
   end
 end
 
--- NOTE: if farmer rednets that it has dropped stuff then how long do we wait for the items to get to the chest? -- TODO: investigate how long it takes for items to drift
+-- it takes about 20 seconds for items to get from the furthest point to the chest
 local function getResources() -- empty the bottom chest
   -- go to the exit
   -- go down to the chest

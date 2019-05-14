@@ -58,3 +58,39 @@ end
   -- shell.getRunningProgram() -- no shell for API and can't eaisly convert to number (asci numbers?)
   -- tutle.getFuelLevel()
   -- could we listen to rednet traffic?
+  -- os.pullEventRaw() will need to override or have a daemon
+
+-- from discord https://discordapp.com/channels/477910221872824320/477911902152949771/577959903499386894
+if not SHA then
+  os.loadLib("SHA");
+end
+
+local oldPullEvent = os.pullEvent;
+local oldPullEventRaw = os.pullEvent;
+
+local epool = "";
+
+local function storeAll(...)
+  for _,v in ipairs({...}) do
+   epool = epool..v
+  end
+  return ...
+end
+
+function os.pullEvent(event)
+return storeAll(oldPullEvent(event));
+end
+
+function os.pullEventRaw(event)
+ return storeAll(oldPullEventRaw(event));
+end
+
+function randomBits()
+  while #epool < 1024 do
+    os.sleep(1)
+  end
+  local hash = SHA.SHA256(epool);
+  epool = hash:sub(5,-1);
+  local a,b,c,d = hash:sub(1,4);
+  return a*16777216+b*65536+c*256+d;
+end

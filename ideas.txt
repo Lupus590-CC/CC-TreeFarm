@@ -4,8 +4,11 @@ update detector?
 
 how to init config
 
-TODO: is the farm small enough that a rednet repeater is not needed? #high
+TODO: is the farm small enough that a rednet repeater is not needed?
   test near bedrock during a thunderstorm
+  maybe, max needed range is about 16 blocks
+  range during thunderstorm at y-level that Handy__Andy plans to deploy this at is about 17 blocks. That's not a lot of wiggle room.
+  more testing needed
 
 TODO: check and fix indentation #high
 
@@ -60,7 +63,6 @@ logging turtles divide tasks into rows
 low roof prevents branches
 
 TODO: programmatic locations
-TODO: put world in git?
 
 lama overrides real gps, if they conflict then lama is used
 
