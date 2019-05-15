@@ -1,8 +1,8 @@
 TODO: organise this file
 
 TODO: unit testing stuff
-	https://github.com/SquidDev-CC/CC-Tweaked/tree/master/src/test/resources/test-rom
-	http://olivinelabs.com/busted/
+	https://github.com/SquidDev-CC/plethora/tree/minecraft-1.12/src/test/resources/assets/plethora-test/test-rom
+	Howl task
 
 update detector?
 
