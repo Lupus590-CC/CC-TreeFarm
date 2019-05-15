@@ -26,6 +26,8 @@
 
 -- TODO: check compatablility with require, LAMA may need a big rewrite as it interacts with the global namespace #VERY_HIGH
 
+-- TODO: reference frames? may need a full rewrite
+
 --Copy the default turtle directory
 local turtle = {}
 for k, v in pairs( _G.turtle ) do
