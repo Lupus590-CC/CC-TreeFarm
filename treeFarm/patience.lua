@@ -25,7 +25,7 @@ local function startTimer(secondsToWait)
   end
 
   -- add to list
-  local timerId = {} -- TODO: This is bad
+  local timerId = math.random(1, 2147483647) -- TODO: replace with UUID generator
   timers[timerId] = secondsToWait
 
   return timerId

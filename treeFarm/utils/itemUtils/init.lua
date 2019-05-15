@@ -102,7 +102,7 @@ local function selectItemByIdWithFreeSpaceOrEmptySlot(itemId, allowFullSlots)
 end
 
 -- items which give more fuel than targetFuelValue are not eligible
-local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #testThis
+local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #homeOnly
   targetFuelValue = targetFuelValue or math.huge
   if type(targetFuelValue) ~= "number" then
       error("arg[1] expected number or nil, got "..type(targetFuelValue),2)

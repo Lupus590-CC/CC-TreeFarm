@@ -24,6 +24,8 @@
 -- Converted to be Require compatible by Lupus590 and released under the same MIT license.
 -- Look for REQUIRE_COMPAT in comments, the connected multi line comments are removed original stuff with the replacement under that.
 
+-- TODO: check compatablility with require, LAMA may need a big rewrite as it interacts with the global namespace #VERY_HIGH
+
 --Copy the default turtle directory
 local turtle = {}
 for k, v in pairs( _G.turtle ) do

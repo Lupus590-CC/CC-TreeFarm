@@ -2,6 +2,18 @@ TODO: organise this file
 
 update detector?
 
+TODO: editor config?
+
+TODO: testing framework
+  McFly is recommended by SquidDev
+
+TODO: full top down screenshot of farm (no trees) #homeOnly
+
+If I have multiple turtles then will there be enough fuel?
+  might not be worth it, the turtle already spends most of the time waiting
+    perhaps I should make it multiple levels, with one turtle handling it all
+      how would this effect rednet range?
+
 how to init config
 
 TODO: is the farm small enough that a rednet repeater is not needed?
@@ -9,10 +21,11 @@ TODO: is the farm small enough that a rednet repeater is not needed?
   maybe, max needed range is about 16 blocks
   range during thunderstorm at y-level that Handy__Andy plans to deploy this at is about 17 blocks. That's not a lot of wiggle room.
   more testing needed
+  the farm has a bit more upper space, perhaps a repeater can be placed here? TODO: place a repeater at farm max and test again
 
 TODO: check and fix indentation #high
 
-can we have too much wood to smelt?
+NOTE: can we have too much wood to smelt?
   could we be unable to catch up?
 
 make the whole farm stackable?
@@ -28,7 +41,7 @@ Computer server?
   arguably more useful to hive
   if desync then server is right (even if it isn't)
 
-has advanced pocket computer
+Handy__Andy has a advanced pocket computer
 
 wireless modems are cheap
   rednet range during thunder, about 19
@@ -39,7 +52,7 @@ Incremental construction of farm?
 
 Request building equipment with label
 
-Lost and found(apples) and spare construction material chests
+Lost and found(including apples) and spare construction material chests
 
 if the system runs out of saplings then place more in the sapling chest
   saplings will get used as fuel for the turtles and furnaces with charcoal as a backup -- NOT: this is not currently true
@@ -60,21 +73,31 @@ logging turtles divide tasks into rows
   turtle with one row: chop away from chests, wait for regrowth, chop towards chests, restock,  wait for regrowth
 
 
-low roof prevents branches
-
 TODO: programmatic locations
 
 lama overrides real gps, if they conflict then lama is used
+  TODO: edit lama to have reference frames
 
-
+Lowest allowed point = 20
+Highest allowed point = 75
+TODO: how tall is the farm?
+  8 blocks for the tree part (stackable)
+  4? for the trench (not stackable)
+  if I stack it then part doesn't need to be replicated
+    do I need multiple sapling catchers/movers?
+      depends if the leaves keep catching them
+        might be able to mitigate by always chopping from the bottom of the farm
+      I might want to remove the inner most tree line too
+  might be able to stack them upto 5 or 6 times
 size = 14*5*2 = 140
 time taken to cut one tree = 10
 time taken to clear farm = 1400
 30 mins in seconds = 30 * 60 = 1800
 
 max logs per tree = 6
+  low roof prevents branches
 
-Allow a chest for placing build items
+TODO: Allow a chest for placing build items
   may need two so that the turtle can sort
 
 Required items list

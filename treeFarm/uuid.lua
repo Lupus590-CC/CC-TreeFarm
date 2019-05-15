@@ -26,7 +26,7 @@ end
 -- math.random( 1, 2147483647 ) = 15257
 -- ("%08x"):format(math.random( 1, 2^31-2 )) = 15357
 -- ("%08x"):format(math.random( 1, 2^31-2 ))..("%08x"):format(math.random( 1, 2^31-2 )) = process killed by repl, got to 4194305
--- TODO: test on CC #testThis
+-- TODO: test on CC #homeOnly
 
 -- NOTE: the main (only?) issue is making sure that two computers don't get the same seed
 

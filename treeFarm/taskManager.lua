@@ -18,7 +18,7 @@ local tasks = {} -- TODO: persist
 
 local function addTask(name, trigger, recuring) -- TODO: implement -- TODO: how to do trigger?
   -- TODO: arg checks
-  local taskId = tostring({}) -- TODO: this is bad
+  local taskId = math.random(1, 2147483647) -- TODO: replace with UUID generator
 
   tasks[taskId] = something
   return taskId
