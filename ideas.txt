@@ -1,5 +1,9 @@
 TODO: organise this file
 
+TODO: unit testing stuff
+	https://github.com/SquidDev-CC/CC-Tweaked/tree/master/src/test/resources/test-rom
+	http://olivinelabs.com/busted/
+
 update detector?
 
 TODO: editor config?
