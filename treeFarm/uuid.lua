@@ -1,3 +1,5 @@
+-- TODO: I'me starting to think that Hive will want this but Tree Farm will not need it
+
 
 -- https://www.google.com/search?q=uuid+v4+spec
 
@@ -61,6 +63,7 @@ end
   -- os.pullEventRaw() will need to override or have a daemon
 
 -- from discord https://discordapp.com/channels/477910221872824320/477911902152949771/577959903499386894
+-- NOTE: would this work, there won't be alot of different events
 if not SHA then
   os.loadLib("SHA");
 end

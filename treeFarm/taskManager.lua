@@ -18,7 +18,7 @@ local tasks = {} -- TODO: persist
 
 local function addTask(name, trigger, recuring) -- TODO: implement -- TODO: how to do trigger?
   -- TODO: arg checks
-  local taskId = math.random(1, 2147483647) -- TODO: replace with UUID generator
+  local taskId = math.random(1, 2147483647) -- it's good enough for rednet so it's good enough for us -- TODO: check file output, we may want to use ("%08x"):format(math.random( 1, 2^31-2 )) #homeOnly
 
   tasks[taskId] = something
   return taskId
