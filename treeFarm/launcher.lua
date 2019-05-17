@@ -1,6 +1,6 @@
-local builderScript = require "treeFarm.build"
+local builderScript = require("treeFarm.build")
 
-local managementScript = require "treefarm.manage"
+local managementScript = require("treefarm.manage")
 
 -- rednet server lookup and host if not found
 -- master slave setup

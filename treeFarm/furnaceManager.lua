@@ -49,7 +49,7 @@ local function loadThisFurnace() -- TODO: empty the furnace first?
   end
 end
 
--- it takes about 20 seconds for items to get from the furthest point to the chest
+-- NOTE: it takes about 20 seconds for items to get from the furthest point to the chest
 local function getResources() -- empty the bottom chest
   -- go to the exit
   -- go down to the chest

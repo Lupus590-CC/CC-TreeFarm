@@ -3,9 +3,9 @@
   -- remote only needs to talk to the main turtle
   -- still have multiple farming turtles?
 
-
-local serverName = "lupus590TreeFarm" -- TODO: take from config
-local protocolName = "lupus590TreeFarm" -- TODO: take from config
+ -- TODO: take from config
+local serverName = "lupus590TreeFarm"
+local protocolName = "lupus590TreeFarm"
 
 local rednetUtils = {
   serverName = serverName,

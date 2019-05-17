@@ -8,13 +8,13 @@ Tasks:minify "minify"
 
 -- add license to start of output file
 Tasks:Task "license" (function(_, _, file, dest)
-  local fs = require "howl.platform".fs
-  local contents = table.concat {
+  local fs = require("howl.platform").fs
+  local contents = table.concat( {
   "--[[\n",
-  fs.read(File "License.txt"),
+  fs.read(File("License.txt")),
   "\n]]\n",
   fs.read(File(file)),
-  }
+  })
 
   fs.write(File(dest), contents)
   end)
@@ -29,8 +29,12 @@ Tasks:Task "license" (function(_, _, file, dest)
 -- wouldn't the above duplicate stuff as things become nested?
 Tasks:require "main" {
   include = "treeFarm/*.lua",
-  startup = "treeFarm/main.lua",
+  startup = "treeFarm/launcher.lua",
   output = "build/treeFarm.un.lua",
 }
 
-Tasks:Task "build" { "clean", "minify", "license" } :Description "Main build task"
+Tasks:Task "rename"
+  :maps("wild:build/*.lua", "wild:build/*")
+  :description "Removes .lua extention for Old CC compatability/convinience"
+
+Tasks:Task "build" { "clean", "minify", "license", "rename" } :Description "Main build task"

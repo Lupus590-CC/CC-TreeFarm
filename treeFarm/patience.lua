@@ -57,7 +57,7 @@ local function enterLoop(patienceFile, updateInterval)
   if type(patienceFile) ~= "string" then
     error("arg[1] expected string or nil got "..type(patienceFile),2)
   end
-  updateInterval = updateInterval or 5 -- NOTE: is there a way to get this more accurate without hammering the HDD?
+  updateInterval = updateInterval or 5 -- is there a way to get this more accurate without hammering the HDD?
   if type(updateInterval) ~= "number" then
     error("arg[2] expected number or nil got "..type(updateInterval),2)
   end

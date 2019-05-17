@@ -3,6 +3,14 @@
 
 -- TODO: allow convert from nsh to vncd and back
   -- https://github.com/lyqyd/cc-netshell/issues/1
+  --[[
+  issue copied here:
+  I'm not 100% sure how you could do this, but you will need an escape key so that you can switch from vncd mode to nsh mode.
+  as for nsh to vncd mode, a command in the terminal?
+
+  If required, some clarification, when the user connects to a server they start in a new shell, they can then type in a command to get the servers current terminal view (like in vncd). When they want to exit vncd mode they can press a key (right ctrl?) and exit back into the separate shell.
+
+  ]]
 
 -- TODO: scroll bars if client screen is smaller
   -- resize the remote?

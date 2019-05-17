@@ -25,6 +25,8 @@
 -- Look for REQUIRE_COMPAT in comments, the connected multi line comments are removed original stuff with the replacement under that.
 
 -- TODO: check compatablility with require, LAMA may need a big rewrite as it interacts with the global namespace #VERY_HIGH
+  -- put LAMA into the gobal space and pretend to load if were are already there (returning the one found in global)
+  -- copy to hive
 
 -- TODO: reference frames? may need a full rewrite
 

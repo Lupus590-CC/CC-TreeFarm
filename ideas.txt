@@ -6,11 +6,6 @@ TODO: unit testing stuff
 
 update detector?
 
-TODO: editor config?
-
-TODO: testing framework
-  McFly is recommended by SquidDev
-
 TODO: full top down screenshot of farm (no trees) #homeOnly
 
 If I have multiple turtles then will there be enough fuel?
@@ -19,6 +14,10 @@ If I have multiple turtles then will there be enough fuel?
       how would this effect rednet range?
 
 how to init config
+
+TODO: how do I want the remote control system to work?
+  especially if I replace nsh with my own thing
+    with nsh compatibility?
 
 TODO: is the farm small enough that a rednet repeater is not needed?
   test near bedrock during a thunderstorm
@@ -31,6 +30,11 @@ TODO: check and fix indentation #high
 
 NOTE: can we have too much wood to smelt?
   could we be unable to catch up?
+    the farmer could stop if the smelter says so
+      computer at the bottom which only monitors the chest?
+
+TODO: location placer
+  pocket computer app which lets the user know how big the farm will be and tells the turtles where to build it
 
 make the whole farm stackable?
   only need to put jack o'lantern and dirt
