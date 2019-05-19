@@ -6,8 +6,6 @@ TODO: unit testing stuff
 
 update detector?
 
-TODO: full top down screenshot of farm (no trees) #homeOnly
-
 If I have multiple turtles then will there be enough fuel?
   might not be worth it, the turtle already spends most of the time waiting
     perhaps I should make it multiple levels, with one turtle handling it all

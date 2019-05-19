@@ -1,11 +1,26 @@
 --
 -- Copyright 2019 Lupus590
 --
--- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to
+--  deal in the Software without restriction, including without limitation the
+--  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+--  sell copies of the Software, and to permit persons to whom the Software is
+--  furnished to do so, subject to the following conditions: The above
+--  copyright notice and this permission notice shall be included in all copies
+--  or substantial portions of the Software.
 --
--- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+-- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+-- IN THE SOFTWARE.
 --
--- TODO: line wrap license
+
+
+-- BUG: doesn't seem to be saving auythng #homeOnly
 
 local configuration = require("configuration")
 local running = false
@@ -57,7 +72,7 @@ local function enterLoop(patienceFile, updateInterval)
   if type(patienceFile) ~= "string" then
     error("arg[1] expected string or nil got "..type(patienceFile),2)
   end
-  updateInterval = updateInterval or 5 -- is there a way to get this more accurate without hammering the HDD?
+  updateInterval = updateInterval or 5 -- TODO: is there a way to get this more accurate without hammering the HDD?
   if type(updateInterval) ~= "number" then
     error("arg[2] expected number or nil got "..type(updateInterval),2)
   end

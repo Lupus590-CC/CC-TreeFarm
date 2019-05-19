@@ -8,3 +8,11 @@ _G.package.path = table.concat({
   _G.package.path,
 }, ";")
 end
+
+local p = require("patience")
+
+parallel.waitForAll(p.run, function()
+  p.startTimer(100)
+  p.stop()
+  sleep(10)
+end)
