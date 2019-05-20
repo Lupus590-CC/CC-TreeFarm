@@ -1,6 +1,9 @@
 TODO: organise this file
 
-TODO: unit testing stuff
+TODO: shrink the screenshots #homeOnly #high
+	should make thinks quicker at work during lunch breaks
+
+TODO: try out unit testing stuff #homeOnly #high
 	https://github.com/SquidDev-CC/plethora/tree/minecraft-1.12/src/test/resources/assets/plethora-test/test-rom
 	Howl task
 
