@@ -5,7 +5,8 @@ TODO: shrink the screenshots #homeOnly #high
 
 TODO: try out unit testing stuff #homeOnly #high
 	https://github.com/SquidDev-CC/plethora/tree/minecraft-1.12/src/test/resources/assets/plethora-test/test-rom
-	Howl task
+	Howl task?
+  starting wo wish for a ldoc like thing in the same vain as mcfly compared with busted
 
 update detector?
 
