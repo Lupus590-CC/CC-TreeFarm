@@ -133,12 +133,12 @@ end
 
 local function enterLoop(raiseErrors)
   running = true
+  doLoop = true
   raiseErrorsInDaemons = raiseErrors
   while doLoop do
     daemonHost()
   end
-  doLoop = true -- just in case people want to start us again
-  running = false
+  running = false -- just in case people want to start us again
 end
 
 local function isRunning()

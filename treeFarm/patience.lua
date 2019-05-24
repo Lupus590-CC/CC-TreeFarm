@@ -19,17 +19,15 @@
 -- IN THE SOFTWARE.
 --
 
+local config = require("config")
 
--- BUG: doesn't seem to be saving auythng #homeOnly
-
-local configuration = require("configuration")
 local running = false
 local oldError = error
 local function error(mess, level)
   running = false
   return oldError(mess, (level or 0) +1)
 end
-local timers
+local timers = {}
 local running = false
 local function startTimer(secondsToWait)
   if type(secondsToWait) ~= "number" then
@@ -40,7 +38,7 @@ local function startTimer(secondsToWait)
   end
 
   -- add to list
-  local timerId = math.random(1, 2147483647) -- it's good enough for rednet so it's good enough for us -- TODO: check file output, we may want to use ("%08x"):format(math.random( 1, 2^31-2 )) #homeOnly
+  local timerId = tostring(math.random(1, 2147483647)) -- it's good enough for rednet so it's good enough for us -- TODO: check file output, we may want to use ("%08x"):format(math.random( 1, 2^31-2 )) #homeOnly
   timers[timerId] = secondsToWait
 
   return timerId
@@ -62,15 +60,16 @@ local function exitLoop()
   doLoop = false
 end
 
-local function enterLoop(patienceFile, updateInterval)
+local function enterLoop(patienceFileName, updateInterval)
   if running then
     return false, "already running"
   end
-  running = true;
+  running = true
+  doLoop = true
 
-  patienceFile = patienceFile or ".patience"
-  if type(patienceFile) ~= "string" then
-    error("arg[1] expected string or nil got "..type(patienceFile),2)
+  patienceFileName = patienceFileName or ".patience"
+  if type(patienceFileName) ~= "string" then
+    error("arg[1] expected string or nil got "..type(patienceFileName),2)
   end
   updateInterval = updateInterval or 5 -- TODO: is there a way to get this more accurate without hammering the HDD?
   if type(updateInterval) ~= "number" then
@@ -78,18 +77,25 @@ local function enterLoop(patienceFile, updateInterval)
   end
 
   -- read the file
-  local file, err = configuration.load(patienceFile)
+  local file, err = config.load(patienceFileName)
   if not file then
     if err == "not a file" then
       timers = {}
     else
-      error("patience couldn't load file with name: "..patienceFile.."\ngot error: "..err,2)
+      error("patience couldn't load file with name: "..patienceFileName.."\ngot error: "..err,2)
     end
   end
   while doLoop do
+
+    for timerId, timeRemaining in pairs(timers) do
+      print(timerId)
+    end
+
+
     for timerId, timeRemaining in pairs(timers) do
       -- queue events if expired
       if timeRemaining <= 0 then
+        print("timer queued")
         os.queueEvent("patienceTimer", timerId)
         timers[timerId] = nil
       end
@@ -98,7 +104,7 @@ local function enterLoop(patienceFile, updateInterval)
     for _, timeRemaining in pairs(timers) do
       timeRemaining = timeRemaining - updateInterval
     end
-    local ok, err = configuration.save(patienceFile, timers)
+    local ok, err = config.save(patienceFileName, timers)
     if not ok then
       error("patience couldn't save file, got error: "..err)
     end
@@ -106,8 +112,7 @@ local function enterLoop(patienceFile, updateInterval)
       sleep(updateInterval)
     end
   end
-  doLoop = true -- just in case people want to start us again
-  running = false
+  running = false -- just in case people want to start us again
   return true
 end
 

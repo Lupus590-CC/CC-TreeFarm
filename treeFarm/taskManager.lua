@@ -77,12 +77,12 @@ local function enterLoop()
     return false, "already running"
   end
   running = true;
+  doLoop = true
   while doLoop do
     -- make sure to pass the tigger event to the task
 
   end
-  doLoop = true -- just in case people want to start us again
-  running = false
+  running = false -- just in case people want to start us again
   return true
 end
 

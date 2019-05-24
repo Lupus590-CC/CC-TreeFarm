@@ -4,3 +4,5 @@
 -- should I cone ldoc or lua doc?
 
 -- what should this thing be called?
+
+-- squiddev is doing something already 
