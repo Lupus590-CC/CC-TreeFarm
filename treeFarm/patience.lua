@@ -22,13 +22,15 @@
 local config = require("config")
 
 local running = false
+
 local oldError = error
 local function error(mess, level)
   running = false
   return oldError(mess, (level or 0) +1)
 end
+
 local timers = {}
-local running = false
+
 local function startTimer(secondsToWait)
   if type(secondsToWait) ~= "number" then
     error("arg[1] expected number got "..type(secondsToWait),2)
@@ -82,7 +84,8 @@ local function enterLoop(patienceFileName, updateInterval)
     if err == "not a file" then
       timers = {}
     else
-      error("patience couldn't load file with name: "..patienceFileName.."\ngot error: "..err,2)
+      error("patience couldn't load file with name: "..patienceFileName
+      .."\ngot error: "..err,2)
     end
   end
   while doLoop do

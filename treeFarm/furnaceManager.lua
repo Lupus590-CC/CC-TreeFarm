@@ -53,7 +53,7 @@ end
 local function getResources() -- empty the bottom chest
   -- go to the exit
   -- go down to the chest
-  -- suck as much as there is inventory space -- TODO: if there is only wood in the turtles and the first slot in the chest is not wood what happens?
+  -- suck as much as there is inventory space -- TODO: if there is only wood in the turtle and the first slot in the chest is not wood what happens?
   -- go back up to furnace room
 end
 
@@ -73,7 +73,7 @@ end
   -- check wood chest
   -- empty this furnace
 
--- NOTE: the logging turtle could message the furnace turtle that it's dropped off more wood
+-- NOTE: the logging turtle could message the furnace turtle that it's dropped off more wood -- note, range issues. could use repeater or wait out thunderstorms (or only drop at specific spots where the range is known to be good iven during thunderstorms)
 
 -- NOTE: furnace turtle could be the server
 

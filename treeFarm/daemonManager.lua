@@ -5,9 +5,22 @@
 --
 -- Copyright 2019 Lupus590
 --
--- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to
+-- deal in the Software without restriction, including without limitation the
+-- rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+-- sell copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions: The above copyright
+-- notice and this permission notice shall be included in all copies or
+-- substantial portions of the Software.
 --
--- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+-- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+-- IN THE SOFTWARE.
 --
 
 
@@ -35,9 +48,11 @@ local function resumeDaemon(daemonName,event)
   if coroutine.status(v) ~= "suspended" then
     local returnedValues = table.pack(coroutine.resume(daemons[newDaemonName].coroutine, event and table.unpack(event, 1, event.n) or nil))
     local ok = table.remove(returnedValues, 1)
-    if not okthen
+    if not ok then
       if raiseErrorsInDaemons then
-        error("daemonManager error in daemon "..daemonName.."\n"..toString(table.unpack(returnedValues, 1, returnedValues.n)))
+        error("daemonManager error in daemon "
+        ..daemonName.."\n"
+        ..toString(table.unpack(returnedValues, 1, returnedValues.n)))
       end
       daemos[newDaemonName] = nil
     end
@@ -60,7 +75,8 @@ local function add(newDaemonName, newdaemonFunc, replaceIfExists, stopFunction)
     error("Arg[4] expected function or nil, got "..type(stopFunction),2)
   end
   if not replaceIfExists and daemons[newDaemonName] then
-    error("daemon with name "..newDaemonName.." exists - to overwrite set arg[3] to true",2)
+    error("daemon with name "..newDaemonName
+    .." exists - to overwrite set arg[3] to true",2)
   end
   daemons[newDaemonName] = {coroutine = coroutine.create(newdaemonFunc), eventFilter = nil, stopFunction = stopFunction}
   resumeDaemon(newDaemonName, {})

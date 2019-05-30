@@ -1,7 +1,7 @@
--- TODO: convert to API
+-- TO DO: convert to API
   -- once converted copy to hive
 
--- TODO: allow convert from nsh to vncd and back
+-- TO DO: allow convert from nsh to vncd and back
   -- https://github.com/lyqyd/cc-netshell/issues/1
   --[[
   issue copied here:

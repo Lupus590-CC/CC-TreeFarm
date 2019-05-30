@@ -18,23 +18,22 @@
 --
 --  Copyright (c) 2018 Lupus590
 --
---  Permission is hereby granted, free of charge, to any person obtaining a copy
---  of this software and associated documentation files (the "Software"), to deal
---  in the Software without restriction, including without limitation the rights
---  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
---  copies of the Software, and to permit persons to whom the Software is
---  furnished to do so, subject to the following conditions:
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to
+-- deal in the Software without restriction, including without limitation the
+-- rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+-- sell copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions: The above copyright
+-- notice and this permission notice shall be included in all copies or
+-- substantial portions of the Software.
 --
---  The above copyright notice and this permission notice shall be included in all
---  copies or substantial portions of the Software.
---
---  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
---  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
---  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
---  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
---  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
---  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
---  SOFTWARE.
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+-- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+-- IN THE SOFTWARE.
 --
 --
 -- MBS's License:
@@ -103,7 +102,9 @@ local function traceback(x)
     local out = { tostring(x), "stack traceback:" }
     while true do
       local _, msg = pcall(error, "", level)
-      if msg == "" then break end
+      if msg == "" then
+        break
+      end
 
       out[#out + 1] = "  " .. msg
       level = level + 1
@@ -115,8 +116,12 @@ end
 
 local function trimTraceback(target, marker)
   local ttarget, tmarker = {}, {}
-  for line in target:gmatch("([^\n]*)\n?") do ttarget[#ttarget + 1] = line end
-  for line in marker:gmatch("([^\n]*)\n?") do tmarker[#tmarker + 1] = line end
+  for line in target:gmatch("([^\n]*)\n?") do
+    ttarget[#ttarget + 1] = line
+  end
+  for line in marker:gmatch("([^\n]*)\n?") do
+    tmarker[#tmarker + 1] = line
+  end
 
   local t_len, m_len = #ttarget, #tmarker
   while t_len >= 3 and ttarget[t_len] == tmarker[m_len] do
@@ -133,22 +138,35 @@ end
 
 
 function checkpoint.add(label, callback, ...)
-  if type(label) ~= "string" then error("Bad arg[1], expected string, got "..type(label), 2) end
-  if type(callback) ~= "function" then error("Bad arg[2], expected function, got "..type(callback), 2) end
+  if type(label) ~= "string" then
+    error("Bad arg[1], expected string, got "..type(label), 2)
+  end
+  if type(callback) ~= "function" then
+    error("Bad arg[2], expected function, got "..type(callback), 2)
+  end
 
   checkpoints[label] = {callback = callback, args = table.pack(...), }
 end
 
 function checkpoint.remove(label) -- this is intended for debugging, users can use it to make sure that their programs don't loop on itself when it's not meant to
-  if type(label) ~= "string" then error("Bad arg[1], expected string, got "..type(label), 2) end
-  if not checkpoints[label] then error("Bad arg[1], no known checkpoint with label "..tostring(label), 2) end
+  if type(label) ~= "string" then
+    error("Bad arg[1], expected string, got "..type(label), 2)
+  end
+  if not checkpoints[label] then
+    error("Bad arg[1], no known checkpoint with label "..tostring(label), 2)
+  end
 
   checkpoints[label] = nil
 end
 
 function checkpoint.reach(label)
-  if type(label) ~= "string" then error("Bad arg[1], expected string, got "..type(label), 2) end
-  if not checkpoints[label] then error("Bad arg[1], no known checkpoint with label '"..tostring(label).."'. You may want to check spelling, scope and such.", 2) end
+  if type(label) ~= "string" then
+    error("Bad arg[1], expected string, got "..type(label), 2)
+  end
+  if not checkpoints[label] then
+    error("Bad arg[1], no known checkpoint with label '"..tostring(label)
+    .."'. You may want to check spelling, scope and such.", 2)
+  end
 
   local f = fs.open(checkpointFile,"w")
   f.writeLine(label)
@@ -157,10 +175,19 @@ function checkpoint.reach(label)
 end
 
 function checkpoint.run(defaultLabel, fileName, stackTracing) -- returns whatever the last callback returns (xpcall stuff stripped if used)
-  if type(defaultLabel) ~= "string" then error("Bad arg[1], expected string, got "..type(defaultLabel), 2) end
-  if not checkpoints[defaultLabel] then error("Bad arg[1], no known checkpoint with label "..tostring(defaultLabel), 2) end
-  if fileName and type(fileName) ~= "string" then error("Bad arg[2], expected string or nil, got "..type(fileName), 2) end
-  if stackTracing and type(stackTracing) ~= "boolean" then error("Bad arg[3], expected boolean or nil, got "..type(stackTracing), 2) end
+  if type(defaultLabel) ~= "string" then
+    error("Bad arg[1], expected string, got "..type(defaultLabel), 2)
+  end
+  if not checkpoints[defaultLabel] then
+    error("Bad arg[1], no known checkpoint with label "
+    ..tostring(defaultLabel), 2)
+  end
+  if fileName and type(fileName) ~= "string" then
+    error("Bad arg[2], expected string or nil, got "..type(fileName), 2)
+  end
+  if stackTracing and type(stackTracing) ~= "boolean" then
+    error("Bad arg[3], expected boolean or nil, got "..type(stackTracing), 2)
+  end
 
   if stackTracing ~= nil then
     useStackTracing = stackTracing
@@ -175,7 +202,11 @@ function checkpoint.run(defaultLabel, fileName, stackTracing) -- returns whateve
     local f = fs.open(checkpointFile, "r")
     nextLabel = f.readLine()
     f.close()
-    if not checkpoints[nextLabel] then error("Found checkpoint file '"..fileName.."' containing unknown label '"..nextLabel.."'. Are your sure that this is the right file and that nothing is changing it?", 0) end
+    if not checkpoints[nextLabel] then
+      error("Found checkpoint file '"..fileName.."' containing unknown label '"
+      ..nextLabel.."'. Are your sure that this is the right file "
+      .."and that nothing is changing it?", 0)
+    end
   end
 
 
@@ -212,7 +243,9 @@ function checkpoint.run(defaultLabel, fileName, stackTracing) -- returns whateve
 
 
           if intentionalError == false and errorMessage ~= "Terminated" then
-            errorMessage = errorMessage.."\n\nCheckpoints ran in this instance:\n  "..table.concat(checkpointTrace, "\n  ").." <- error occured in\n"
+            errorMessage = errorMessage
+            .."\n\nCheckpoints ran in this instance:\n  "
+            ..table.concat(checkpointTrace, "\n  ").." <- error occured in\n"
           end
 
         end

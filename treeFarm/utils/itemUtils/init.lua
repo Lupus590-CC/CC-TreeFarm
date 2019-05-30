@@ -6,15 +6,16 @@ local function itemIdArgCheck(itemIdArg, argPosition)
     error("arg[2] expected number got "..type(argPosition),2)
   end
 
-
   if type(itemIdArg) ~= "table" then
     error("arg["..argPosition.."] expected table, got "..type(itemIdArg),3)
   end
   if type(itemIdArg.name) ~= "string" then
-    error("arg["..argPosition.."].name expected string, got "..type(itemIdArg.name),3)
+    error("arg["..argPosition.."].name expected string, got "
+    ..type(itemIdArg.name),3)
   end
   if type(itemIdArg.damage) ~= "number" then
-    error("arg["..argPosition.."].damage expected number, got "..type(itemIdArg.damage),3)
+    error("arg["..argPosition.."].damage expected number, got "
+    ..type(itemIdArg.damage),3)
   end
 end
 
@@ -42,12 +43,12 @@ local function selectItemById(itemId, extentionCriteria)
   local function checkCurrectItem()
     local currentItem = turtle.getItemDetail()
     if type(currentItem) == "table" and currentItem.name == itemId.name
-    and currentItem.damage == itemId.damage and extentionCriteria(currentItem) then
+    and currentItem.damage == itemId.damage and extentionCriteria(currentItem)
+    then
       return true
     end
     return false
   end
-
 
   -- if the current slot has it don't bother searching
   if checkCurrectItem() then
@@ -115,7 +116,9 @@ local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #ho
       local currentItem = turtle.getItemDetail()
       if type(currentItem) == "table"
       and reverseItemLookup(currentItem).fuelValue
-      and reverseItemLookup(currentItem).fuelValue > bestFuelValue and reverseItemLookup(currentItem).fuelValue =< targetFuelValue then
+      and reverseItemLookup(currentItem).fuelValue > bestFuelValue
+      and reverseItemLookup(currentItem).fuelValue =< targetFuelValue
+      then
         bestFuelSlot = i
         bestFuelValue = reverseItemLookup(currentItem).fuelValue
       end
@@ -127,11 +130,6 @@ local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #ho
   end
 
   return false
-end
-
-local function mergeItemStacks() -- TODO: implement
-  local currentSlot = 1
-  -- can we just try to move everything to the first slot and 'magic' will take care of the details of merging stacks?
 end
 
 local function countItemQuantityById(itemId)
@@ -148,36 +146,57 @@ local function countItemQuantityById(itemId)
   return count
 end
 
--- if quantityToDrop is negative then that is quantity to keep
-local function dropItemsById(itemId, quantityToDrop) -- TODO: discard this? just use selectById and turtle.drop?
-  itemIdArgCheck(itemId,1)
-
-
-  quantityToDrop = quantityToDrop or Math.huge -- built in turtle.drop behaviour is to do a full stack by default, this mimics that
-  if type(quantityToDrop) ~= "number" then
-    error("arg[2] expected number or nil, got "..type(quantityToDrop),2)
+local function forEachSlot(func)
+  if type(func) ~= "function" then
+      error("arg[1] expected function, got "..type(func),2)
   end
 
-  -- NOTE: what does turtle.drop do? (into air)
-    -- if amountToDrop > itemCount then drop stack and return true
-    -- if amountToDrop < itemCount then drop that amount and return true
-    -- if amountToDrop == 0 then drop none and return true
-    -- if amountToDrop < 0 then error
-  -- NOTE: what does turtle.drop do? (into inventory)
-    -- with no arg and not enough space then return true and drop until full
-    -- with no arg and no space then don't drop any and return false and error message
-    -- if amountToDrop > space then drop to limit and return true
-
-
-
+  for i = 1 to 16 do
+    turtle.select(i)
+    func()
+  end
 end
 
-local function dropItemsByIdKeepingQuantity(itemId, quantityToDrop) -- TODO: discard this? just use selectById and turtle.drop?
+local function forEachSlotSkippingEmpty(func)
+  if type(func) ~= "function" then
+      error("arg[1] expected function, got "..type(func),2)
+  end
+
+  local f = function()
+    if turtle.getItemCount() > 0 then
+      func()
+    end
+  end
+
+  forEachSlot(f)
+end
+
+local function forEachSlotWithItem(itemId, func, extentionCriteria)
   itemIdArgCheck(itemId,1)
+  if type(func) ~= "function" then
+      error("arg[2] expected function, got "..type(func),2)
+  end
+  extentionCriteria = extentionCriteria or function() return true end
+  if type(extentionCriteria) ~= "function" then
+    error("arg[3] expected function or nil, got "..type(extentionCriteria), 2)
+  end
 
+  local f = function()
+    local currentItem = turtle.getItemDetail()
+    if type(currentItem) == "table" and currentItem.name == itemId.name
+    and currentItem.damage == itemId.damage and extentionCriteria(currentItem)
+    then
+      func()
+    end
+  end
+
+  forEachSlotSkippingEmpty(f)
 end
 
-local function getSpace() -- TODO: name better
+local function getFreeSpaceCount()
+  local count = 0
+  forEachSlotSkippingEmpty(function() count = count +1 end)
+  return 16 - count
 end
 
 local itemUtils = {
@@ -187,9 +206,12 @@ local itemUtils = {
   selectEmptySlot = selectEmptySlot,
   selectItemByIdWithFreeSpaceOrEmptySlot = selectItemByIdWithFreeSpaceOrEmptySlot,
   selectBestFuel = selectBestFuel,
-  mergeItemStacks = mergeItemStacks,
   countItemQuantityById = countItemQuantityById,
-  dropItemsById = dropItemsById,
+  forEachSlot = forEachSlot,
+  forEachSlotSkippingEmpty = forEachSlotSkippingEmpty,
+  forEachSlotWithItem = forEachSlotWithItem,
+  getFreeSpaceCount = getFreeSpaceCount,
+
 
 }
 

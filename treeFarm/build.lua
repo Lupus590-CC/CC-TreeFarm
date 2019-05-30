@@ -10,13 +10,15 @@ local function placeTreePodium() -- TODO: fuel checks
 
   -- move check to before? this func is called?
   if not (utils.itemUtils.selectItemById(itemIds.dirt)
-    and utils.itemUtils.selectItemById(itemIds.jackOLantern)
-    and (utils.itemUtils.selectItemById(itemIds.cobblestone)
-    or utils.itemUtils.selectItemById(itemIds.stone) and utils.itemUtils.selectEmptySlot())) then
+  and utils.itemUtils.selectItemById(itemIds.jackOLantern)
+  and (utils.itemUtils.selectItemById(itemIds.cobblestone)
+  or utils.itemUtils.selectItemById(itemIds.stone)
+  and utils.itemUtils.selectEmptySlot()))
+  then
     return false, "bad inventory" -- TODO: let caller sort out stocking?
   end
 
-  -- TODO: check that where we are is the correct location
+  -- TODO: check that where we are in the (a?) correct location
 
   turtle.back() -- current location is where we need to build
 

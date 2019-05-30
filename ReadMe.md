@@ -1,6 +1,6 @@
 # build instructions
 
-TODO: better build instructions
+TO DO: better build instructions
 
 Run `Howl.lua` in a ComputerCraft computer (or turtle) to generate files in
 `/build` directory. Run any of the generated files

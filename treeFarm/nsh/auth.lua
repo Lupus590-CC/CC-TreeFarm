@@ -1,4 +1,4 @@
--- TODO: convert to API?
+-- TO DO: convert to API?
   -- once converted copy to hive
     -- add encryption or replace with better authentication method
       -- encrypt the whole pipeline?

@@ -37,4 +37,5 @@ Tasks:Task "rename"
   :maps("wild:build/*.lua", "wild:build/*")
   :description "Removes .lua extention for Old CC compatability/convinience"
 
-Tasks:Task "build" { "clean", "minify", "license", "rename" } :Description "Main build task"
+Tasks:Task "build" { "clean", "minify", "license", "rename" }
+  :Description "Main build task"

@@ -1,5 +1,8 @@
 TODO: organise this file
 
+TODO: arg type checker as a function
+  where to put and how to access everywhere?
+
 TODO: shrink the screenshots #homeOnly #high
 	should make thinks quicker at work during lunch breaks
 
@@ -27,8 +30,6 @@ TODO: is the farm small enough that a rednet repeater is not needed?
   range during thunderstorm at y-level that Handy__Andy plans to deploy this at is about 17 blocks. That's not a lot of wiggle room.
   more testing needed
   the farm has a bit more upper space, perhaps a repeater can be placed here? TODO: place a repeater at farm max and test again
-
-TODO: check and fix indentation #high
 
 NOTE: can we have too much wood to smelt?
   could we be unable to catch up?

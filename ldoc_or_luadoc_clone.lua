@@ -5,4 +5,4 @@
 
 -- what should this thing be called?
 
--- squiddev is doing something already 
+-- squiddev is doing something already

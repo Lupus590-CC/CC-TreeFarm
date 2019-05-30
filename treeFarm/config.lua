@@ -1,10 +1,11 @@
-
-
 local function load(filename)
   local file = fs.open(filename, "r")
-  local data = textutils.unserialize(file.readAll())
-  file.close()
-  return data
+  if file then
+    local data = textutils.unserialize(file.readAll())
+    file.close()
+    return data
+  end
+  return nil, "not a file"
 end
 
 local function save(filename, data)

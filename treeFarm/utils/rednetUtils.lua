@@ -1,9 +1,9 @@
--- TODO: serverless?
+-- TO DO: serverless?
   -- remote just broadcasts
   -- remote only needs to talk to the main turtle
   -- still have multiple farming turtles?
 
- -- TODO: take from config
+ -- TO DO: take from config
 local serverName = "lupus590TreeFarm"
 local protocolName = "lupus590TreeFarm"
 
