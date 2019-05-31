@@ -40,7 +40,7 @@ local function startTimer(secondsToWait)
   end
 
   -- add to list
-  local timerId = tostring(math.random(1, 2147483647)) -- it's good enough for rednet so it's good enough for us -- TODO: check file output, we may want to use ("%08x"):format(math.random( 1, 2^31-2 )) #homeOnly
+  local timerId = tostring(math.random(1, 2147483647)) -- it's good enough for rednet so it's good enough for us
   timers[timerId] = secondsToWait
 
   return timerId
@@ -89,23 +89,16 @@ local function enterLoop(patienceFileName, updateInterval)
     end
   end
   while doLoop do
-
-    for timerId, timeRemaining in pairs(timers) do
-      print(timerId)
-    end
-
-
     for timerId, timeRemaining in pairs(timers) do
       -- queue events if expired
       if timeRemaining <= 0 then
-        print("timer queued")
         os.queueEvent("patienceTimer", timerId)
         timers[timerId] = nil
       end
     end
     -- decrement the timeRemaining
-    for _, timeRemaining in pairs(timers) do
-      timeRemaining = timeRemaining - updateInterval
+    for k, timeRemaining in pairs(timers) do
+      timers[k] = timeRemaining - updateInterval
     end
     local ok, err = config.save(patienceFileName, timers)
     if not ok then

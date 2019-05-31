@@ -40,21 +40,59 @@ end
    {"timer", timerId},
    {"patienceTimer", patienceTimerId},
    {"rednet_message", nil, nil, approveProtocol}, -- any rednet message with that protocal -- TODO: how does table.length handle this? enforce an n property?
+   -- allow sencond value to be a function? this function is a user defined filter which gets the event arg data --NOTE: can't save functions, but can save their string.dump (if they don't have up values - how to detect and reject up values?)
+   --[[
+local u = "world"
+local function test()
+  print("hello "..u)
+  print("hello "..os.version())
+end
+
+test()
+
+local dump = string.dump(test)
+
+
+
+local loaded = load(dump, nil, "t", _ENV or getfenv(1))
+local ok, err = pcall(loaded)
+
+if not ok then
+  print(err)
+end
+
+
+local dump2 = "function()\n"
+    .."print(\"hello \".."u")\n"
+    .."print(\"hello \"..os.version())\n"
+  .."end"
+
+local loaded2 = load(dump2, nil, "t", _ENV or getfenv(1))
+local ok2, err2 = pcall(loaded2)
+
+if not ok2 then
+  print(err2)
+end]]
 }
 local function addTask(name, trigger, priority, recuring) -- TODO: implement
   -- TODO: arg checks
-  if type(name) ~= "string" then -- TODO: use this as the task table key instead of creating an id?
+  if type(name) ~= "string" then
     error("arg[1] expected string got "..type(name),1)
   end
 
   if type(trigger) ~= "table" then
     error("arg[2] expected table got "..type(trigger),1)
   end
-  if type(trigger[1]) ~= "table" then
-    error("arg[2][1] expected table got "..type(trigger[1]
-    .."\n tasks must have at least one tigger event"),1)
+  for k, v in ipairs(trigger) do
+    if type(v) ~= "table" then
+      error("arg[2]["..k.."] expected table got "..type(v)
+      .."\n tasks must have at least one tigger event"),1)
+    end
+    if type(v[1]) ~= "string" then
+      error("arg[2]["..k.."][1] expected string got "..type(v[1])
+      .."\n this should be an event name like the first argument of "),1)
+    end
   end
-  -- TODO: check all tiggers
 
   if type(priority) ~= "number" then
     error("arg[3] expected number got "..type(priority),1)
@@ -67,14 +105,11 @@ local function addTask(name, trigger, priority, recuring) -- TODO: implement
 
 
 
-  local taskId = math.random(1, 2147483647) -- it's good enough for rednet so it's good enough for us -- TODO: check file output, we may want to use ("%08x"):format(math.random( 1, 2^31-2 )) #homeOnly
-
-  tasks[taskId] = {name = "name",
+  tasks[name] = {
     trigger = trigger,
     priority = priority,
     recuring = recuring,
   }
-  return taskId
 end
 
 local function removeTask(taskId) -- TODO: arge check?
