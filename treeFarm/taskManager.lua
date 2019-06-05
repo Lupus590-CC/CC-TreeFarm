@@ -25,18 +25,20 @@
 -- look at https://github.com/CC-Hive/Main needs
 
 local patience = require("patience")
+local config = require("config")
 
-local taskfile = ".tasks"
-local tasks = {} -- TODO: persist
-
+local taskFileName = ".tasks"
+local tasks = {} -- TODO: persist (we load but never save) when is best to save?
+  -- how do I edit tasks? should I be able to? how do I make sure to save after but not too often?
+    -- have a getTask and replaceTask commands?
 local running = false
 local oldError = error
 local function error(mess, level)
   running = false
-  return oldError(mess, (level or 0) +1)
+  return oldError(mess, (level or 1) +1)
 end
 
- local exampleTrigger = {
+ local exampleTriggerList = {
    {"timer", timerId},
    {"patienceTimer", patienceTimerId},
    {"rednet_message", nil, nil, approveProtocol}, -- any rednet message with that protocal -- TODO: how does table.length handle this? enforce an n property?
@@ -73,24 +75,26 @@ local ok2, err2 = pcall(loaded2)
 if not ok2 then
   print(err2)
 end]]
+  -- don't worry about up values for tree farm, try to support them in Hive
 }
-local function addTask(name, trigger, priority, recuring) -- TODO: implement
+
+local function addTask(name, triggerList, priority, recuring) -- TODO: implement
   -- TODO: arg checks
   if type(name) ~= "string" then
     error("arg[1] expected string got "..type(name),1)
   end
 
-  if type(trigger) ~= "table" then
-    error("arg[2] expected table got "..type(trigger),1)
+  if type(triggerList) ~= "table" then
+    error("arg[2] expected table got "..type(triggerList),1)
   end
-  for k, v in ipairs(trigger) do
+  for k, v in ipairs(triggerList) do
     if type(v) ~= "table" then
       error("arg[2]["..k.."] expected table got "..type(v)
       .."\n tasks must have at least one tigger event"),1)
     end
     if type(v[1]) ~= "string" then
       error("arg[2]["..k.."][1] expected string got "..type(v[1])
-      .."\n this should be an event name like the first argument of "),1)
+      .."\n this should be an event name like the first return value of "),1)
     end
   end
 
@@ -106,14 +110,18 @@ local function addTask(name, trigger, priority, recuring) -- TODO: implement
 
 
   tasks[name] = {
-    trigger = trigger,
+    triggerList = triggerList,
     priority = priority,
     recuring = recuring,
   }
 end
 
-local function removeTask(taskId) -- TODO: arge check?
-  tasks[taskId] = nil
+local function removeTask(name)
+  if type(name) ~= "string" then
+    error("arg[1] expected string got "..type(name),1)
+  end
+
+  tasks[name] = nil
 end
 
 local doLoop = true
@@ -127,8 +135,23 @@ local function enterLoop()
   end
   running = true;
   doLoop = true
+
+  local ok, data = config.load(taskFileName)
+  if ok then
+    tasks = data
+  else
+    if data == "not a file" then
+      tasks = {}
+    else
+      error("taskManager couldn't load file with name: "..taskFileName
+      .."\ngot error: "..data)
+    end
+  end
+
   while doLoop do
     -- make sure to pass the tigger event to the task
+    -- TODO: how do we trigger events? we can't save callback.
+    -- raise events? the task name is the event type? will we need a blacklist to prevent collisions with events? that's not practical to maintain
 
   end
   running = false -- just in case people want to start us again

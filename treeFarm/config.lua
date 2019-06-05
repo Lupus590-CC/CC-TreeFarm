@@ -1,15 +1,17 @@
 local function load(filename)
   local function unsafeload()
     local file = fs.open(filename, "r")
-    if file then
-      local data = textutils.unserialize(file.readAll())
-      file.close()
-      return data
-    end
-    error("not a file")
+    local data = textutils.unserialize(file.readAll())
+    file.close()
+    return data
   end
 
-    return pcall(unsafeload)
+  if not fs.exists(filename) or fs.isDir(filename) then
+    return false, "not a file"
+  end
+
+
+  return pcall(unsafeload)
 end
 
 local function save(filename, data)

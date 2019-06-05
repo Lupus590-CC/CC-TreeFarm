@@ -26,7 +26,7 @@ local running = false
 local oldError = error
 local function error(mess, level)
   running = false
-  return oldError(mess, (level or 0) +1)
+  return oldError(mess, (level or 1) +1)
 end
 
 local timers = {}
@@ -79,13 +79,15 @@ local function enterLoop(patienceFileName, updateInterval)
   end
 
   -- read the file
-  local file, err = config.load(patienceFileName)
-  if not file then
-    if err == "not a file" then
+  local ok, data = config.load(patienceFileName)
+  if ok then
+    timers = data
+  else
+    if data == "not a file" then
       timers = {}
     else
       error("patience couldn't load file with name: "..patienceFileName
-      .."\ngot error: "..err,2)
+      .."\ngot error: "..data)
     end
   end
   while doLoop do

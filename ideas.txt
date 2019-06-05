@@ -3,13 +3,12 @@ TODO: organise this file
 TODO: arg type checker as a function
   where to put and how to access everywhere?
 
-TODO: shrink the screenshots #homeOnly #high
-	should make thinks quicker at work during lunch breaks
 
 TODO: try out unit testing stuff #homeOnly #high
+  write tests for checkpoint
 	https://github.com/SquidDev-CC/plethora/tree/minecraft-1.12/src/test/resources/assets/plethora-test/test-rom
 	Howl task?
-  starting wo wish for a ldoc like thing in the same vain as mcfly compared with busted
+  starting to wish for a ldoc like thing in the same vain as mcfly compared with busted - SquidDev is working on a thing
 
 update detector?
 

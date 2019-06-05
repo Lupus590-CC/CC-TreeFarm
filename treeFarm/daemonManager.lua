@@ -36,7 +36,7 @@ local running = false
 local oldError = error
 local function error(mess, level)
   running = false
-  return oldError(mess, (level or 0) +1)
+  return oldError(mess, (level or 1) +1)
 end
 local function resumeDaemon(daemonName,event)
   if type(daemonName) ~= "string" then
@@ -61,22 +61,19 @@ local function resumeDaemon(daemonName,event)
 end
 
 
-local function add(newDaemonName, newdaemonFunc, replaceIfExists, stopFunction)
+local function add(newDaemonName, newdaemonFunc, stopFunction)
   if type(newDaemonName) ~= "string" then
     error("Arg[1] expected string, got "..type(newDaemonName),2)
   end
   if type(newdaemonFunc) ~= "function" then
     error("Arg[2] expected function, got "..type(newdaemonFunc),2)
   end
-  if replaceIfExists and type(replaceIfExists) ~= "bool" then
-    error("Arg[3] expected bool or nil, got "..type(replaceIfExists),2)
-  end
   if stopFunction and type(stopFunction) ~= "function" then
-    error("Arg[4] expected function or nil, got "..type(stopFunction),2)
+    error("Arg[3] expected function or nil, got "..type(stopFunction),2)
   end
-  if not replaceIfExists and daemons[newDaemonName] then
+  if daemons[newDaemonName] then
     error("daemon with name "..newDaemonName
-    .." exists - to overwrite set arg[3] to true",2)
+    .." exists - if you want to replace it then remove it first (you may want to stop or terminate it before removing it)",2)
   end
   daemons[newDaemonName] = {coroutine = coroutine.create(newdaemonFunc), eventFilter = nil, stopFunction = stopFunction}
   resumeDaemon(newDaemonName, {})
