@@ -39,8 +39,8 @@ local function placeTreePodium() -- TODO: fuel checks
   for i = 1, 6 do
     turtle.up()
   end
-  local _ = utils.itemUtils.selectItemById(itemIds.cobblestone) -- TODO: stone then cobble? depends if we plan to stack
-  or utils.itemUtils.selectItemById(itemIds.stone)
+  local _ = utils.itemUtils.selectItemById(itemIds.stone)
+  or utils.itemUtils.selectItemById(itemIds.cobblestone)
   turtle.place()
 
   for i = 1, 8 do
@@ -61,6 +61,11 @@ local function placeTreePodium() -- TODO: fuel checks
 
   -- TODO: update bounding box
 
+end
+
+local function updateTreePositions()
+  -- write to file
+  -- queue event
 end
 
 -- TODO: build while waiting for things to grow

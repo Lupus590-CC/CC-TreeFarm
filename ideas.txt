@@ -10,13 +10,6 @@ TODO: try out unit testing stuff #homeOnly #high
 	Howl task?
   starting to wish for a ldoc like thing in the same vain as mcfly compared with busted - SquidDev is working on a thing
 
-update detector?
-
-If I have multiple turtles then will there be enough fuel?
-  might not be worth it, the turtle already spends most of the time waiting
-    perhaps I should make it multiple levels, with one turtle handling it all
-      how would this effect rednet range?
-
 how to init config
 
 TODO: how do I want the remote control system to work?
@@ -38,18 +31,12 @@ NOTE: can we have too much wood to smelt?
 TODO: location placer
   pocket computer app which lets the user know how big the farm will be and tells the turtles where to build it
 
-make the whole farm stackable?
-  only need to put jack o'lantern and dirt
-    jack o'lantern can act as tree height capping block
-
 don't bother with a peer to peer system or a server?
   can only have one farming turtle then
   peer to peer could be useful to hive?
   how to handle desync?
 
-Computer server?
-  arguably more useful to hive
-  if desync then server is right (even if it isn't)
+let turtles have pairings, that way multiple farms can be in range of each other and not have cross talk
 
 Handy__Andy has a advanced pocket computer
 
@@ -68,19 +55,12 @@ if the system runs out of saplings then place more in the sapling chest
   saplings will get used as fuel for the turtles and furnaces with charcoal as a backup -- NOT: this is not currently true
   what to do when the chests are full?
 
-if using two turtles then I my not need to have them able to navigate around each other as their zones of work won't cross each other. (building may be an exception)
-  with modems, turtles may be able to negotiate navigating around each other
-  can I get polite navigation with redstone only?
-
 
 two turtles
   tree chopping turtle
     drops the logs into the water and builds the place
   smelting turtle
     collects logs and saplings from bottom chest and sorts and uses furnaces
-
-logging turtles divide tasks into rows
-  turtle with one row: chop away from chests, wait for regrowth, chop towards chests, restock,  wait for regrowth
 
 
 TODO: programmatic locations
@@ -90,7 +70,7 @@ lama overrides real gps, if they conflict then lama is used
 
 Lowest allowed point = 20
 Highest allowed point = 75
-TODO: how tall is the farm?
+TODO: how tall is the farm? #homeOnly
   8 blocks for the tree part (stackable)
   4? for the trench (not stackable)
   if I stack it then part doesn't need to be replicated

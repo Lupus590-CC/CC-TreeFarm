@@ -81,33 +81,31 @@ end]]
 local function addTask(name, triggerList, priority, recuring) -- TODO: implement
   -- TODO: arg checks
   if type(name) ~= "string" then
-    error("arg[1] expected string got "..type(name),1)
+    error("arg[1] expected string got "..type(name),2)
   end
 
   if type(triggerList) ~= "table" then
-    error("arg[2] expected table got "..type(triggerList),1)
+    error("arg[2] expected table got "..type(triggerList),2)
   end
   for k, v in ipairs(triggerList) do
     if type(v) ~= "table" then
       error("arg[2]["..k.."] expected table got "..type(v)
-      .."\n tasks must have at least one tigger event"),1)
+      .."\n tasks must have at least one tigger event"),2)
     end
     if type(v[1]) ~= "string" then
       error("arg[2]["..k.."][1] expected string got "..type(v[1])
-      .."\n this should be an event name like the first return value of "),1)
+      .."\n this should be an event name like the first return value of "),2)
     end
   end
 
   if type(priority) ~= "number" then
-    error("arg[3] expected number got "..type(priority),1)
+    error("arg[3] expected number got "..type(priority),2)
   end
 
   recuring = recuring or false
   if type(recuring) ~= "boolean" then
-    error("arg[4] expected boolean got "..type(recuring),1)
+    error("arg[4] expected boolean got "..type(recuring),2)
   end
-
-
 
   tasks[name] = {
     triggerList = triggerList,
@@ -118,7 +116,7 @@ end
 
 local function removeTask(name)
   if type(name) ~= "string" then
-    error("arg[1] expected string got "..type(name),1)
+    error("arg[1] expected string got "..type(name),2)
   end
 
   tasks[name] = nil
@@ -150,8 +148,13 @@ local function enterLoop()
 
   while doLoop do
     -- make sure to pass the tigger event to the task
+    -- should we do this?
+
     -- TODO: how do we trigger events? we can't save callback.
     -- raise events? the task name is the event type? will we need a blacklist to prevent collisions with events? that's not practical to maintain
+    -- this means that there is a coroutine sat arround waiting for one event
+    -- file path?
+    -- that's the recivers problem?
 
   end
   running = false -- just in case people want to start us again
@@ -160,6 +163,19 @@ end
 
 local function isRunning()
   return running
+end
+
+local taskEventType = "task"
+local function waitForTask(taskName)
+  if taskName and type(taskName) ~= "string" then
+    error("arg[1] expected string or nil got "..type(taskName),2)
+  end
+  while true do
+    local _, eventTaskName, triggerEventData = os.pullEvent(taskEventType)
+    if taskName == eventTaskName then
+      return eventTaskName, triggerEventData
+    end
+  end
 end
 
 local taskManager = {
@@ -172,4 +188,6 @@ local taskManager = {
   stop = exitLoop,
   isRunning = isRunning,
   hasStarted = isRunning,
+  taskEventType = taskEventType,
+  waitForTask = waitForTask
 }

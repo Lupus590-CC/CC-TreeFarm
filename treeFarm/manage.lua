@@ -37,6 +37,11 @@ local function doTreeLine()
   until atEndOfLine
 end
 
+function updateTreePositions()
+  -- if pulled event is a notification then
+    -- read the file (could I just pass the new table via the event?)
+end
+
 -- TODO: move to next line
 
 -- TODO: detect full inventory and dropoff
