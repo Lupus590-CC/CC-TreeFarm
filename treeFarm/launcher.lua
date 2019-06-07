@@ -1,3 +1,4 @@
+require("argChecker")
 local builderScript = require("treeFarm.build")
 
 local managementScript = require("treefarm.manage")

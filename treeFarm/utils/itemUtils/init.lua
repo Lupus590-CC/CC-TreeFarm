@@ -2,17 +2,16 @@ local itemIds = require("itemIds")
 
 -- internal utility
 local function itemIdArgCheck(itemIdArg, argPosition)
-  if type(argPosition) ~= "number" then
-    error("arg[2] expected number got "..type(argPosition),2)
-  end
+  argChecker(2, argPosition, {"number"}, 2)
 
-  if type(itemIdArg) ~= "table" then
-    error("arg["..argPosition.."] expected table, got "..type(itemIdArg),3)
-  end
+  argChecker(argPosition, itemIdArg, {"table"}, 3)
+  --argChecker(position, value, validTypesList, level)
+  -- NOTE: argChecker can't check the contents of a table
   if type(itemIdArg.name) ~= "string" then
     error("arg["..argPosition.."].name expected string, got "
     ..type(itemIdArg.name),3)
   end
+  --argChecker(position, value, validTypesList, level)
   if type(itemIdArg.damage) ~= "number" then
     error("arg["..argPosition.."].damage expected number, got "
     ..type(itemIdArg.damage),3)
@@ -34,11 +33,8 @@ setmetatable(reverseItemLookup, {
 
 local function selectItemById(itemId, extentionCriteria)
   itemIdArgCheck(itemId,1)
-
+  argChecker(2, extentionCriteria, {"function", "nil"})
   extentionCriteria = extentionCriteria or function() return true end
-  if type(extentionCriteria) ~= "function" then
-    error("arg[2] expected function or nil, got "..type(extentionCriteria), 2)
-  end
 
   local function checkCurrectItem()
     local currentItem = turtle.getItemDetail()
@@ -82,10 +78,7 @@ end
  -- by default full slots are not deemed valid for selection
 local function selectItemByIdWithFreeSpaceOrEmptySlot(itemId, allowFullSlots)
   itemIdArgCheck(itemId,1)
-
-  if allowFullSlots and type(allowFullSlots) ~= "boolean" then
-    error("arg[2] expected boolean or nil, got "..type(allowFullSlots),2)
-  end
+  argChecker(2, allowFullSlots, {"boolean", "nil"})
 
   local vetoFullSlots = nil
 
@@ -104,10 +97,8 @@ end
 
 -- items which give more fuel than targetFuelValue are not eligible
 local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #homeOnly
+  argChecker(1, targetFuelValue, {"number", "nil"})
   targetFuelValue = targetFuelValue or math.huge
-  if type(targetFuelValue) ~= "number" then
-      error("arg[1] expected number or nil, got "..type(targetFuelValue),2)
-  end
 
   local bestFuelSlot
   local bestFuelValue = 0
@@ -147,9 +138,7 @@ local function countItemQuantityById(itemId)
 end
 
 local function forEachSlot(func)
-  if type(func) ~= "function" then
-      error("arg[1] expected function, got "..type(func),2)
-  end
+  argChecker(1, func, {"function"})
 
   for i = 1 to 16 do
     turtle.select(i)
@@ -158,9 +147,7 @@ local function forEachSlot(func)
 end
 
 local function forEachSlotSkippingEmpty(func)
-  if type(func) ~= "function" then
-      error("arg[1] expected function, got "..type(func),2)
-  end
+  argChecker(1, func, {"function"})
 
   local f = function()
     if turtle.getItemCount() > 0 then
@@ -173,13 +160,9 @@ end
 
 local function forEachSlotWithItem(itemId, func, extentionCriteria)
   itemIdArgCheck(itemId,1)
-  if type(func) ~= "function" then
-      error("arg[2] expected function, got "..type(func),2)
-  end
+  argChecker(1, func, {"function"})
+  argChecker(2, extentionCriteria, {"function", "nil"})
   extentionCriteria = extentionCriteria or function() return true end
-  if type(extentionCriteria) ~= "function" then
-    error("arg[3] expected function or nil, got "..type(extentionCriteria), 2)
-  end
 
   local f = function()
     local currentItem = turtle.getItemDetail()

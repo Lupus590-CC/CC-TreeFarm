@@ -1,3 +1,5 @@
+require("argChecker")
+
 -- summon turtles
 -- check status of turtles
 

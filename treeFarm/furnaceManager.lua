@@ -1,3 +1,4 @@
+require("argChecker")
 local checkpoint = require("checkpoint")
 local lama = require("lama")
 local utils = require("utils")
@@ -20,9 +21,7 @@ if not furnaceStates then
 end
 
 local function fuelValueForFurnace(turtleFuelValue)
-  if type(turtleFuelValue) ~= "number" then
-    error("arg[1] expected number got "..type(turtleFuelValue),2)
-  end
+  argChecker(1, turtleFuelValue, {"number"})
   return turtleFuelValue/10
 end
 

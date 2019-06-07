@@ -1,4 +1,5 @@
 -- build the tree farm
+require("argChecker")
 local utils = require("utils")
 local lama = require("lama")
 local task = require("taskManager")

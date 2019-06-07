@@ -19,6 +19,49 @@
 -- IN THE SOFTWARE.
 --
 
+local function argChecker(position, value, validTypesList, level)
+  -- check our own args first, sadly we can't use ourself for this
+  if type(position) ~= "number" then
+    error("argChecker: arg[1] expected number got "..type(position),2)
+  end
+  -- value could be anything, it's what the caller wants us to check for them
+  if type(validTypesList) ~= "table" then
+    error("argChecker: arg[3] expected table got "..type(validTypesList),2)
+  end
+  if not validTypesList[1] then
+    error("argChecker: arg[3] table must contain at least one element",2)
+  end
+  for k, v in pairs(validTypesList) do
+    if type(k) ~= "number" then
+      error("argChecker: arg[3] non-numeric index "..k.." in table",2)
+    end
+    if type(v) ~= "string" then
+      error("argChecker: arg[3]["..k.."] expected string got "..type(v),2)
+    end
+  end
+  if type(level) ~= "nil" and type(level) ~= "number" then
+    error("argChecker: arg[4] expected number or nil got "..type(level),2)
+  end
+  level = level and level + 1 or 2
+
+  -- check the client's stuff
+  for k, v in ipairs(validTypesList) do
+    if type(value) == v then
+      return
+    end
+  end
+
+  local expectedTypes
+  if #validTypesList == 1 then
+      expectedTypes = validTypesList[1]
+  else
+      expectedTypes = table.concat(validTypesList, ", ", 1, #validTypesList - 1) .. " or " .. validTypesList[#validTypesList]
+  end
+
+  error("arg["..position.."] expected "..expectedTypes
+  .." got "..type(value), level)
+end
+
 local config = require("config")
 
 local running = false
@@ -32,9 +75,7 @@ end
 local timers = {}
 
 local function startTimer(secondsToWait)
-  if type(secondsToWait) ~= "number" then
-    error("arg[1] expected number got "..type(secondsToWait),2)
-  end
+  argChecker(1, secondsToWait, {"number"})
   if not running then
     error("patience is not running yet, have you called enterLoop?")
   end
@@ -47,9 +88,7 @@ local function startTimer(secondsToWait)
 end
 
 local function cancelTimer(timerId)
-  if type(timerId) ~= "number" then
-    error("arg[1] expected number got "..type(timerId),2)
-  end
+  argChecker(1, timerId, {"number"})
   if not running then
     error("patience is not running yet, have you called enterLoop?")
   end
@@ -63,20 +102,16 @@ local function exitLoop()
 end
 
 local function enterLoop(patienceFileName, updateInterval)
+  argChecker(1, patienceFileName, {"string", "nil"})
+  patienceFileName = patienceFileName or ".patience"
+  argChecker(2, updateInterval, {"number", "nil"})
+  updateInterval = updateInterval or 5 -- TODO: is there a way to get this more accurate without hammering the HDD?
+
   if running then
     return false, "already running"
   end
   running = true
   doLoop = true
-
-  patienceFileName = patienceFileName or ".patience"
-  if type(patienceFileName) ~= "string" then
-    error("arg[1] expected string or nil got "..type(patienceFileName),2)
-  end
-  updateInterval = updateInterval or 5 -- TODO: is there a way to get this more accurate without hammering the HDD?
-  if type(updateInterval) ~= "number" then
-    error("arg[2] expected number or nil got "..type(updateInterval),2)
-  end
 
   -- read the file
   local ok, data = config.load(patienceFileName)

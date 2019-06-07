@@ -28,6 +28,7 @@
   -- copy to hive
 
 -- TODO: reference frames? may need a full rewrite
+-- don't forget to use argChecker
 
 --Copy the default turtle directory
 local turtle = {}

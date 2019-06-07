@@ -63,11 +63,50 @@
 --
 --]]
 
--- TO DO: detect when we errored and warn somehow to prevent boot, error, reboot loops
--- May be able to detect rebotes using some monstocity of os.clock os.time os.day
+-- TODO: cleanup code
 
+local function argChecker(position, value, validTypesList, level)
+  -- check our own args first, sadly we can't use ourself for this
+  if type(position) ~= "number" then
+    error("argChecker: arg[1] expected number got "..type(position),2)
+  end
+  -- value could be anything, it's what the caller wants us to check for them
+  if type(validTypesList) ~= "table" then
+    error("argChecker: arg[3] expected table got "..type(validTypesList),2)
+  end
+  if not validTypesList[1] then
+    error("argChecker: arg[3] table must contain at least one element",2)
+  end
+  for k, v in pairs(validTypesList) do
+    if type(k) ~= "number" then
+      error("argChecker: arg[3] non-numeric index "..k.." in table",2)
+    end
+    if type(v) ~= "string" then
+      error("argChecker: arg[3]["..k.."] expected string got "..type(v),2)
+    end
+  end
+  if type(level) ~= "nil" and type(level) ~= "number" then
+    error("argChecker: arg[4] expected number or nil got "..type(level),2)
+  end
+  level = level and level + 1 or 2
 
--- TO DO: cleanup code
+  -- check the client's stuff
+  for k, v in ipairs(validTypesList) do
+    if type(value) == v then
+      return
+    end
+  end
+
+  local expectedTypes
+  if #validTypesList == 1 then
+      expectedTypes = validTypesList[1]
+  else
+      expectedTypes = table.concat(validTypesList, ", ", 1, #validTypesList - 1) .. " or " .. validTypesList[#validTypesList]
+  end
+
+  error("arg["..position.."] expected "..expectedTypes
+  .." got "..type(value), level)
+end
 
 local checkpoint = shell and {} or (_ENV or getfenv())
 
@@ -138,20 +177,14 @@ end
 
 
 function checkpoint.add(label, callback, ...)
-  if type(label) ~= "string" then
-    error("Bad arg[1], expected string, got "..type(label), 2)
-  end
-  if type(callback) ~= "function" then
-    error("Bad arg[2], expected function, got "..type(callback), 2)
-  end
+  argChecker(1, label, {"string"})
+  argChecker(2, callback, {"function"})
 
   checkpoints[label] = {callback = callback, args = table.pack(...), }
 end
 
 function checkpoint.remove(label) -- this is intended for debugging, users can use it to make sure that their programs don't loop on itself when it's not meant to
-  if type(label) ~= "string" then
-    error("Bad arg[1], expected string, got "..type(label), 2)
-  end
+  argChecker(1, label, {"string"})
   if not checkpoints[label] then
     error("Bad arg[1], no known checkpoint with label "..tostring(label), 2)
   end
@@ -160,9 +193,7 @@ function checkpoint.remove(label) -- this is intended for debugging, users can u
 end
 
 function checkpoint.reach(label)
-  if type(label) ~= "string" then
-    error("Bad arg[1], expected string, got "..type(label), 2)
-  end
+  argChecker(1, label, {"string"})
   if not checkpoints[label] then
     error("Bad arg[1], no known checkpoint with label '"..tostring(label)
     .."'. You may want to check spelling, scope and such.", 2)
@@ -175,18 +206,12 @@ function checkpoint.reach(label)
 end
 
 function checkpoint.run(defaultLabel, fileName, stackTracing) -- returns whatever the last callback returns (xpcall stuff stripped if used)
-  if type(defaultLabel) ~= "string" then
-    error("Bad arg[1], expected string, got "..type(defaultLabel), 2)
-  end
+  argChecker(1, defaultLabel, {"string"})
+  argChecker(2, fileName, {"string", "nil"})
+  argChecker(3, label, {"boolean", "nil"})
   if not checkpoints[defaultLabel] then
     error("Bad arg[1], no known checkpoint with label "
     ..tostring(defaultLabel), 2)
-  end
-  if fileName and type(fileName) ~= "string" then
-    error("Bad arg[2], expected string or nil, got "..type(fileName), 2)
-  end
-  if stackTracing and type(stackTracing) ~= "boolean" then
-    error("Bad arg[3], expected boolean or nil, got "..type(stackTracing), 2)
   end
 
   if stackTracing ~= nil then
@@ -218,9 +243,6 @@ function checkpoint.run(defaultLabel, fileName, stackTracing) -- returns whateve
     nextLabel = nil
 
     if useStackTracing then
-
-
-
       -- The following line is horrible, but we need to capture the current traceback and run
       -- the function on the same line.
       intentionalError = nil
@@ -234,20 +256,19 @@ function checkpoint.run(defaultLabel, fileName, stackTracing) -- returns whateve
 
           local max, remaining = 15, 10
           if #trace > max then
-            for i = #trace - max, 0, -1 do table.remove(trace, remaining + i) end
+            for i = #trace - max, 0, -1 do
+              table.remove(trace, remaining + i)
+            end
             table.insert(trace, remaining, "  ...")
           end
 
-
           errorMessage = table.concat(trace, "\n")
-
 
           if intentionalError == false and errorMessage ~= "Terminated" then
             errorMessage = errorMessage
             .."\n\nCheckpoints ran in this instance:\n  "
             ..table.concat(checkpointTrace, "\n  ").." <- error occured in\n"
           end
-
         end
 
         error(errorMessage, 0)
@@ -258,15 +279,14 @@ function checkpoint.run(defaultLabel, fileName, stackTracing) -- returns whateve
 
   end
 
-
   -- we have finished the program, delete the checkpointFile so that the program starts from the beginning if ran again
   if fs.exists(checkpointFile) then
     fs.delete(checkpointFile)
   end
 
+  -- NOTE: should we be doing this? I think we were doing this because traceback mode packs the table
   return type(returnValues) == "table" and table.unpack(returnValues, 1, returnValues.n) or returnValues -- if it's a table, return the unpacked table, else return whatever it is
 
- end
-
+end
 
 return checkpoint

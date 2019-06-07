@@ -1,3 +1,4 @@
+require("argChecker")
 local rednetUtils = require("utils.rednetUtils")
 
 rednet.host(rednetUtils.protocolName, rednetUtils.serverName)
