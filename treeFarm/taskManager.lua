@@ -121,12 +121,12 @@ end]]
   -- don't worry about up values for tree farm, try to support them in Hive
 }
 
-local function addTask(name, triggerList, priority, recuring) 
+local function addTask(name, triggerList, priority, recuring)
   argChecker(1, name, {"string"})
   argChecker(2, triggerList, {"table"})
   -- argChecker can't do contents of tables
   -- TODO: list checker
-  -- tTODO: fix this looking really ugly
+  -- TODO: fix this looking really ugly
   for keyOfCurrentTriggerValue, currentTrigger in ipairs(triggerList) do
     if type(currentTrigger) ~= "table" then
       error("arg[2]["..keyOfCurrentTriggerValue.."] expected table got "..type(currentTrigger)
