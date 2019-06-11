@@ -81,34 +81,43 @@ local function error(mess, level)
   running = false
   return oldError(mess, (level or 1) +1)
 end
+
 local function resumeDaemon(daemonName, event)
   argChecker(1, daemonName, {"string"})
   argChecker(2, event, {"table", "nil"})
   if coroutine.status(v) ~= "suspended" then
-    local returnedValues = table.pack(coroutine.resume(daemons[newDaemonName].coroutine, event and table.unpack(event, 1, event.n) or nil))
+    local returnedValues = table.pack(coroutine.resume(daemons[daemonName].coroutine, event and table.unpack(event, 1, event.n) or nil))
     local ok = table.remove(returnedValues, 1)
     if not ok then
-      if raiseErrorsInDaemons then
+      if raiseErrorsInDaemons or daemons[daemonName].errorOnDaemonErrors then
         error("daemonManager error in daemon "
         ..daemonName.."\n"
-        ..toString(table.unpack(returnedValues, 1, returnedValues.n)))
+        ..toString(table.unpack(returnedValues, 1, returnedValues.n))) -- TODO: this tostring is wrong, probably need table.concat
       end
-      daemos[newDaemonName] = nil
+      daemons[daemonName] = nil
     end
-    daemons[newDaemonName].eventFilter = returnedValues[1]
+    daemons[daemonName].eventFilter = returnedValues[1]
   end
 end
 
 
-local function add(daemonName, mainLoopFunc, stopFunction)
+local function add(daemonName, mainLoopFunc, stopFunction, completeFunction, errorFunction, errorOnDaemonErrors)
   argChecker(1, daemonName, {"string"})
   argChecker(2, mainLoopFunc, {"function"})
   argChecker(3, stopFunction, {"function", "nil"})
+  argChecker(4, completeFunction, {"function", "nil"}) -- TODO: implement
+  argChecker(5, errorFunction, {"function", "nil"}) -- TODO: implement
+  argChecker(6, errorOnDaemonErrors, {"boolean", "nil"})
+  forwardErrors = forwardErrors or false
+
   if daemons[daemonName] then
     error("daemon with name "..daemonName
     .." exists - if you want to replace it then remove it first (you may want to stop or terminate it before removing it)",2)
   end
-  daemons[daemonName] = {coroutine = coroutine.create(mainLoopFunc), eventFilter = nil, stopFunction = stopFunction}
+  daemons[daemonName] = {coroutine = coroutine.create(mainLoopFunc),
+  eventFilter = nil, stopFunction = stopFunction,
+  completeFunction = completeFunction, errorFunction = errorFunction,
+  errorOnDaemonErrors = errorOnDaemonErrors,}
   resumeDaemon(daemonName, {})
   daemons[daemonName].eventFilter = returnedValues[1]
 end
@@ -141,29 +150,13 @@ local function terminateDaemon(daemonName)
   return false -- it won't die (it might on future resumes, no guarantee)
 end
 
-local function getDaemonList()
+local function getListOfDaemonNames() -- NOTE: it's not clear from the function name that this returns the names of the deamons but not the deamons themselves.
   local list = {}
   for k,v in pairs(daemons) do
     table.add(list,k) -- users can list them all with ipairs
     list[k]=true -- or index by name to see if it's there
   end
   return list
-end
-
-local function daemonHost()
-  local event = table.pack(os.pullEventRaw())
-  if not doLoop then
-    return
-  end
-  for k, v in pairs(daemons)
-    if coroutine.status(v) == "suspended" then
-      if v.eventFilter == nil or v.eventFilter == event[1] then
-        resumeDaemon(k, event))
-      end
-    elseif coroutine.status(v) == "dead" then
-      daemons[k] = nil
-    end
-  end
 end
 
 local doLoop = true
@@ -176,7 +169,19 @@ local function enterLoop(raiseErrors)
   doLoop = true
   raiseErrorsInDaemons = raiseErrors
   while doLoop do
-    daemonHost()
+    local event = table.pack(os.pullEventRaw())
+    if not doLoop then
+      return
+    end
+    for k, v in pairs(daemons)
+      if coroutine.status(v) == "suspended" then
+        if v.eventFilter == nil or v.eventFilter == event[1] then
+          resumeDaemon(k, event))
+        end
+      elseif coroutine.status(v) == "dead" then
+        daemons[k] = nil
+      end
+    end
   end
   running = false -- just in case people want to start us again
 end
@@ -191,8 +196,7 @@ local daemonManager = {
   remove = remove,
   stopDaemon = stopDaemon,
   terminateDaemon = terminateDaemon
-  getDaemonList = getDaemonList,
-  daemonHost = daemonHost,
+  getListOfDaemonNames = getListOfDaemonNames,
   exitLoop = exitLoop,
   enterLoop = enterLoop,
   run = enterLoop,
