@@ -21,8 +21,11 @@
 
 
 -- TODO: implement
+-- use files to store tasks?then we just need the file name
+-- TODO: decide how this is supposed to work #VERY_HIGH
 
 -- look at https://github.com/CC-Hive/Main needs
+-- seems quite different to this, will probably need adaption
 
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
@@ -70,10 +73,13 @@ end
 local patience = require("patience")
 local config = require("config")
 
-local taskFileName = ".tasks"
-local tasks = {} -- TODO: persist (we load but never save) when is best to save?
+local taskFileName = ".task"
+local taskLibrary = {} -- TODO: persist (we load but never save) when is best to save?
   -- how do I edit tasks? should I be able to? how do I make sure to save after but not too often?
     -- have a getTask and replaceTask commands?
+
+local taskQueue = {} -- triggered tasks which need to run -- TODO: persist
+
 local running = false
 local oldError = error
 local function error(mess, level)
@@ -121,45 +127,61 @@ end]]
   -- don't worry about up values for tree farm, try to support them in Hive
 }
 
-local function addTask(name, triggerList, priority, recuring)
-  argChecker(1, name, {"string"})
+local function validateTriggerList(argPosition, triggerList, level)
+  argChecker(1, argPosition, {"number"})
   argChecker(2, triggerList, {"table"})
-  -- argChecker can't do contents of tables
-  -- TODO: list checker
-  -- TODO: fix this looking really ugly
+  argChecker(3, level, {"number","nil"})
+  level = level + 1 or 2
+
+  if #triggerList == 0 then
+    error("arg["..argPosition.."] table has no valid keys, tasks must have at least one tigger event", level)
+  end
   for keyOfCurrentTriggerValue, currentTrigger in ipairs(triggerList) do
+    -- validate the event arg
     if type(currentTrigger) ~= "table" then
-      error("arg[2]["..keyOfCurrentTriggerValue.."] expected table got "..type(currentTrigger)
-      .."\n tasks must have at least one tigger event"),2)
+      error("arg["..argPosition.."]["..keyOfCurrentTriggerValue.."] expected table got "..type(currentTrigger),level)
     end
     if type(currentTrigger[1]) ~= "string" then
-      error("arg[2]["..keyOfCurrentTriggerValue.."][1] expected string got "..type(currentTrigger[1])
-      .."\n this should be an event name like the first return value of os.pullEvent. The other values of the table can be the arguments of that event, nils are fine.",2)
+      error("arg["..argPosition.."]["..keyOfCurrentTriggerValue.."][1] expected string got "..type(currentTrigger[1])
+      .."\n this should be an event name like the first return value of os.pullEvent. The other values of the table can be the arguments of that event, nils are fine.",level)
     end
     -- we checked the first value for a string already but skipping that will take more effort than it's worth
     for currentTriggerKey, currentTriggerValue in ipairs(currentTrigger) do
       if not pcall(textutils.serialize, currentTriggerValue) then
-        error("arg[2]["..keyOfCurrentTriggerValue.."]["..currentTriggerKey.."] could not serialize value with type "
-        ..type(currentTriggerValue),2)
+        error("arg["..argPosition.."]["..keyOfCurrentTriggerValue.."]["..currentTriggerKey.."] could not serialize value with type "
+        ..type(currentTriggerValue),level)
+      end
     end
   end
+end
+
+local function addTask(name, triggerList, priority, recuring)
+  argChecker(1, name, {"string"})
+  argChecker(2, triggerList, {"table"})
+
+  validateTriggerList(2, triggerList)
 
   argChecker(3, priority, {"number"})
-
   argChecker(4, recuring, {"boolean", "nil"})
   recuring = recuring or false
 
-  tasks[name] = {
+  if taskLibrary[name] then
+    return false, "already exists"
+  end
+
+  taskLibrary[name] = {
     triggerList = triggerList,
     priority = priority,
     recuring = recuring,
   }
+
+  return true
 end
 
 local function removeTask(name)
   argChecker(1, name, {"string"})
 
-  tasks[name] = nil
+  taskLibrary[name] = nil
 end
 
 local doLoop = true
@@ -176,10 +198,10 @@ local function enterLoop()
 
   local ok, data = config.load(taskFileName)
   if ok then
-    tasks = data
+    taskLibrary = data
   else
     if data == "not a file" then
-      tasks = {}
+      taskLibrary = {}
     else
       error("taskManager couldn't load file with name: "..taskFileName
       .."\ngot error: "..data)

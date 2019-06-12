@@ -82,6 +82,11 @@ local function error(mess, level)
   return oldError(mess, (level or 1) +1)
 end
 
+local function remove(daemonName)
+  argChecker(1, daemonName, {"string"})
+  daemons[daemonName] = nil
+end
+
 local function resumeDaemon(daemonName, event)
   argChecker(1, daemonName, {"string"})
   argChecker(2, event, {"table", "nil"})
@@ -91,28 +96,33 @@ local function resumeDaemon(daemonName, event)
     if not ok then
       if raiseErrorsInDaemons or daemons[daemonName].errorOnDaemonErrors then
         error("daemonManager error in daemon "
-        ..daemonName.."\n"
-        ..toString(table.unpack(returnedValues, 1, returnedValues.n))) -- TODO: this tostring is wrong, probably need table.concat
+        ..daemonName.."\n"..table.concat(returnedValues,"\n")
       end
-      daemons[daemonName] = nil
+      if daemons[daemonName].errorFunction then
+        daemons[daemonName].errorFunction(daemonName, returnedValues)
+      end
+      if coroutine.status(daemons[daemonName].coroutine) == "dead" then
+        -- the errorFunction might readd the daemon, if they do then it won't be dead and we shouldn't remove it
+        remove(daemonName)
+      end
     end
     daemons[daemonName].eventFilter = returnedValues[1]
+    daemons[daemonName].returnedValues = returnedValues
   end
 end
 
 
-local function add(daemonName, mainLoopFunc, stopFunction, completeFunction, errorFunction, errorOnDaemonErrors)
+local function add(daemonName, mainLoopFunc, stopFunction, completeFunction, errorFunction, errorOnDaemonErrors, restartOnError)
   argChecker(1, daemonName, {"string"})
   argChecker(2, mainLoopFunc, {"function"})
   argChecker(3, stopFunction, {"function", "nil"})
-  argChecker(4, completeFunction, {"function", "nil"}) -- TODO: implement
-  argChecker(5, errorFunction, {"function", "nil"}) -- TODO: implement
+  argChecker(4, completeFunction, {"function", "nil"})
+  argChecker(5, errorFunction, {"function", "nil"})
   argChecker(6, errorOnDaemonErrors, {"boolean", "nil"})
   forwardErrors = forwardErrors or false
 
   if daemons[daemonName] then
-    error("daemon with name "..daemonName
-    .." exists - if you want to replace it then remove it first (you may want to stop or terminate it before removing it)",2)
+    return false, "already exists"
   end
   daemons[daemonName] = {coroutine = coroutine.create(mainLoopFunc),
   eventFilter = nil, stopFunction = stopFunction,
@@ -120,11 +130,8 @@ local function add(daemonName, mainLoopFunc, stopFunction, completeFunction, err
   errorOnDaemonErrors = errorOnDaemonErrors,}
   resumeDaemon(daemonName, {})
   daemons[daemonName].eventFilter = returnedValues[1]
-end
 
-local function remove(daemonName)
-  argChecker(1, daemonName, {"string"})
-  daemons[daemonName] = nil
+  return true
 end
 
 local function stopDaemon(daemonName)
@@ -179,7 +186,13 @@ local function enterLoop(raiseErrors)
           resumeDaemon(k, event))
         end
       elseif coroutine.status(v) == "dead" then
-        daemons[k] = nil
+        if v.completeFunction then
+          v.completeFunction(k, v.returnedValues) -- if users want to restart the daemon they the should have made it not stop in the first place
+        end
+        if coroutine.status(v) == "dead" then
+          -- the completeFunction might have readded the daemon, if they did then it won't be dead and we shouldn't remove it
+          remove(k)
+        end
       end
     end
   end
@@ -192,8 +205,8 @@ end
 
 
 local daemonManager = {
-  add = add,
   remove = remove,
+  add = add,
   stopDaemon = stopDaemon,
   terminateDaemon = terminateDaemon
   getListOfDaemonNames = getListOfDaemonNames,

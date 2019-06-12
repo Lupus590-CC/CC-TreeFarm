@@ -1,4 +1,4 @@
--- TODO: add to snippets/random CC code github repo
+-- TODO: add to snippets/random CC code github repo #homeOnly
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
   if type(position) ~= "number" then

@@ -21,7 +21,7 @@ TODO: is the farm small enough that a rednet repeater is not needed?
   maybe, max needed range is about 16 blocks
   range during thunderstorm at y-level that Handy__Andy plans to deploy this at is about 17 blocks. That's not a lot of wiggle room.
   more testing needed
-  the farm has a bit more upper space, perhaps a repeater can be placed here? TODO: place a repeater at farm max and test again
+  the farm has a bit more upper space, perhaps a repeater can be placed here? TODO: place a repeater at farm max and test again #homeOnly
 
 NOTE: can we have too much wood to smelt?
   could we be unable to catch up?
