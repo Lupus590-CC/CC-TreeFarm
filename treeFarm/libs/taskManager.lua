@@ -20,7 +20,6 @@
 --
 
 
--- TODO: implement
 -- use files to store tasks?then we just need the file name
 -- TODO: decide how this is supposed to work #VERY_HIGH
 
@@ -73,12 +72,67 @@ end
 local patience = require("patience")
 local config = require("config")
 
-local taskFileName = ".task"
-local taskLibrary = {} -- TODO: persist (we load but never save) when is best to save?
-  -- how do I edit tasks? should I be able to? how do I make sure to save after but not too often?
+local fileNamePrefix = ".taskManager"
+local taskLibrary = {} -- every task we know about
+  -- how do I edit tasks? should I be able to?
     -- have a getTask and replaceTask commands?
 
-local taskQueue = {} -- triggered tasks which need to run -- TODO: persist
+local taskQueue = {} -- triggered tasks which need to run (task name only, lookup in taskLibrary)
+local inProgressTasks = {} -- tasks which have been marked as started but not completed (task name only, lookup in taskLibrary)
+
+local function saveTaskLibrary()
+  local ok, err = config.save(fileNamePrefix..".taskLibrary", taskLibrary)
+  if not ok then
+    error("taskManager: couldn't save taskLibrary. Got error:\n"..err)
+  end
+end
+local function loadTaskLibrary()
+  local ok, data = config.load(fileNamePrefix..".taskLibrary")
+  if not ok then
+    if data == "not a file" then
+      taskLibrary = {}
+      return
+    end
+    error("taskManager: couldn't load taskLibrary. Got error:\n"..data)
+  end
+  taskLibrary = data
+end
+
+local function saveTaskQueue()
+  local ok, err = config.save(fileNamePrefix..".taskQueue",taskQueue)
+  if not ok then
+    error("taskManager: couldn't save taskQueue. Got error:\n"..err)
+  end
+end
+local function loadTaskQueue()
+  local ok, data = config.load(fileNamePrefix..".taskQueue")
+  if not ok then
+    if data == "not a file" then
+      taskQueue = {}
+      return
+    end
+    error("taskManager: couldn't load taskQueue. Got error:\n"..data)
+  end
+  taskQueue = data
+end
+
+local function saveInProgressTasks()
+  local ok, err = config.save(fileNamePrefix..".inProgressTasks",data)
+  if not ok then
+    error("taskManager: couldn't save inProgressTasks. Got error:\n"..err)
+  end
+end
+local function loadInProgressTasks()
+  local ok, data = config.load(fileNamePrefix..".inProgressTasks")
+  if not ok then
+    if data == "not a file" then
+      inProgressTasks = {}
+      return
+    end
+    error("taskManager: couldn't load inProgressTasks. Got error:\n"..data)
+  end
+  inProgressTasks = data
+end
 
 local running = false
 local oldError = error
@@ -175,13 +229,24 @@ local function addTask(name, triggerList, priority, recuring)
     recuring = recuring,
   }
 
+  saveTaskLibrary()
   return true
 end
 
-local function removeTask(name)
-  argChecker(1, name, {"string"})
+local function removeTask(taskName)
+  argChecker(1, taskName, {"string"})
 
+  for k, v in ipairs(taskQueue) do
+    while v == taskName do -- have to do this as we are editing as we iterate
+      table.remove(taskQueue, k)
+      v = taskQueue[k]
+    end
+  end
   taskLibrary[name] = nil
+  -- TODO: figure out what to do with in progress tasks
+
+  saveTaskQueue() -- we might not have changed it but whatever
+  saveTaskLibrary()
 end
 
 local doLoop = true
@@ -189,26 +254,23 @@ local function exitLoop()
   doLoop = false
 end
 
-local function enterLoop()
+local function enterLoop(taskFileNamePrefix)
+  argChecker(1, taskFileNamePrefix, {"string", "nil"})
+  fileNamePrefix = taskFileNamePrefix or fileNamePrefix
+
   if running then
     return false, "already running"
   end
   running = true;
   doLoop = true
 
-  local ok, data = config.load(taskFileName)
-  if ok then
-    taskLibrary = data
-  else
-    if data == "not a file" then
-      taskLibrary = {}
-    else
-      error("taskManager couldn't load file with name: "..taskFileName
-      .."\ngot error: "..data)
-    end
-  end
+  loadTaskQueue()
+  loadTaskLibrary()
+  loadInProgressTasks()
 
   while doLoop do
+
+    -- TODO: implement
     -- make sure to pass the tigger event to the task
     -- should we do this?
 
@@ -238,6 +300,61 @@ local function waitForTask(taskName)
   end
 end
 
+-- doing tasks out of order is fine, maybe the current task host can't do the first task
+local function markTaskAsStarted(taskName, taskHostId)
+  argChecker(1, taskName, {"string"})
+  argChecker(2, taskHostId, {"string"})
+  for k, v in ipairs(taskQueue) do
+    if v == taskName then
+      local startedTask = table.remove(taskQueue, k)
+      if inProgressTasks[taskName] then
+        error("duplicate task detected, task name: "..taskName)
+      end
+      inProgressTasks[taskName] = taskHostId
+      saveInProgressTasks()
+      saveTaskQueue()
+      return true
+    end
+  end
+  return false, "task doesn't exist or has not been triggered"
+end
+
+-- TODO: how to interrupt tasks?
+-- put the task back in the queue?
+-- preferably with the progress preserved
+
+local function markTaskAsComplete(taskName, taskHostId)
+  argChecker(1, taskName, {"string"})
+  argChecker(2, taskHostId, {"string"})
+  if inProgressTasks[taskName] == taskHostId then
+    inProgressTasks[taskName] = nil
+    saveInProgressTasks()
+    return true
+  elseif inProgressTasks[taskName] then
+    return false, "task is owned by another task host"
+  end
+  return false, "task has not been started or doesn't exist"
+end
+
+local function taskIsInprogress(taskName)
+  argChecker(1, taskName, {"string"})
+  return inProgressTasks[taskName] and true or false
+end
+
+local function getInprogressTaskList()
+  local list = {}
+  for k in pairs(inProgressTasks)
+    table.insert(list, k)
+  end
+end
+
+local function getTaskQueue()
+  local list = {}
+  for _, v in pairs(taskQueue)
+    table.insert(list, v)
+  end
+end
+
 local taskManager = {
   addTask = addTask,
   removeTask = removeTask,
@@ -249,5 +366,10 @@ local taskManager = {
   isRunning = isRunning,
   hasStarted = isRunning,
   taskEventType = taskEventType,
-  waitForTask = waitForTask
+  waitForTask = waitForTask,
+  markTaskAsStarted = markTaskAsStarted,
+  markTaskAsComplete = markTaskAsComplete,
+  taskIsInprogress = taskIsInprogress,
+  getInprogressTaskList = getInprogressTaskList,
+  getTaskQueue = getTaskQueue,
 }

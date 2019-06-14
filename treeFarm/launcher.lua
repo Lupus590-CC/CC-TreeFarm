@@ -1,7 +1,10 @@
-require("argChecker")
-local builderScript = require("treeFarm.build")
+require("libs.argChecker")
+local builderScript = require("farmBuilder")
 
-local managementScript = require("treefarm.manage")
+local farmManagementScript = require("farmManager")
+local furnaceManagementScript = require("furnaceManager")
+
+local checkpoint = require("libs.checkpoint")
 
 -- rednet server lookup and host if not found
 -- master slave setup

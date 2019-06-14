@@ -1,10 +1,13 @@
-require("argChecker")
-local checkpoint = require("checkpoint")
-local lama = require("lama")
-local utils = require("utils")
-local patience = require("patience")
-local daemonManager = require("daemonManager")
-local config = require("configuration")
+require("libs.argChecker")
+local checkpoint = require("libs.checkpoint")
+local lama = require("libs.lama")
+local utils = require("libs.utils")
+local patience = require("libs.patience")
+local daemonManager = require("libs.daemonManager")
+local config = require("libs.config")
+
+
+-- TODO: should the furnace turtle have a crafting peripheral?
 
 local furnaceStatesFile = ".furnaceStates"
 --[[

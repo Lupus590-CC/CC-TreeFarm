@@ -1,8 +1,8 @@
 -- build the tree farm
-require("argChecker")
-local utils = require("utils")
-local lama = require("lama")
-local task = require("taskManager")
+require("libs.argChecker")
+local utils = require("libs.utils")
+local lama = require("libs.lama")
+local task = require("libs.taskManager")
 
 -- TODO: first pair with remote and then mark out farm
 

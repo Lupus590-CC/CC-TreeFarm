@@ -1,24 +1,3 @@
--- The MIT License (MIT)
---
--- Copyright (c) 2016-2018 SquidDev
---
--- Permission is hereby granted, free of charge, to any person obtaining a copy
--- of this software and associated documentation files (the "Software"), to
--- deal in the Software without restriction, including without limitation the
--- rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
--- sell copies of the Software, and to permit persons to whom the Software is
--- furnished to do so, subject to the following conditions: The above copyright
--- notice and this permission notice shall be included in all copies or
--- substantial portions of the Software.
---
--- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
--- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
--- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
--- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
--- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
--- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
--- IN THE SOFTWARE.
-
 --- A very basic test framework for ComputerCraft
 --
 -- Like Busted (http://olivinelabs.com/busted/), but more memorable.
@@ -54,14 +33,13 @@ local active_stubs = {}
 --
 -- @tparam string var The variable to stub
 -- @param value The value to stub it with
-local function stub(var, value)
-    if not active_stubs[var] then
-        active_stubs[var] = { value = _G[var] }
-    end
+local function stub(tbl, var, value)
+    check('stub', 1, 'table', tbl)
+    check('stub', 2, 'string', var)
 
-    _G[var] = value
+    table.insert(active_stubs, { tbl = tbl, var = var, value = tbl[var] })
+    rawset(tbl, var, value)
 end
-
 
 --- Capture the current global state of the computer
 local function push_state()
@@ -71,18 +49,26 @@ local function push_state()
         term = term.current(),
         input = io.input(),
         output = io.output(),
+        dir = shell.dir(),
+        path = shell.path(),
         stubs = stubs,
     }
 end
 
 --- Restore the global state of the computer to a previous version
 local function pop_state(state)
-    for k, v in pairs(active_stubs) do _G[k] = v.value end
+    for i = #active_stubs, 1, -1 do
+        local stub = active_stubs[i]
+        rawset(stub.tbl, stub.var, stub.value)
+    end
+
     active_stubs = state.stubs
 
     term.redirect(state.term)
     io.input(state.input)
     io.output(state.output)
+    shell.setDir(state.dir)
+    shell.setPath(state.path)
 end
 
 local error_mt = { __tostring = function(self) return self.message end }
@@ -372,6 +358,9 @@ if not fs.isDir(root_dir) then
     io.stderr:write(("%q is not a directory.\n"):format(root_dir))
     error()
 end
+
+-- Ensure the test folder is also on the package path
+package.path = ("/%s/?.lua;/%s/?/init.lua;%s"):format(root_dir, root_dir, package.path)
 
 do
     -- Load in the tests from all our files
