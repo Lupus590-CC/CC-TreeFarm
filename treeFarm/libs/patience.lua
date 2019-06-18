@@ -81,14 +81,14 @@ local function startTimer(secondsToWait)
   end
 
   -- add to list
-  local timerId = tostring(math.random(1, 2147483647)) -- it's good enough for rednet so it's good enough for us
+  local timerId = string.format("%08x", math.random(1, 2147483647))
   timers[timerId] = secondsToWait
 
   return timerId
 end
 
 local function cancelTimer(timerId)
-  argChecker(1, timerId, {"number"})
+  argChecker(1, timerId, {"string"})
   if not running then
     error("patience is not running yet, have you called enterLoop?")
   end

@@ -19,12 +19,7 @@
 -- IN THE SOFTWARE.
 --
 
-
--- use files to store tasks?then we just need the file name
--- TODO: decide how this is supposed to work #VERY_HIGH
-
--- look at https://github.com/CC-Hive/Main needs
--- seems quite different to this, will probably need adaption
+-- TODO: test table.getn({"test"}) #homeOnly
 
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
@@ -141,44 +136,10 @@ local function error(mess, level)
   return oldError(mess, (level or 1) +1)
 end
 
- local exampleTriggerList = {
+ local exampleTriggerList = { -- nil is treated as wildcard
    {"timer", timerId},
    {"patienceTimer", patienceTimerId},
-   {"rednet_message", nil, nil, approveProtocol}, -- any rednet message with that protocal -- TODO: how does table.length handle this? enforce an n property?
-   -- allow sencond value to be a function? this function is a user defined filter which gets the event arg data --NOTE: can't save functions, but can save their string.dump (if they don't have up values - how to detect and reject up values?)
-   --[[
-local u = "world"
-local function test()
-  print("hello "..u)
-  print("hello "..os.version())
-end
-
-test()
-
-local dump = string.dump(test)
-
-
-
-local loaded = load(dump, nil, "t", _ENV or getfenv(1))
-local ok, err = pcall(loaded)
-
-if not ok then
-  print(err)
-end
-
-
-local dump2 = "function()\n"
-    .."print(\"hello \".."u")\n"
-    .."print(\"hello \"..os.version())\n"
-  .."end"
-
-local loaded2 = load(dump2, nil, "t", _ENV or getfenv(1))
-local ok2, err2 = pcall(loaded2)
-
-if not ok2 then
-  print(err2)
-end]]
-  -- don't worry about up values for tree farm, try to support them in Hive
+   {"rednet_message", nil, nil, approveProtocol}, -- any rednet message with that protocal -- TODO: how does table.length handle this? enforce an n property? there is a table.getn function
 }
 
 local function validateTriggerList(argPosition, triggerList, level)
@@ -197,10 +158,10 @@ local function validateTriggerList(argPosition, triggerList, level)
     end
     if type(currentTrigger[1]) ~= "string" then
       error("arg["..argPosition.."]["..keyOfCurrentTriggerValue.."][1] expected string got "..type(currentTrigger[1])
-      .."\n this should be an event name like the first return value of os.pullEvent. The other values of the table can be the arguments of that event, nils are fine.",level)
+      .."\n this should be an event name like the first return value of os.pullEvent. The other values of the table can be the arguments of that event, nils are treated as wildcards for the arguments.",level)
     end
     -- we checked the first value for a string already but skipping that will take more effort than it's worth
-    for currentTriggerKey, currentTriggerValue in ipairs(currentTrigger) do
+    for currentTriggerKey, currentTriggerValue in pairs(currentTrigger) do
       if not pcall(textutils.serialize, currentTriggerValue) then
         error("arg["..argPosition.."]["..keyOfCurrentTriggerValue.."]["..currentTriggerKey.."] could not serialize value with type "
         ..type(currentTriggerValue),level)
@@ -219,32 +180,37 @@ local function addTask(name, triggerList, priority, recuring)
   argChecker(4, recuring, {"boolean", "nil"})
   recuring = recuring or false
 
+  local uniqueTaskId = string.format("%08x", math.random(1, 2147483647))
   if taskLibrary[name] then
     return false, "already exists"
   end
 
-  taskLibrary[name] = {
+
+  taskLibrary[uniqueTaskId] = {
     triggerList = triggerList,
     priority = priority,
     recuring = recuring,
+    uniqueTaskId = uniqueTaskId,
+    name = name
   }
 
   saveTaskLibrary()
-  return true
+  return true, uniqueTaskId
 end
 
-local function removeTask(taskName)
-  argChecker(1, taskName, {"string"})
+local function removeTask(uniqueTaskId)
+  argChecker(1, uniqueTaskId, {"string"})
 
   for k, v in ipairs(taskQueue) do
-    while v == taskName do -- have to do this as we are editing as we iterate
+    while v == uniqueTaskId do -- have to do this as we are editing as we iterate
       table.remove(taskQueue, k)
       v = taskQueue[k]
     end
   end
-  taskLibrary[name] = nil
-  -- TODO: figure out what to do with in progress tasks
+  taskLibrary[uniqueTaskId] = nil
+  inProgressTasks[uniqueTaskId] = nil
 
+  saveInProgressTasks()
   saveTaskQueue() -- we might not have changed it but whatever
   saveTaskLibrary()
 end
@@ -290,27 +256,26 @@ local function isRunning()
 end
 
 local taskEventType = "task"
-local function waitForTask(taskName)
+local function waitForTask(taskName, uniqueTaskId)
   argChecker(1, taskName, {"string", "nil"})
+  argChecker(2, uniqueTaskId, {"string", "nil"})
   while true do
-    local _, eventTaskName, triggerEventData = os.pullEvent(taskEventType)
-    if taskName == eventTaskName then
-      return eventTaskName, triggerEventData
+    local _, eventTaskName, eventTaskId, triggerEventData
+     = os.pullEvent(taskEventType)
+    if taskName == eventTaskName and uniqueTaskId == eventTaskId then
+      return eventTaskName, eventTaskId, triggerEventData
     end
   end
 end
 
 -- doing tasks out of order is fine, maybe the current task host can't do the first task
-local function markTaskAsStarted(taskName, taskHostId)
-  argChecker(1, taskName, {"string"})
+local function markTaskAsStarted(uniqueTaskId, taskHostId)
+  argChecker(1, uniqueTaskId, {"string"})
   argChecker(2, taskHostId, {"string"})
   for k, v in ipairs(taskQueue) do
-    if v == taskName then
+    if v == uniqueTaskId then
       local startedTask = table.remove(taskQueue, k)
-      if inProgressTasks[taskName] then
-        error("duplicate task detected, task name: "..taskName)
-      end
-      inProgressTasks[taskName] = taskHostId
+      inProgressTasks[uniqueTaskId] = taskHostId
       saveInProgressTasks()
       saveTaskQueue()
       return true
@@ -319,26 +284,26 @@ local function markTaskAsStarted(taskName, taskHostId)
   return false, "task doesn't exist or has not been triggered"
 end
 
--- TODO: how to interrupt tasks?
+-- TODO: how to interrupt tasks? #Hive
 -- put the task back in the queue?
 -- preferably with the progress preserved
 
-local function markTaskAsComplete(taskName, taskHostId)
-  argChecker(1, taskName, {"string"})
+local function markTaskAsComplete(uniqueTaskId, taskHostId)
+  argChecker(1, uniqueTaskId, {"string"})
   argChecker(2, taskHostId, {"string"})
-  if inProgressTasks[taskName] == taskHostId then
-    inProgressTasks[taskName] = nil
+  if inProgressTasks[uniqueTaskId] == taskHostId then
+    inProgressTasks[uniqueTaskId] = nil
     saveInProgressTasks()
     return true
-  elseif inProgressTasks[taskName] then
+  elseif inProgressTasks[uniqueTaskId] then
     return false, "task is owned by another task host"
   end
   return false, "task has not been started or doesn't exist"
 end
 
-local function taskIsInprogress(taskName)
-  argChecker(1, taskName, {"string"})
-  return inProgressTasks[taskName] and true or false
+local function taskIsInprogress(uniqueTaskId)
+  argChecker(1, uniqueTaskId, {"string"})
+  return inProgressTasks[uniqueTaskId] and true or false
 end
 
 local function getInprogressTaskList()
@@ -353,6 +318,10 @@ local function getTaskQueue()
   for _, v in pairs(taskQueue)
     table.insert(list, v)
   end
+end
+
+local function getTaskLibrary()
+  -- TODO: implement?
 end
 
 local taskManager = {

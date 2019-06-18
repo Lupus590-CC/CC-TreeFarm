@@ -55,7 +55,7 @@ end
 local function getResources() -- empty the bottom chest
   -- go to the exit
   -- go down to the chest
-  -- suck as much as there is inventory space -- TODO: if there is only wood in the turtle and the first slot in the chest is not wood what happens?
+  -- suck as much as there is inventory space -- TODO: if there is only wood in the turtle and the first slot in the chest is not wood what happens? #homeOnly
   -- go back up to furnace room
 end
 
