@@ -19,7 +19,12 @@
 -- IN THE SOFTWARE.
 --
 
--- TODO: test table.getn({"test"}) #homeOnly
+local running = false
+local oldError = error
+local function error(mess, level)
+  running = false
+  return oldError(mess, (level or 1) +1)
+end
 
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
@@ -129,17 +134,12 @@ local function loadInProgressTasks()
   inProgressTasks = data
 end
 
-local running = false
-local oldError = error
-local function error(mess, level)
-  running = false
-  return oldError(mess, (level or 1) +1)
-end
+
 
  local exampleTriggerList = { -- nil is treated as wildcard
    {"timer", timerId},
    {"patienceTimer", patienceTimerId},
-   {"rednet_message", nil, nil, approveProtocol}, -- any rednet message with that protocal -- TODO: how does table.length handle this? enforce an n property? there is a table.getn function
+   {"rednet_message", nil, nil, approveProtocol}, -- any rednet message with that protocal
 }
 
 local function validateTriggerList(argPosition, triggerList, level)
@@ -181,10 +181,6 @@ local function addTask(name, triggerList, priority, recuring)
   recuring = recuring or false
 
   local uniqueTaskId = string.format("%08x", math.random(1, 2147483647))
-  if taskLibrary[name] then
-    return false, "already exists"
-  end
-
 
   taskLibrary[uniqueTaskId] = {
     triggerList = triggerList,
@@ -202,7 +198,7 @@ local function removeTask(uniqueTaskId)
   argChecker(1, uniqueTaskId, {"string"})
 
   for k, v in ipairs(taskQueue) do
-    while v == uniqueTaskId do -- have to do this as we are editing as we iterate
+    while v.taskId == uniqueTaskId do -- have to do this as we are editing as we iterate
       table.remove(taskQueue, k)
       v = taskQueue[k]
     end
@@ -220,6 +216,25 @@ local function exitLoop()
   doLoop = false
 end
 
+local function queueTask(taskId, triggeredEvent)
+  argChecker(1, taskId, {"string"})
+  argChecker(2, triggeredEvent, {"table"})
+
+  if not taskLibrary[taskId] then
+    return false, "task doesn't exist"
+  end
+
+    -- TODO: what do we do with retriggered tasks already in progress or in the queue?
+
+  os.queueEvent(taskEventType, taskLibrary[taskId].name, taskId, triggeredEvent)
+  table.add(taskQueue, {taskId=taskId, triggeredEvent=triggeredEvent})
+  saveTaskQueue()
+  return true
+
+
+
+end
+
 local function enterLoop(taskFileNamePrefix)
   argChecker(1, taskFileNamePrefix, {"string", "nil"})
   fileNamePrefix = taskFileNamePrefix or fileNamePrefix
@@ -234,19 +249,36 @@ local function enterLoop(taskFileNamePrefix)
   loadTaskLibrary()
   loadInProgressTasks()
 
-  while doLoop do
-
-    -- TODO: implement
-    -- make sure to pass the tigger event to the task
-    -- should we do this?
-
-    -- TODO: how do we trigger events? we can't save callback.
-    -- raise events? the task name is the event type? will we need a blacklist to prevent collisions with events? that's not practical to maintain
-    -- this means that there is a coroutine sat arround waiting for one event
-    -- file path?
-    -- that's the recivers problem?
-
+  local function eventMatchesThisTrigger(event, trigger)
+    for k, v in pairs(trigger)
+      if type(k) == "number" and event[k] ~= v then
+        return false
+      end
+    end
+    return true
   end
+
+  local function eventMatchesATriggerInList(event, triggerList)
+    for _, trigger in ipairs(triggerList) do
+      if event[1] == trigger[1]
+      and eventMatchesThisTrigger(event, trigger) then
+        return true
+      end
+    end
+    return false
+  end
+
+  while doLoop do
+    local event = table.pack(os.pullEvent())
+    if event[1] ~= taskEventType then -- ignore task events as we queue them
+      for taskId, taskData in pairs(taskLibrary) do
+        if eventMatchesATriggerInList(event, taskData.triggerList) then
+          queueTask(taskId, event)
+        end
+      end
+    end
+  end
+
   running = false -- just in case people want to start us again
   return true
 end
@@ -273,7 +305,7 @@ local function markTaskAsStarted(uniqueTaskId, taskHostId)
   argChecker(1, uniqueTaskId, {"string"})
   argChecker(2, taskHostId, {"string"})
   for k, v in ipairs(taskQueue) do
-    if v == uniqueTaskId then
+    if v.taskId == uniqueTaskId then
       local startedTask = table.remove(taskQueue, k)
       inProgressTasks[uniqueTaskId] = taskHostId
       saveInProgressTasks()
@@ -306,28 +338,42 @@ local function taskIsInprogress(uniqueTaskId)
   return inProgressTasks[uniqueTaskId] and true or false
 end
 
-local function getInprogressTaskList()
-  local list = {}
-  for k in pairs(inProgressTasks)
-    table.insert(list, k)
+local function copyTable(from)
+  local copy = {}
+  for k, v in pairs(from) do
+    if type(v) == "table" then
+      copy[k] = copyTable(v)
+    else
+      copy[k] = v
+    end
   end
+  return copy
+end
+
+local function getInprogressTasks()
+  return copyTable(inProgressTasks)
 end
 
 local function getTaskQueue()
-  local list = {}
-  for _, v in pairs(taskQueue)
-    table.insert(list, v)
-  end
+  return copyTable(taskQueue)
 end
 
 local function getTaskLibrary()
-  -- TODO: implement?
+  return copyTable(taskLibrary)
+end
+
+local function getTaskInfoById(taskId)
+  if taskLibrary[taskId] then
+    return true, copyTable(taskLibrary[taskId])
+  end
+  return false, "could not find that task"
 end
 
 local taskManager = {
   addTask = addTask,
   removeTask = removeTask,
   exitLoop = exitLoop,
+  queueTask = queueTask, -- here to allow manual task triggering
   enterLoop = enterLoop,
   run = enterLoop,
   start = enterLoop,
@@ -339,6 +385,8 @@ local taskManager = {
   markTaskAsStarted = markTaskAsStarted,
   markTaskAsComplete = markTaskAsComplete,
   taskIsInprogress = taskIsInprogress,
-  getInprogressTaskList = getInprogressTaskList,
+  getInprogressTasks = getInprogressTasks,
   getTaskQueue = getTaskQueue,
+  getTaskLibrary = getTaskLibrary,
+  getTaskInfoById = getTaskInfoById,
 }
