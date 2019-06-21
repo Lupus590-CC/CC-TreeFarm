@@ -4,7 +4,13 @@ local itemIds = require("libs.utils.itemUtils.itemIds")
 
 -- TODO: inventory checks
 
-local function chopTree() -- DODO: fuel checks
+local function chopTree() -- TODO: fuel checks
+  -- TODO: handle chunk reloads
+  -- if wood in front then we just started
+  -- if wood above then we were digging up
+  -- if wood below then we were going back down
+  -- if there is wood below then we need to replace it with a sapling
+  -- if there is a sapling below then we are done
   turtle.dig()
   turtle.forward()
   local hasBlock, blockId = turtle.inspect()
@@ -16,6 +22,7 @@ local function chopTree() -- DODO: fuel checks
   while turtle.down() do
   end
   turtle.digDown()
+  -- TODO: relace sapling
 end
 
 local function doTreeLine()

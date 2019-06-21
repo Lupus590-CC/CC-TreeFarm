@@ -5,23 +5,9 @@ local utils = require("libs.utils")
 local patience = require("libs.patience")
 local daemonManager = require("libs.daemonManager")
 local config = require("libs.config")
+local taskManager = require("libs.taskManager")
 
 
--- TODO: should the furnace turtle have a crafting peripheral?
-
-local furnaceStatesFile = ".furnaceStates"
---[[
-local furnaceStates = {
-  [timerId] = {
-    furnaceId -- use position instead?
-  }
-}
-]]
-
-local furnaceStates, err = config.load(furnaceStatesFile)
-if not furnaceStates then
-  error("Error loading furnace states: "..err)
-end
 
 local function fuelValueForFurnace(turtleFuelValue)
   argChecker(1, turtleFuelValue, {"number"})
@@ -30,6 +16,9 @@ end
 
 
 local function loadThisFurnace() -- TODO: empty the furnace first?
+  -- TODO: what to do if this is interupted by chunk unload?
+
+
   -- Assumption, facing the furnace on the same level as it
   emptyThisFurnace()
 

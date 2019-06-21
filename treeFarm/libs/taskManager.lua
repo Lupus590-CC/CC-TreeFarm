@@ -224,15 +224,13 @@ local function queueTask(taskId, triggeredEvent)
     return false, "task doesn't exist"
   end
 
-    -- TODO: what do we do with retriggered tasks already in progress or in the queue?
+    -- TODO: what do we do with retriggered tasks already in progress or in the queue? #askDiscord
 
+  -- should the client care about the event that triggered the task?
   os.queueEvent(taskEventType, taskLibrary[taskId].name, taskId, triggeredEvent)
   table.add(taskQueue, {taskId=taskId, triggeredEvent=triggeredEvent})
   saveTaskQueue()
   return true
-
-
-
 end
 
 local function enterLoop(taskFileNamePrefix)
