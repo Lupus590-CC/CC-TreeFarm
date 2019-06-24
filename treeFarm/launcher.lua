@@ -12,6 +12,13 @@ local checkpoint = require("libs.checkpoint")
 -- divide and re-divide tasks
 
 
+
+
+local t = require("libs.utils.itemUtils")
+
+t.selectBestFuel(1)
+
+
 -- TODO: check for modem
 
 -- TODO: set start up file

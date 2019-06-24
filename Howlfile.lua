@@ -1,25 +1,28 @@
 Options:Default "trace"
-Tasks:Default "build"
+Tasks:Default "main"
+
+-- TODO: ask SquidDev to look at this getting error "Cannot find main task"
+-- line number changes depending on howl version
 
 Tasks:clean()
 
-Tasks:minify "minify"
-  :maps("wild:build/*.un.lua", "wild:build/*.min.un.lua")
-
--- add license to start of output file
-Tasks:Task "license" (function(_, _, file, dest)
-  local fs = require("howl.platform").fs
-  local contents = table.concat( {
-  "--[[\n",
-  fs.read(File("License.txt")),
-  "\n]]\n",
-  fs.read(File(file)),
-  })
-
-  fs.write(File(dest), contents)
-  end)
-  :maps("wild:build/*.un.lua", "wild:build/*.lua")
-  :description "Prepends license"
+-- Tasks:minify "minify"
+--   :maps("wild:build/*.un.lua", "wild:build/*.min.un.lua")
+--
+-- -- add license to start of output file
+-- Tasks:Task "license" (function(_, _, file, dest)
+--   local fs = require("howl.platform").fs
+--   local contents = table.concat( {
+--   "--[[\n",
+--   fs.read(File("License.txt")),
+--   "\n]]\n",
+--   fs.read(File(file)),
+--   })
+--
+--   fs.write(File(dest), contents)
+--   end)
+--   :maps("wild:build/*.un.lua", "wild:build/*.lua")
+--   :description "Prepends license"
 
 
 -- TODO: separate into multiple tasks, farm, build, furnace, remote, combine
@@ -33,9 +36,9 @@ Tasks:require "main" {
   output = "build/treeFarm.un.lua",
 }
 
-Tasks:Task "rename"
-  :maps("wild:build/*.lua", "wild:build/*")
-  :description "Removes .lua extention for Old CC compatability/convinience"
+-- Tasks:Task "rename"
+--   :maps("wild:build/*.lua", "wild:build/*")
+--   :description "Removes .lua extention for Old CC compatability/convinience"
 
-Tasks:Task "build" { "clean", "minify", "license", "rename" }
-  :Description "Main build task"
+-- Tasks:Task "build" { "clean", "minify", "license", "rename" }
+--   :Description "Main build task"

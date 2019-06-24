@@ -1,4 +1,6 @@
 local itemIds = require("itemIds")
+--local argChecker = require("argChecker").argChecker
+--local tableChecker = require("argChecker").tableChecker
 
 -- internal utility
 local function itemIdArgCheck(itemIdArg, argPosition)
@@ -108,7 +110,7 @@ local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #ho
       if type(currentItem) == "table"
       and reverseItemLookup(currentItem).fuelValue
       and reverseItemLookup(currentItem).fuelValue > bestFuelValue
-      and reverseItemLookup(currentItem).fuelValue =< targetFuelValue
+      and reverseItemLookup(currentItem).fuelValue <= targetFuelValue
       then
         bestFuelSlot = i
         bestFuelValue = reverseItemLookup(currentItem).fuelValue
@@ -140,7 +142,7 @@ end
 local function forEachSlot(func)
   argChecker(1, func, {"function"})
 
-  for i = 1 to 16 do
+  for i = 1, 16 do
     turtle.select(i)
     func()
   end

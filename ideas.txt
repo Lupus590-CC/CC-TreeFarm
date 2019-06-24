@@ -21,7 +21,8 @@ TODO: is the farm small enough that a rednet repeater is not needed?
   maybe, max needed range is about 16 blocks
   range during thunderstorm at y-level that Handy__Andy plans to deploy this at is about 17 blocks. That's not a lot of wiggle room.
   more testing needed
-  the farm has a bit more upper space, perhaps a repeater can be placed here? TODO: place a repeater at farm max and test again #homeOnly
+  the farm has a bit more upper space, perhaps a repeater can be placed here?
+    not enough in my test world but Andy's place will be higher so it might be ok
 
 NOTE: can we have too much wood to smelt?
   could we be unable to catch up?
@@ -70,9 +71,10 @@ lama overrides real gps, if they conflict then lama is used
 
 Lowest allowed point = 20
 Highest allowed point = 75
-TODO: how tall is the farm? #homeOnly
+how tall is the farm?
   8 blocks for the tree part (stackable)
-  4? for the trench (not stackable)
+  4 for the trench (not stackable)
+  3 block high for the water slide and chests and things
   if I stack it then part doesn't need to be replicated
     do I need multiple sapling catchers/movers?
       depends if the leaves keep catching them
