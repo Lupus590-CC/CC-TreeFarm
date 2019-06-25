@@ -62,7 +62,7 @@ local function argChecker(position, value, validTypesList, level)
   .." got "..type(value), level)
 end
 
-local config = require("config")
+local config = require("treeFarm.libs.config")
 
 local running = false
 

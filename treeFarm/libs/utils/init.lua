@@ -1,6 +1,6 @@
-local rednetUtils = require("rednetUtils")
-local itemUtils = require("itemUtils")
-local nav = require("nav")
+local rednetUtils = require("treeFarm.libs.utils.rednetUtils")
+local itemUtils = require("treeFarm.libs.utils.itemUtils")
+local nav = require("treeFarm.libs.utils.nav")
 
 
 

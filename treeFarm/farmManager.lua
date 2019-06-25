@@ -1,6 +1,6 @@
 -- general management of the farm
-require("libs.argChecker")
-local itemIds = require("libs.utils.itemUtils.itemIds")
+require("treeFarm.libs.argChecker")
+local itemIds = require("treeFarm.libs.utils.itemUtils.itemIds")
 
 -- TODO: inventory checks
 

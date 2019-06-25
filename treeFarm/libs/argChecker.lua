@@ -35,7 +35,7 @@ local function argCheckerFunc(position, value, validTypesList, level)
       expectedTypes = table.concat(validTypesList, ", ", 1, #validTypesList - 1) .. " or " .. validTypesList[#validTypesList]
   end
 
-  error("arg["..position.."] expected "..expectedTypes
+  error("arg["..tosting(position).."] expected "..expectedTypes
   .." got "..type(value), level)
 end
 
@@ -52,16 +52,16 @@ local function tableCheckerFunc(positionInfo, tableToCheck, templateTable, rejec
  for k, v in pairs(templateTable) do
    hasElements = true
    if type(v) ~= "table" then
-     error("arg["..3.."]["..tostring(k).."] expected table got "..type(v),2)
+     error("arg[3]["..tostring(k).."] expected table got "..type(v),2)
    end
    for k2, v2 in pairs(v) do
      if type(v2) ~= "string" then
-       error("arg["..3.."]["..tostring(k).."]["..tostring(k2).."] expected string got "..type(v2),2)
+       error("arg[3]["..tostring(k).."]["..tostring(k2).."] expected string got "..type(v2),2)
      end
    end
  end
  if not hasElements then
-   error("arg["..3.."] table must contain at least one element",2)
+   error("arg[3] table must contain at least one element",2)
  end
 
 
@@ -89,22 +89,21 @@ local function tableCheckerFunc(positionInfo, tableToCheck, templateTable, rejec
          expectedTypes = table.concat(validTypesList, ", ", 1, #validTypesList - 1) .. " or " .. validTypesList[#validTypesList]
      end
 
-     error(positionInfo.."["..key.."] expected "..expectedTypes
+     error(positionInfo.."["..tostring(key).."] expected "..expectedTypes
      .." got "..type(value), level)
    end
  end
 
  for k, v in pairs(templateTable) do
    if not tableToCheck[k] then
-     error("arg["..position.."] table is missing key "..tostring(k), level)
+     error("arg["..tostring(position).."] table is missing key "..tostring(k), level)
    end
  end
 end
 
 
--- TODO: this doesn't work? #homeOnly
-ENV.argChecker = argCheckerFunc
-ENV.tableChecker = tableCheckerFunc
+_ENV.argChecker = argCheckerFunc
+_ENV.tableChecker = tableCheckerFunc
 
 
 local this = {

@@ -1,4 +1,4 @@
-local itemIds = require("itemIds")
+local itemIds = require("treeFarm.libs.utils.itemUtils.itemIds")
 --local argChecker = require("argChecker").argChecker
 --local tableChecker = require("argChecker").tableChecker
 

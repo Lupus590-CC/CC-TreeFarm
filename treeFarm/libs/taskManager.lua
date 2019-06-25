@@ -69,8 +69,8 @@ local function argChecker(position, value, validTypesList, level)
   .." got "..type(value), level)
 end
 
-local patience = require("patience")
-local config = require("config")
+local patience = require("treeFarm.libs.patience")
+local config = require("treeFarm.libs.config")
 
 local fileNamePrefix = ".taskManager"
 local taskLibrary = {} -- every task we know about
@@ -248,7 +248,7 @@ local function enterLoop(taskFileNamePrefix)
   loadInProgressTasks()
 
   local function eventMatchesThisTrigger(event, trigger)
-    for k, v in pairs(trigger)
+    for k, v in pairs(trigger) do
       if type(k) == "number" and event[k] ~= v then
         return false
       end

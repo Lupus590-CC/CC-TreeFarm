@@ -96,7 +96,7 @@ local function resumeDaemon(daemonName, event)
     if not ok then
       if raiseErrorsInDaemons or daemons[daemonName].errorOnDaemonErrors then
         error("daemonManager error in daemon "
-        ..daemonName.."\n"..table.concat(returnedValues,"\n")
+        ..daemonName.."\n"..table.concat(returnedValues,"\n"))
       end
       if daemons[daemonName].errorFunction then
         daemons[daemonName].errorFunction(daemonName, returnedValues)
@@ -180,10 +180,10 @@ local function enterLoop(raiseErrors)
     if not doLoop then
       return
     end
-    for k, v in pairs(daemons)
+    for k, v in pairs(daemons) do
       if coroutine.status(v) == "suspended" then
         if v.eventFilter == nil or v.eventFilter == event[1] then
-          resumeDaemon(k, event))
+          resumeDaemon(k, event)
         end
       elseif coroutine.status(v) == "dead" then
         if v.completeFunction then
@@ -208,7 +208,7 @@ local daemonManager = {
   remove = remove,
   add = add,
   stopDaemon = stopDaemon,
-  terminateDaemon = terminateDaemon
+  terminateDaemon = terminateDaemon,
   getListOfDaemonNames = getListOfDaemonNames,
   exitLoop = exitLoop,
   enterLoop = enterLoop,

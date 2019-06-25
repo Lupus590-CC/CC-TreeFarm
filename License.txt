@@ -1,5 +1,7 @@
-If you are reading this code you will have an easier time on github:
+If you are reading this in the same file that runs the program then you will have an easier time on github:
 https://github.com/lupus590/CC-TreeFarm
+
+Trust me, legally I have to repeat each license despite them all being the same for each dependency. Also, you have the minified version which means that all the code will be very hard to read for a human, computers which understand CC flavoured Lua will be fine.
 
 Treefarm
 --------
@@ -58,7 +60,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ===============================================================================
 
-Require (used during testing, not in final output)
+Require (was used during testing but removed sue to howl being very different in how it does require, not in final output)
 -------
 
 Available from

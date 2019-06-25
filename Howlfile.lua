@@ -2,8 +2,10 @@ Options:Default "trace"
 
 Tasks:clean()
 
--- Tasks:minify "minify"
---   :Maps("wild:build/*.un.lua", "wild:build/*.min.un.lua")
+Tasks:minify "minify" {
+	input = "build/treefarm.un.lua",
+	output = "build/treefarm.min.un.lua",
+}
 
 -- add license to start of output file
 Tasks:Task "license" (function(_, _, file, dest)
@@ -11,13 +13,13 @@ Tasks:Task "license" (function(_, _, file, dest)
   local contents = table.concat( {
   "--[[\n",
   fs.read(File("License.txt")),
-  "\n]]\n",
-  fs.read(File(file)),
+  "\n]]\n\n",
+  fs.read(File("build/treefarm.min.un.lua")),
   })
 
-  fs.write(File(dest), contents)
+  fs.write(File("build/treefarm.min.lua"), contents)
   end)
-  :Maps("wild:build/*.un.lua", "wild:build/*.lua")
+  :Maps("build/treefarm.min.un.lua", "build/treefarm.min.lua")
   :description "Prepends license"
 
 
@@ -26,16 +28,36 @@ Tasks:Task "license" (function(_, _, file, dest)
 -- idea to add another task which copies the shared folder into these separate
 -- project folders since require can't go up directories
 -- wouldn't the above duplicate stuff as things become nested?
-Tasks:require "main" {
+Tasks:require "mainBuild" {
   include = "treeFarm/*.lua",
+  exclude = "treeFarm/test.lua",
   startup = "treeFarm/launcher.lua",
-  output = "build/treeFarm.un.lua",
+  output = "build/treefarm.un.lua",
 }
-Tasks:Default "main"
+  :Description "Main build task"
 
-Tasks:Task "rename" (function() end)
-  :Maps("wild:build/*.lua", "wild:build/*")
+
+Tasks:require "testBuild" {
+  include = "treeFarm/*.lua",
+  startup = "treeFarm/test.lua",
+  output = "build/treefarm.test.lua",
+}
+
+Tasks:Task "test" { "clean", "testBuild" }
+  :Description "Test build chain task"
+
+Tasks:Task "rename" (function(_, _, file, dest)
+  local fs = require("howl.platform").fs
+  local contents = fs.read(File("build/treefarm.min.lua"))
+
+  fs.write(File("build/treefarm"), contents)
+  end)
+  :Maps("build/treefarm.min.lua", "build/treefarm")
   :description "Removes .lua extention for Old CC compatability/convinience"
 
-Tasks:Task "build" { "clean", "main", --[["minify", "license",]] "rename" }
-  :Description "Main build task"
+
+
+ Tasks:Task "build" { "clean", "mainBuild", "minify", "license", "rename" }
+   :Description "Main build chain task"
+
+Tasks:Default "build"

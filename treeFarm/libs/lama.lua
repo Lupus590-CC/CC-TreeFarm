@@ -23,12 +23,15 @@
 -- Converted to be Require compatible by Lupus590 and released under the same MIT license.
 -- Look for REQUIRE_COMPAT in comments, the connected multi line comments are removed original stuff with the replacement under that.
 
--- TODO: check compatablility with require, LAMA may need a big rewrite as it interacts with the global namespace #VERY_HIGH
-  -- put LAMA into the gobal space and pretend to load if were are already there (returning the one found in global)
-  -- copy to hive
+-- TODO: copy to hive (I think I fixed the require compatablility)
 
 -- TODO: reference frames? may need a full rewrite
 -- don't forget to use argChecker
+
+-- REQUIRE_COMPAT
+if _G.LAMA then
+  return _G.LAMA
+end
 
 --Copy the default turtle directory
 local turtle = {}
@@ -47,11 +50,8 @@ if not fs.isDir( ".lama" ) then
 end
 
 -- REQUIRE_COMPAT
---[[
---get the current env
---anything declared as env.name will end up in the loaded API
-local env = getfenv() ]]
-local env = shell and {} or (_ENV or getfenv()) -- see https://github.com/lupus590/CC-Random-Code/blob/8cb3bd9b6e54c0176ff3e9418fc96b7866d3c963/src/dofile%20and%20loadAPI%20compatable%20API's.lua#L3
+_G.LAMA = {}
+local env = shell and _G.LAMA or (_ENV or getfenv()) -- see https://github.com/lupus590/CC-Random-Code/blob/8cb3bd9b6e54c0176ff3e9418fc96b7866d3c963/src/dofile%20and%20loadAPI%20compatable%20API's.lua#L3
 
 local fuel = {}
 local facing = {}
@@ -269,4 +269,5 @@ position.save()
 facing.save()
 
 -- REQUIRE_COMPAT
+_G.LAMA = env
 return env

@@ -1,23 +1,12 @@
-require("libs.argChecker")
-local builderScript = require("farmBuilder")
+require("treeFarm.libs.argChecker")
 
-local farmManagementScript = require("farmManager")
-local furnaceManagementScript = require("furnaceManager")
 
-local checkpoint = require("libs.checkpoint")
+local checkpoint = require("treeFarm.libs.checkpoint")
 
 -- rednet server lookup and host if not found
 -- master slave setup
 -- check if built already
 -- divide and re-divide tasks
-
-
-
-
-local t = require("libs.utils.itemUtils")
-
-t.selectBestFuel(1)
-
 
 -- TODO: check for modem
 
@@ -28,10 +17,22 @@ t.selectBestFuel(1)
 if pocket then
   -- launch remote control script
 elseif turtle then
+
+
+
+
+
+  local function hasPickaxe()
+    return false -- TODO: implement
+  end
+
   if hasPickaxe() then
     -- launch farming program
+    local farmManagementScript = require("treeFarm.farmManager")
+    local builderScript = require("treeFarm.farmBuilder")
   else
     -- launch furnace program
+    local furnaceManagementScript = require("treeFarm.furnaceManager")
   end
 else
   error("program is not compatible with this device")
