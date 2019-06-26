@@ -26,6 +26,9 @@
 -- TODO: copy to hive (I think I fixed the require compatablility)
 
 -- TODO: reference frames? may need a full rewrite
+-- how to track reference frames?
+-- how to access reference frames?
+-- push/pop interface for creating and removing reference frames
 -- don't forget to use argChecker
 
 -- REQUIRE_COMPAT

@@ -1,6 +1,5 @@
 local itemIds = require("treeFarm.libs.utils.itemUtils.itemIds")
---local argChecker = require("argChecker").argChecker
---local tableChecker = require("argChecker").tableChecker
+
 
 -- internal utility
 local function itemIdArgCheck(itemIdArg, argPosition)

@@ -30,7 +30,7 @@ Tasks:Task "license" (function(_, _, file, dest)
 -- wouldn't the above duplicate stuff as things become nested?
 Tasks:require "mainBuild" {
   include = "treeFarm/*.lua",
-  exclude = "treeFarm/test.lua",
+  exclude = {"treeFarm/test.lua", "test/*.lua"},
   startup = "treeFarm/launcher.lua",
   output = "build/treefarm.un.lua",
 }

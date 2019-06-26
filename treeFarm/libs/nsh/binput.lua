@@ -1,4 +1,4 @@
--- TO DO: convert to API?
+-- TODO: convert to API?
   -- once converted copy to hive
     -- maybe not, it's not very flexible: the nsh protocol (tror) doesn't seem to do files very well
 
