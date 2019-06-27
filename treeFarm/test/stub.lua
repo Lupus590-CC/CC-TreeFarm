@@ -1,5 +1,5 @@
 -- Copyright hydraz 2019
--- available at https://hydraz.semi.works/txt/stub.lua.html 
+-- available at https://hydraz.semi.works/txt/stub.lua.html
 -- https://discordapp.com/channels/477910221872824320/477911902152949771/593523800465866755
 
 local stub_mt = {}
@@ -56,16 +56,4 @@ local function stub(it, ...)
   return table
 end
 
-local t = {
-  print = print
-}
-
-stub(t, 'print')
-t.print("foo")
-t.print("foo", "bar")
-print(t.print:called())
-print(t.print:called_with("foo"))
-print(t.print:called_with("bar"))
-print(t.print:called_with("foo", "bar"))
-t.print:revert()
-t.print('foo')
+return stub
