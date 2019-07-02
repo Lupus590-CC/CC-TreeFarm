@@ -15,18 +15,21 @@ local function fuelValueForFurnace(turtleFuelValue)
 end
 
 
-local function loadThisFurnace() -- TODO: empty the furnace first?
+local function loadThisFurnace(subState) -- TODO: empty the furnace first?
   -- TODO: what to do if this is interupted by chunk unload?
+  -- could do alot of checkpoints for each step
+  -- thats a lot of functions
+  -- could use args and different lables.
 
 
   -- Assumption, facing the furnace on the same level as it
-  emptyThisFurnace()
+  emptyThisFurnace() -- what to do with the stuff we took out?
 
   -- go to top of furnace
   turtle.up()
   turtle.forward()
   -- select wood
-  -- place in furnace -- what if there is stuff in there? -- can turtles take from the input/fuel slots?
+  -- place in furnace -- what if there is stuff in there? -- TODO: can turtles take from furnace's input/fuel slots? #homeOnly
 
   -- go to side of furnace
   turtle.back()
@@ -38,17 +41,52 @@ local function loadThisFurnace() -- TODO: empty the furnace first?
   if not ok then
     error("Error saving furnace state: "..err)
   end
+
+
+
+  if subState == "state1" then
+
+  elseif subState == "state2" then
+
+  elseif subState == "state3" then
+
+  else
+    error("bad subState: "..tostring(subState), 2)
+  end
 end
+checkpoint.add("loadThisFurnace", loadThisFurnace, "state1")
+checkpoint.add("loadThisFurnace:state1", loadThisFurnace, "state1")
+checkpoint.add("loadThisFurnace:state2", loadThisFurnace, "state2")
+checkpoint.add("loadThisFurnace:state3", loadThisFurnace, "state3")
 
 -- it takes about 20 seconds for items to get from the furthest point to the chest
-local function getResources() -- empty the bottom chest
+-- it will probably take this turtle longer than that to get to the chest
+local function getResources(subState) -- empty the bottom chest
   -- go to the exit
   -- go down to the chest
   -- suck as much as there is inventory space -- TODO: if there is only wood in the turtle and the first slot in the chest is not wood what happens? #homeOnly
   -- go back up to furnace room
-end
+  -- TODO: need a goto function?
 
-local function putAwayNotWood()
+  -- NOTE: home when there is nothing cooking is the input chest
+  -- this means that this function needs replanned
+
+  if subState == "goToChest" then
+
+  elseif subState == "emptyChest" then
+
+  elseif subState == "goBack" then
+
+  else
+    error("bad subState: "..tostring(subState), 2)
+  end
+end
+checkpoint.add("getResources", getResources, "goToChest")
+checkpoint.add("getResources:goTochest", getResources, "goToChest")
+checkpoint.add("getResources:emptyChest", getResources, "emptyChest")
+checkpoint.add("getResources:goBack", getResources, "goBack")
+
+local function putAwayNotWood(subState)
   -- go to sapling chest
   -- put all saplings into chest
 
@@ -58,7 +96,22 @@ local function putAwayNotWood()
 
   -- go to junk chest
   -- put in everything but the wood and fuel
+  if subState == "state1" then
+
+  elseif subState == "state2" then
+
+  elseif subState == "state3" then
+
+  else
+    error("bad subState: "..tostring(subState), 2)
+  end
 end
+checkpoint.add("putAwayNotWood", putAwayNotWood, "state1")
+checkpoint.add("putAwayNotWood:state1", putAwayNotWood, "state1")
+checkpoint.add("putAwayNotWood:state2", putAwayNotWood, "state2")
+checkpoint.add("putAwayNotWood:state3", putAwayNotWood, "state3")
+
+
 
 -- NOTE: have a task list?
   -- check wood chest
