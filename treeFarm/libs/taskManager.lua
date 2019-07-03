@@ -49,7 +49,7 @@ local function argChecker(position, value, validTypesList, level)
   if type(level) ~= "nil" and type(level) ~= "number" then
     error("argChecker: arg[4] expected number or nil got "..type(level),2)
   end
-  level = level and level + 1 or 2
+  level = level and level + 1 or 3
 
   -- check the client's stuff
   for k, v in ipairs(validTypesList) do
