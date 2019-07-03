@@ -12,6 +12,8 @@ TODO: try out unit testing stuff #homeOnly #high
 
 how to init config
 
+spin in one spot if out of fuel or other error
+
 TODO: how do I want the remote control system to work?
   especially if I replace nsh with my own thing
     with nsh compatibility?

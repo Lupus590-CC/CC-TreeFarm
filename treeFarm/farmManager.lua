@@ -1,19 +1,30 @@
 -- general management of the farm
 require("treeFarm.libs.argChecker")
-local itemIds = require("treeFarm.libs.utils.itemUtils.itemIds")
+
+local itemUtils = require("treeFarm.libs.utils.itemUtils")
+local itemIds = itemUtils.itemIds
+local checkpoint = require("treeFarm.libs.checkpoint")
 
 -- TODO: inventory checks
 
 local function chopTree() -- TODO: fuel checks
   -- TODO: handle chunk reloads
-  -- if wood in front then we just started
-  -- if wood above then we were digging up
   -- if wood below then we were going back down
   -- if there is wood below then we need to replace it with a sapling
   -- if there is a sapling below then we are done
-  turtle.dig()
-  turtle.forward()
-  local hasBlock, blockId = turtle.inspect()
+
+  if not itemUtils.selectItemById(itemIdArg.sapling) then
+    -- TODO: get more saplings
+  end
+
+  local hasBlock, blockId = turtle.inspectUp()
+  if blockId.name == itemIds.log.name then
+    turtle.dig()
+    turtle.forward()
+  end
+
+  -- if wood above then we were digging up
+  hasBlock, blockId = turtle.inspectUp()
   while blockId.name == itemIds.log.name do
     turtle.digUp()
     turtle.up()
@@ -21,9 +32,19 @@ local function chopTree() -- TODO: fuel checks
   end
   while turtle.down() do
   end
-  turtle.digDown()
-  -- TODO: relace sapling
+
+  -- if wood below then we were going back down
+  hasBlock, blockId = turtle.inspectUp()
+  if blockId.name == itemIds.log.name then
+    turtle.digDown()
+    itemUtils.selectItemById(itemIdArg.sapling)
+    turtle.placeDown()
+  end
+  -- NOTE: what if the chunk unload is when we dug the log but have not placed the sapling yet? is this really a concern? #homeOnly
+
+  checkpoint.reach("doTreeLine")
 end
+checkpoint.add("chopTree")
 
 local function doTreeLine()
   -- TODO: fuel checks and unloading
@@ -35,6 +56,7 @@ local function doTreeLine()
     local hasBlock, blockId = turtle.inspect()
     if hasBlock then
       if blockId.name == itemIds.log.name then
+        checkpoint.reach("chopTree")
         chopTree()
       elseif blockId.name == itemIds.leaves.name then
         turtle.dig()

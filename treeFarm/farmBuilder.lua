@@ -7,7 +7,7 @@ local task = require("treeFarm.libs.taskManager")
 -- TODO: first pair with remote and then mark out farm
 
 local function placeTreePodium() -- TODO: fuel checks
-  -- if fuel level is less than 20 + reserve then abort
+  -- if fuel level is less than 20 + reserve then abort -- NOTE: don't worry, should never happen
 
   -- move check to before? this func is called?
   if not (utils.itemUtils.selectItemById(itemIds.dirt)

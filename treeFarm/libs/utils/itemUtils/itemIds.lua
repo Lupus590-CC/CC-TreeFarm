@@ -32,6 +32,8 @@ local itemIds = {
   bucket = { name = "minecraft:bucket", damage = 0, maxStackSize = 64 },
   coalBlock = { name= "minecraft:coal_block", damage = 0, fuelValue = 800,
     maxStackSize = 64 },
+  sapling = { name= "minecraft:sapling", damage = 0, fuelValue = 5,
+    maxStackSize = 64 }, -- TODO: check this #homeOnly
 }
 
 for k, v in pairs(itemIds) do

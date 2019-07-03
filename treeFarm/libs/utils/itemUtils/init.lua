@@ -98,12 +98,13 @@ end
 
 -- items which give more fuel than targetFuelValue are not eligible
 local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #homeOnly
+  -- TODO: add an argument to skip saplings?
   argChecker(1, targetFuelValue, {"number", "nil"})
   targetFuelValue = targetFuelValue or math.huge
 
   local bestFuelSlot
   local bestFuelValue = 0
-  for i = 1, 16 do
+  for i = 1, 16 do -- TODO: use forEachSlotSkippingEmpty?
       turtle.select(i)
       local currentItem = turtle.getItemDetail()
       if type(currentItem) == "table"
