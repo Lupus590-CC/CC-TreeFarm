@@ -10,7 +10,7 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 
 -- TODO: check for modem
 
--- TODO: set start up file
+
 
 -- TODO: identify computer type and launch correct part of program
 -- ask user instead?
@@ -18,7 +18,8 @@ if pocket then
   -- launch remote control script
 elseif turtle then
 
-
+-- TODO: lama override
+-- TODO: set start up file
 
 
 

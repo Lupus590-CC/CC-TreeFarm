@@ -1,5 +1,5 @@
 local itemIds = require("treeFarm.libs.utils.itemUtils.itemIds")
-
+-- TODO: reimplement various utilities using the other utilities
 
 -- internal utility
 local function itemIdArgCheck(itemIdArg, argPosition)
@@ -144,16 +144,16 @@ local function forEachSlot(func)
 
   for i = 1, 16 do
     turtle.select(i)
-    func()
+    func(i)
   end
 end
 
 local function forEachSlotSkippingEmpty(func)
   argChecker(1, func, {"function"})
 
-  local f = function()
+  local f = function(slotId)
     if turtle.getItemCount() > 0 then
-      func()
+      func(slotId)
     end
   end
 
@@ -166,12 +166,12 @@ local function forEachSlotWithItem(itemId, func, extentionCriteria)
   argChecker(2, extentionCriteria, {"function", "nil"})
   extentionCriteria = extentionCriteria or function() return true end
 
-  local f = function()
+  local f = function(slotId)
     local currentItem = turtle.getItemDetail()
     if type(currentItem) == "table" and currentItem.name == itemId.name
-    and currentItem.damage == itemId.damage and extentionCriteria(currentItem)
+    and currentItem.damage == itemId.damage and extentionCriteria(slotId, currentItem)
     then
-      func()
+      func(slotId, currentItem)
     end
   end
 

@@ -2,6 +2,8 @@ require("treeFarm.libs.argChecker")
 local checkpoint = require("treeFarm.libs.checkpoint")
 local lama = require("treeFarm.libs.lama")
 local utils = require("treeFarm.libs.utils")
+local itemUtils = utils.itemUtils
+local itemIds = itemUtils.itemIds
 local patience = require("treeFarm.libs.patience")
 local daemonManager = require("treeFarm.libs.daemonManager")
 local config = require("treeFarm.libs.config")
@@ -15,50 +17,80 @@ local function fuelValueForFurnace(turtleFuelValue)
 end
 
 
-local function loadThisFurnace(subState) -- TODO: empty the furnace first?
-  -- TODO: what to do if this is interupted by chunk unload?
-  -- could do alot of checkpoints for each step
-  -- thats a lot of functions
-  -- could use args and different lables.
+local function loadThisFurnace(subState)
+  -- Assumption for initual call, facing the furnace on the same level as it
 
 
-  -- Assumption, facing the furnace on the same level as it
-  emptyThisFurnace() -- what to do with the stuff we took out?
+  -- just have one furnace? empty it when we put more stuff in?
 
-  -- go to top of furnace
-  turtle.up()
-  turtle.forward()
-  -- select wood
-  -- place in furnace -- what if there is stuff in there? -- TODO: can turtles take from furnace's input/fuel slots? #homeOnly
+  subState = subState or "placeWood"
+  if subState == "placeWood" then
+    checkpoint.reach("loadThisFurnace:placeWood")
 
-  -- go to side of furnace
-  turtle.back()
-  turtle.down()
-  -- select and place fuel
+    -- TODO: check that we have enough charcoal
+    if countItemQuantityById(itemIds.log) < 8 then
+      subState = "abort"
+    end
 
-  -- update furnaceStates
-  local ok, err = config.save(furnaceStatesFile, furnaceStates)
-  if not ok then
-    error("Error saving furnace state: "..err)
+    local hasBlock, blockId = turtle.inspect()
+    if blockId.name == itemIds.furnace.name then
+      turtle.up()
+    end
+
+    hasBlock = turtle.detect()
+    if not hasBlock then
+      turtle.forward()
+    end
+
+    -- TODO: allow varous amounts of wood? will need to update fuel too
+    selectItemById(itemIds.log)
+    if turtle.getItemcount() < 8 then
+      local electedSlot = turtle.getSelectedSlot()
+      -- TODO: merge stacks untill we have 8 logs in one stack
+      itemUtils.forEachSlotWithItem(itemIds.log, func[slotId, currentItem], extentionCriteria[slotId, currentItem])
+
+      turtle.select(electedSlot)
+      if turtle.getItemcount() < 8 then
+        subState = "abort"
+      end
+    end
+
+    if subState ~= "abort" then
+      -- we found enough wood
+      turtle.dropDown(8)
+
+      checkpoint.reach("loadThisFurnace:placeFuel")
+      subState = "placeFuel"
+    end
+  end
+  if subState == "placeFuel" then
+
+    local hasBlock, blockId = turtle.inspectDown()
+    if blockId.name == itemIds.furnace.name then
+      turtle.back()
+    end
+
+    hasBlock = turtle.detect()
+    if not hasBlock then
+      turtle.down()
+    end
+
+    turtle.selectItemById(itemIds.charcoal) -- TODO: adapt for other fuel, wood drop off assumes optimal smelt count of 8
+    turtle.drop(1) -- TODO: how much fuel
+
+    -- TODO: update furnaceStates
+    local ok, err = config.save(furnaceStatesFile, furnaceStates)
+    if not ok then
+      error("Error saving furnace state: "..err)
+    end
+
   end
 
 
-
-  if subState == "state1" then
-
-  elseif subState == "state2" then
-
-  elseif subState == "state3" then
-
-  else
-    error("bad subState: "..tostring(subState), 2)
-  end
 end
-checkpoint.add("loadThisFurnace", loadThisFurnace, "state1")
-checkpoint.add("loadThisFurnace:state1", loadThisFurnace, "state1")
-checkpoint.add("loadThisFurnace:state2", loadThisFurnace, "state2")
-checkpoint.add("loadThisFurnace:state3", loadThisFurnace, "state3")
-
+checkpoint.add("loadThisFurnace", loadThisFurnace)
+checkpoint.add("loadThisFurnace:placeWood", loadThisFurnace, "placeWood")
+checkpoint.add("loadThisFurnace:placeFuel", loadThisFurnace, "placeFuel")
 -- it takes about 20 seconds for items to get from the furthest point to the chest
 -- it will probably take this turtle longer than that to get to the chest
 local function getResources(subState) -- empty the bottom chest

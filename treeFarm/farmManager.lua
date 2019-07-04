@@ -8,7 +8,7 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 -- TODO: inventory checks
 
 local function chopTree() -- TODO: fuel checks
-  
+
   if not itemUtils.selectItemById(itemIds.sapling) then
     -- TODO: get more saplings
   end
@@ -31,10 +31,19 @@ local function chopTree() -- TODO: fuel checks
   hasBlock, blockId = turtle.inspectDown()
   if blockId.name == itemIds.log.name then
     turtle.digDown()
-    itemUtils.selectItemById(itemIds.sapling)
-    turtle.placeDown()
   end
-  -- NOTE: what if the chunk unload is when we dug the log but have not placed the sapling yet? is this really a concern? #homeOnly
+
+  if hasBlock and blockId.name ~= itemIds.log.name
+  and not itemIds.sapling.name then
+    -- we dug the log and went too far down
+    -- (likely due to a chunk unload before we could place the sapling)
+    turtle.up()
+  end
+
+  -- if there is alreay a sapling then this will silently fail
+  itemUtils.selectItemById(itemIds.sapling)
+  turtle.placeDown()
+
 
   checkpoint.reach("doTreeLine")
 end
@@ -42,7 +51,7 @@ checkpoint.add("chopTree", chopTree)
 
 local function doTreeLine()
   -- TODO: fuel checks and unloading
-  -- NOTE:breaking leaves can put saplings into the turtle
+  -- NOTE: breaking leaves can put saplings into the turtle
   local atEndOfLine = false
   repeat
     while turtle.forward() do

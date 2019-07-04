@@ -3,6 +3,9 @@ TODO: organise this file
 TODO: arg type checker as a function
   where to put and how to access everywhere?
 
+TODO: put an extra chest down for the furnace turtle to put wood which needs to burn when it has less than 8
+or just designate a slot?
+
 
 TODO: try out unit testing stuff #homeOnly #high
   write tests for checkpoint
@@ -13,6 +16,7 @@ TODO: try out unit testing stuff #homeOnly #high
 how to init config
 
 spin in one spot if out of fuel or other error
+only the farmer spins, the furnace one messages the farmer who then spins on their behalf
 
 TODO: how do I want the remote control system to work?
   especially if I replace nsh with my own thing
