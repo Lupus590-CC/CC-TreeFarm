@@ -10,7 +10,7 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 local function chopTree() -- TODO: fuel checks
 
   if not itemUtils.selectItemById(itemIds.sapling) then
-    -- TODO: get more saplings
+    -- TODO: what to do when out of saplings
   end
 
   local hasBlock, blockId = turtle.inspect()
@@ -82,4 +82,10 @@ end
 
 -- TODO: restock
 
-chopTree()
+local farmManager = {
+  chopTree = chopTree,
+  doTreeLine = doTreeLine,
+  updateTreePositions = updateTreePositions,
+}
+
+return farmManager

@@ -9,6 +9,8 @@ local task = require("treeFarm.libs.taskManager")
 local function placeTreePodium() -- TODO: fuel checks
   -- if fuel level is less than 20 + reserve then abort -- NOTE: don't worry, should never happen
 
+  -- TODO: make unload safe
+
   -- move check to before? this func is called?
   if not (utils.itemUtils.selectItemById(itemIds.dirt)
   and utils.itemUtils.selectItemById(itemIds.jackOLantern)
@@ -44,6 +46,7 @@ local function placeTreePodium() -- TODO: fuel checks
   or utils.itemUtils.selectItemById(itemIds.cobblestone)
   turtle.place()
 
+  --TODO: replace with go down until stone or cobblestone found
   for i = 1, 8 do
     turtle.down()
   end
@@ -52,7 +55,6 @@ local function placeTreePodium() -- TODO: fuel checks
   turtle.dig()
 
 
-  turtle.forward() -- go back to where we started
 
 
   --TODO: send message that location is built
@@ -73,3 +75,11 @@ end
 -- arguably maintaining the farm and building a podium are different Hive tasks
 
 -- when building the water ways, make sure that the boundry has a wall, we don't want the water flowing the wrong way
+
+
+local farmBuilder = {
+  placeTreePodium = placeTreePodium,
+  updateTreePositions = updateTreePositions,
+}
+
+return farmBuilder

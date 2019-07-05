@@ -166,3 +166,12 @@ checkpoint.add("putAwayNotWood:state3", putAwayNotWood, "state3")
 -- collect from furnaces -- TODO: how to divide up fuel?
 -- put some (ow much) charcoal back into furnace
 -- put some charcoal into the output chest -- the rest stays in the turtle for it to used
+
+
+local furnaceManager = {
+  loadThisFurnace = loadThisFurnace,
+  getResources = getResources,
+  putAwayNotWood = putAwayNotWood,
+}
+
+return furnaceManager

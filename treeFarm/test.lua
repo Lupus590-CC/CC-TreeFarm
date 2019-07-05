@@ -1,21 +1,20 @@
 
-require("treeFarm.test.toetle")
+local toetle = require("treeFarm.test.toetle")
 
 do
-  -- load all the things
-  require("treeFarm.farmBuilder")
-  require("treeFarm.farmManager")
-  require("treeFarm.furnaceManager")
-  require("treeFarm.launcher")
-  require("treeFarm.remote")
+  -- local farmBuilder = require("treeFarm.farmBuilder")
+  -- local farmManager = require("treeFarm.farmManager")
+  -- local furnaceManager = require("treeFarm.furnaceManager")
+  -- local launcher = require("treeFarm.launcher")
+  -- local remote = require("treeFarm.remote")
 
-  require("treeFarm.libs.argChecker")
-  require("treeFarm.libs.checkpoint")
-  require("treeFarm.libs.config")
-  require("treeFarm.libs.daemonManager")
-  require("treeFarm.libs.lama")
-  require("treeFarm.libs.patience")
-  require("treeFarm.libs.taskManager")
+  -- local argChecker = require("treeFarm.libs.argChecker")
+  -- local checkpoint = require("treeFarm.libs.checkpoint")
+  -- local config = require("treeFarm.libs.config")
+  -- local daemonManager = require("treeFarm.libs.daemonManager")
+  -- local lama = require("treeFarm.libs.lama")
+  -- local patience = require("treeFarm.libs.patience")
+  -- local taskManager = require("treeFarm.libs.taskManager")
 
-  require("treeFarm.libs.utils")
+  -- local utils = require("treeFarm.libs.utils")
 end
