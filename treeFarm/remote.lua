@@ -6,9 +6,13 @@ require("treeFarm.libs.argChecker")
 -- if only shell then open in background
   -- always do this?
 
+local function run()
+
+end
+
 
 local remote = {
-
+  run = run,
 }
 
 return remote

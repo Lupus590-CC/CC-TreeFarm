@@ -5,9 +5,10 @@ local itemUtils = require("treeFarm.libs.utils.itemUtils")
 local itemIds = itemUtils.itemIds
 local checkpoint = require("treeFarm.libs.checkpoint")
 
+
 -- TODO: inventory checks
 
-local function chopTree() -- TODO: fuel checks
+local function chopTree() -- TODO: fuel checks - use implied fuel checks?
 
   if not itemUtils.selectItemById(itemIds.sapling) then
     -- TODO: what to do when out of saplings
@@ -82,10 +83,21 @@ end
 
 -- TODO: restock
 
+-- TODO: furnace manager watchdog for if the furnace manager forwards an error to us
+local function furnaceWatchdog()
+  -- listen for specific rednet messages
+  -- cause our own error catch system to trigger
+end
+
+local function run()
+  -- TODO: pcall things and for any uncaught errors, stop and spin, when the remote connects message the error
+end
+
 local farmManager = {
   chopTree = chopTree,
   doTreeLine = doTreeLine,
   updateTreePositions = updateTreePositions,
+  run = run,
 }
 
 return farmManager

@@ -9,8 +9,6 @@ local daemonManager = require("treeFarm.libs.daemonManager")
 local config = require("treeFarm.libs.config")
 local taskManager = require("treeFarm.libs.taskManager")
 
-
-
 local function fuelValueForFurnace(turtleFuelValue)
   argChecker(1, turtleFuelValue, {"number"})
   return turtleFuelValue/10
@@ -167,11 +165,16 @@ checkpoint.add("putAwayNotWood:state3", putAwayNotWood, "state3")
 -- put some (ow much) charcoal back into furnace
 -- put some charcoal into the output chest -- the rest stays in the turtle for it to used
 
+local function run()
+  -- TODO: pcall things and for any uncaught errors, message the other turtle
+end
+
 
 local furnaceManager = {
   loadThisFurnace = loadThisFurnace,
   getResources = getResources,
   putAwayNotWood = putAwayNotWood,
+  run = run
 }
 
 return furnaceManager

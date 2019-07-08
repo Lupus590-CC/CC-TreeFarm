@@ -77,9 +77,14 @@ end
 -- when building the water ways, make sure that the boundry has a wall, we don't want the water flowing the wrong way
 
 
+local function run()
+  -- TODO: pcall things and for any uncaught errors, stop and spin
+end
+
 local farmBuilder = {
   placeTreePodium = placeTreePodium,
   updateTreePositions = updateTreePositions,
+  run = run,
 }
 
 return farmBuilder
