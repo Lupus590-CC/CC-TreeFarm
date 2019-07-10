@@ -28,7 +28,15 @@ Tasks:Task "license" (function(_, _, file, dest)
 -- idea to add another task which copies the shared folder into these separate
 -- project folders since require can't go up directories
 -- wouldn't the above duplicate stuff as things become nested?
-Tasks:require "mainBuild" {
+Tasks:require "mainBuild" (function(spec)
+  -- Whatever you had before
+
+  spec.sources:modify(function(file)
+    if file.name:find("%.lua$") then
+      return ('return assert(load(%q, %q, nil, _ENV))(...)'):format(file.contents, "@" .. file.relative)
+    end
+  end)
+end){
   include = "treeFarm/*.lua",
   exclude = {"treeFarm/test.lua", "test/*.lua"},
   startup = "treeFarm/launcher.lua",
@@ -37,7 +45,15 @@ Tasks:require "mainBuild" {
   :Description "Main build task"
 
 
-Tasks:require "testBuild" {
+Tasks:require "testBuild" (function(spec)
+  -- Whatever you had before
+
+  spec.sources:modify(function(file)
+    if file.name:find("%.lua$") then
+      return ('return assert(load(%q, %q, nil, _ENV))(...)'):format(file.contents, "@" .. file.relative)
+    end
+  end)
+end){
   include = "treeFarm/*.lua",
   startup = "treeFarm/test.lua",
   output = "build/treefarm.test.lua",
