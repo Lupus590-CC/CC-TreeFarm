@@ -10,14 +10,23 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 
 local function chopTree() -- TODO: fuel checks - use implied fuel checks?
 
+
   if not itemUtils.selectItemById(itemIds.sapling) then
     -- TODO: what to do when out of saplings
+    -- spin error
+    -- could we ask the furnace manager to get some for us?
   end
+
+  -- TODO: select wood or empty
+
+  -- TODO: what if we fill our inventory with wood?
+    -- just call the empty function, it doesn't matter if we don't empty everything and fill up again quickly, we can empty anywere and let the water catch it
 
   local hasBlock, blockId = turtle.inspect()
   if blockId.name == itemIds.log.name then
     turtle.dig()
-    turtle.forward()
+    turtle.forward() -- what if there is a cunk unload here? we could dig the log but not move forward making it look like we already compleated the tree
+    --TODO: refactor to scan up the log and then dig down to the dirt block and then go up one to place the sapling, don't forget to chop the leaves on the way up
   end
 
   hasBlock, blockId = turtle.inspectUp()
