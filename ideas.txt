@@ -3,6 +3,15 @@ TODO: organise this file
 TODO: arg type checker as a function
   where to put and how to access everywhere?
 
+NOTE: important notes #veryHigh
+can redesign farm
+  change size?
+can also use plethora stuff
+  block sensor
+  entity sensor for saplings?
+  laser gun instead of pickaxe?
+    requires enchant, enchants are not allowed in a thinking pack
+
 TODO: put an extra chest down for the furnace turtle to put wood which needs to burn when it has less than 8
 or just designate a slot?
 
