@@ -1,7 +1,19 @@
 TODO: organise this file
 
-TODO: arg type checker as a function
-  where to put and how to access everywhere?
+torches instead of jackolanterns?
+    put on the side to block the turtle going down to detect absent sapling?
+
+to make use of the block sensor the farmer could swap out the pickaxe and swap back as needed
+  if we want big trees then I need to use it to detect lone logs instead of tree trunks
+
+use one of those schematic builders?
+
+we have plethora, we can wrap chests to get their slots
+have the furnace manager drive monitors for a status screen?
+
+allow the moon turf instead of cobble
+
+can saplings be planted on moon turf?
 
 NOTE: important notes #veryHigh
 can redesign farm

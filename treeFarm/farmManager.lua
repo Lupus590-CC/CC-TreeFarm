@@ -12,9 +12,7 @@ local function chopTree() -- TODO: fuel checks - use implied fuel checks?
 
 
   if not itemUtils.selectItemById(itemIds.sapling) then
-    -- TODO: what to do when out of saplings
-    -- spin error
-    -- could we ask the furnace manager to get some for us?
+    error("out of saplings", 0) -- NOTE: if we use the block sensor then we could just go back for more saplings and then scan for trees
   end
 
   -- TODO: select wood or empty
@@ -23,37 +21,37 @@ local function chopTree() -- TODO: fuel checks - use implied fuel checks?
     -- just call the empty function, it doesn't matter if we don't empty everything and fill up again quickly, we can empty anywere and let the water catch it
 
   local hasBlock, blockId = turtle.inspect()
-  if blockId.name == itemIds.log.name then
-    turtle.dig()
-    turtle.forward() -- what if there is a cunk unload here? we could dig the log but not move forward making it look like we already compleated the tree
-    --TODO: refactor to scan up the log and then dig down to the dirt block and then go up one to place the sapling, don't forget to chop the leaves on the way up
-  end
-
-  hasBlock, blockId = turtle.inspectUp()
-  while blockId.name == itemIds.log.name do
-    turtle.digUp()
-    turtle.up()
+  while hasBlock and blockId.name == itemIds.log.name then
     hasBlock, blockId = turtle.inspectUp()
-  end
-  while turtle.down() do
-  end
-
-  hasBlock, blockId = turtle.inspectDown()
-  if blockId.name == itemIds.log.name then
-    turtle.digDown()
+    if hasBlock and blockId.name == itemIds.leaves.name then
+      turtle.digUp()
+    end
+    turtle.up()
+    hasBlock, blockId = turtle.inspect()
   end
 
-  if hasBlock and blockId.name ~= itemIds.log.name
-  and not itemIds.sapling.name then
-    -- we dug the log and went too far down
-    -- (likely due to a chunk unload before we could place the sapling)
+  hasBlock, blockId = turtle.inspect()
+  while (not hasblock) or blockId.name == itemIds.leaves.name do
+    hasBlock, blockId = turtle.inspect()
+    if hasBlock and blockId.name == itemIds.log.name then
+      turtle.dig()
+    end
+    turtle.down()
+    hasBlock, blockId = turtle.inspect()
+  end
+
+  if blockId.name == itemIds.dirt.name then
     turtle.up()
   end
 
   -- if there is alreay a sapling then this will silently fail
   itemUtils.selectItemById(itemIds.sapling)
-  turtle.placeDown()
+  turtle.place()
 
+  hasBlock, blockId = turtle.inspect()
+  if blockId.name == itemIds.sapling.name then
+    turtle.up()
+  end
 
   checkpoint.reach("doTreeLine")
 end

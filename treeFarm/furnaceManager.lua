@@ -9,6 +9,8 @@ local daemonManager = require("treeFarm.libs.daemonManager")
 local config = require("treeFarm.libs.config")
 local taskManager = require("treeFarm.libs.taskManager")
 
+-- TODO: with plethora the furnace manager could be a computer
+
 local function fuelValueForFurnace(turtleFuelValue)
   argChecker(1, turtleFuelValue, {"number"})
   return turtleFuelValue/10
