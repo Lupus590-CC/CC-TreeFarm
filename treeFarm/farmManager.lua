@@ -11,40 +11,41 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 local function chopTree() -- TODO: fuel checks - use implied fuel checks?
 
   if not itemUtils.selectItemById(itemIds.sapling) then
-    -- TODO: what to do when out of saplings
+    error("out of saplings", 0) -- NOTE: if we use the block sensor then we could just go back for more saplings and then scan for trees
   end
 
   local hasBlock, blockId = turtle.inspect()
-  if blockId.name == itemIds.log.name then
-    turtle.dig()
-    turtle.forward()
-  end
-
-  hasBlock, blockId = turtle.inspectUp()
-  while blockId.name == itemIds.log.name do
-    turtle.digUp()
-    turtle.up()
+  while hasBlock and blockId.name == itemIds.log.name then
     hasBlock, blockId = turtle.inspectUp()
-  end
-  while turtle.down() do
-  end
-
-  hasBlock, blockId = turtle.inspectDown()
-  if blockId.name == itemIds.log.name then
-    turtle.digDown()
+    if hasBlock and blockId.name == itemIds.leaves.name then
+      turtle.digUp()
+    end
+    turtle.up()
+    hasBlock, blockId = turtle.inspect()
   end
 
-  if hasBlock and blockId.name ~= itemIds.log.name
-  and not itemIds.sapling.name then
-    -- we dug the log and went too far down
-    -- (likely due to a chunk unload before we could place the sapling)
+  hasBlock, blockId = turtle.inspect()
+  while (not hasblock) or blockId.name == itemIds.leaves.name do
+    hasBlock, blockId = turtle.inspect()
+    if hasBlock and blockId.name == itemIds.log.name then
+      turtle.dig()
+    end
+    turtle.down()
+    hasBlock, blockId = turtle.inspect()
+  end
+
+  if blockId.name == itemIds.dirt.name then
     turtle.up()
   end
 
   -- if there is alreay a sapling then this will silently fail
   itemUtils.selectItemById(itemIds.sapling)
-  turtle.placeDown()
+  turtle.place()
 
+  hasBlock, blockId = turtle.inspect()
+  if blockId.name == itemIds.sapling.name then
+    turtle.up()
+  end
 
   checkpoint.reach("doTreeLine")
 end

@@ -11,7 +11,7 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 -- check for wireless modem
 local modem = peripheral.find("modem", function(_, modem) return modem.isWireless() end)
 if not modem then
-  error("couldn't find wireless modem", 0)
+  error("couldn't find wireless modem, please attach one to this device and restart this program", 0)
 end
 
 
@@ -19,10 +19,8 @@ end
 -- TODO: identify computer type and launch correct part of program
 -- ask user instead?
 if pocket then
-  local remote = require("treeFarm.remote")
-  remote.run()
-  -- launch remote control script
-elseif turtle then
+  require("treeFarm.remote").run()
+elseif turtle then -- If furnace manager is a normal computer than this will change
 
 -- TODO: lama override
 -- TODO: set start up file
@@ -36,10 +34,12 @@ elseif turtle then
   end
 
   if hasPickaxe() then
-    -- launch farming program
-    local farmManager = require("treeFarm.farmManager")
-    local farmBuilder = require("treeFarm.farmBuilder")
-    -- TODO: decide how to run
+    if hasBuilt() then
+      require("treeFarm.farmManager").run()
+    else
+      require("treeFarm.farmBuilder").run()
+      -- TODO: mark as built
+    end
 
   else
     -- launch furnace program
@@ -47,5 +47,5 @@ elseif turtle then
     local furnaceManager.run()
   end
 else
-  error("program is not compatible with this device")
+  error("program is not compatible with this device", 0)
 end
