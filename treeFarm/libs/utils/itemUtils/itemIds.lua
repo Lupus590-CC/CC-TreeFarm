@@ -35,6 +35,9 @@ local itemIds = {
   sapling = { name = "minecraft:sapling", damage = 0, fuelValue = 5,
     maxStackSize = 64, },
   leaves = { name = "minecraft:leaves", damage = 0, maxStackSize = 64, }, -- TODO: test
+  moonDirt = { name = "galacticraftcore:basic_block_moon", damage = 3, maxStackSize = 64, },
+  moonTurf = { name = "galacticraftcore:basic_block_moon", damage = 5, maxStackSize = 64, },
+  moonRock = { name = "galacticraftcore:basic_block_moon", damage = 4, maxStackSize = 64, },
 }
 
 for k, v in pairs(itemIds) do

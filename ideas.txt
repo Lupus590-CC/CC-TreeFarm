@@ -1,5 +1,7 @@
 TODO: organise this file
 
+TODO: new planning screenshots
+
 torches instead of jackolanterns?
     put on the side to block the turtle going down to detect absent sapling?
 
@@ -10,10 +12,11 @@ use one of those schematic builders?
 
 we have plethora, we can wrap chests to get their slots
 have the furnace manager drive monitors for a status screen?
+neual interface for status updates
 
 allow the moon turf instead of cobble
 
-can saplings be planted on moon turf?
+can saplings be planted on moon turf? no
 
 NOTE: important notes #veryHigh
 can redesign farm
