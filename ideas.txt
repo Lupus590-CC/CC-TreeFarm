@@ -2,6 +2,9 @@ TODO: organise this file
 
 TODO: new planning screenshots
 
+usesful reference: https://squiddev-cc.github.io/plethora/methods.html
+https://tweaked.cc/
+
 torches instead of jackolanterns?
     put on the side to block the turtle going down to detect absent sapling?
 
