@@ -9,14 +9,6 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 -- TODO: inventory checks
 
 local function chopTree() -- TODO: fuel checks - use implied fuel checks?
-
-
-  if not itemUtils.selectItemById(itemIds.sapling) then
-    error("out of saplings", 0) -- NOTE: if we use the block sensor then we could just go back for more saplings and then scan for trees
-  end
-
-  -- TODO: select wood or empty
-
   -- TODO: what if we fill our inventory with wood?
     -- just call the empty function, it doesn't matter if we don't empty everything and fill up again quickly, we can empty anywere and let the water catch it
 
@@ -24,6 +16,9 @@ local function chopTree() -- TODO: fuel checks - use implied fuel checks?
   while hasBlock and blockId.name == itemIds.log.name then
     hasBlock, blockId = turtle.inspectUp()
     if hasBlock and blockId.name == itemIds.leaves.name then
+      if not itemUtils.selectItemByIdOrEmptySlot(itemId.log) then
+        dumpInv()
+      end
       turtle.digUp()
     end
     turtle.up()
@@ -34,6 +29,9 @@ local function chopTree() -- TODO: fuel checks - use implied fuel checks?
   while (not hasblock) or blockId.name == itemIds.leaves.name do
     hasBlock, blockId = turtle.inspect()
     if hasBlock and blockId.name == itemIds.log.name then
+      if not itemUtils.selectItemByIdOrEmptySlot(itemId.log) then
+        dumpInv()
+      end
       turtle.dig()
     end
     turtle.down()
@@ -44,12 +42,13 @@ local function chopTree() -- TODO: fuel checks - use implied fuel checks?
     turtle.up()
   end
 
-  -- if there is alreay a sapling then this will silently fail
-  itemUtils.selectItemById(itemIds.sapling)
-  turtle.place()
+  -- we scan for missing saplings later so we can afford to not have any it's just less effient
+  if itemUtils.selectItemById(itemIds.sapling) then
+    turtle.place()
+  end
 
   hasBlock, blockId = turtle.inspect()
-  if blockId.name == itemIds.sapling.name then
+  if blockId.name == itemIds.sapling.name then -- TODO: what if we didn't place the sapling? move this to do tree line?
     turtle.up()
   end
 
@@ -90,11 +89,7 @@ end
 
 -- TODO: restock
 
--- TODO: furnace manager watchdog for if the furnace manager forwards an error to us
-local function furnaceWatchdog()
-  -- listen for specific rednet messages
-  -- cause our own error catch system to trigger
-end
+
 
 local function run()
   -- TODO: pcall things and for any uncaught errors, stop and spin, when the remote connects message the error

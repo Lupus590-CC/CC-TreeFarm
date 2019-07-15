@@ -1,6 +1,7 @@
 TODO: organise this file
 
-TODO: new planning screenshots
+TODO: second turtle restock chest
+  one for saplings one for fuel
 
 usesful reference: https://squiddev-cc.github.io/plethora/methods.html
 https://tweaked.cc/
@@ -30,9 +31,6 @@ can also use plethora stuff
   laser gun instead of pickaxe?
     requires enchant, enchants are not allowed in a thinking pack
 
-TODO: put an extra chest down for the furnace turtle to put wood which needs to burn when it has less than 8
-or just designate a slot?
-
 just build all in ne go? it will be a lot easier
 
 TODO: try out unit testing stuff #homeOnly #high
@@ -43,25 +41,14 @@ TODO: try out unit testing stuff #homeOnly #high
 
 how to init config
 
-spin in one spot if out of fuel or other error
-only the farmer spins, the furnace one messages the farmer who then spins on their behalf
-
 TODO: how do I want the remote control system to work?
   especially if I replace nsh with my own thing
     with nsh compatibility?
 
-TODO: is the farm small enough that a rednet repeater is not needed?
-  test near bedrock during a thunderstorm
-  maybe, max needed range is about 16 blocks
-  range during thunderstorm at y-level that Handy__Andy plans to deploy this at is about 17 blocks. That's not a lot of wiggle room.
-  more testing needed
-  the farm has a bit more upper space, perhaps a repeater can be placed here?
-    not enough in my test world but Andy's place will be higher so it might be ok
 
 NOTE: can we have too much wood to smelt?
   could we be unable to catch up?
     the farmer could stop if the smelter says so
-      computer at the bottom which only monitors the chest?
 
 TODO: location placer
   pocket computer app which lets the user know how big the farm will be and tells the turtles where to build it
@@ -87,38 +74,14 @@ Request building equipment with label
 Lost and found(including apples) and spare construction material chests
 
 if the system runs out of saplings then place more in the sapling chest
-  saplings will get used as fuel for the turtles and furnaces with charcoal as a backup -- NOT: this is not currently true
+  saplings will get used as fuel for the turtles and furnaces with charcoal as a backup -- NOTE: this is not currently true
   what to do when the chests are full?
-
-
-two turtles
-  tree chopping turtle
-    drops the logs into the water and builds the place
-  smelting turtle
-    collects logs and saplings from bottom chest and sorts and uses furnaces
 
 
 TODO: programmatic locations
 
 lama overrides real gps, if they conflict then lama is used
   TODO: edit lama to have reference frames
-
-Lowest allowed point = 20
-Highest allowed point = 75
-how tall is the farm?
-  8 blocks for the tree part (stackable)
-  4 for the trench (not stackable)
-  3 block high for the water slide and chests and things
-  if I stack it then part doesn't need to be replicated
-    do I need multiple sapling catchers/movers?
-      depends if the leaves keep catching them
-        might be able to mitigate by always chopping from the bottom of the farm
-      I might want to remove the inner most tree line too
-  might be able to stack them upto 5 or 6 times
-size = 14*5*2 = 140
-time taken to cut one tree = 10
-time taken to clear farm = 1400
-30 mins in seconds = 30 * 60 = 1800
 
 max logs per tree = 6
   low roof prevents branches
@@ -127,18 +90,20 @@ TODO: Allow a chest for placing build items
   may need two so that the turtle can sort
 
 Required items list
-  1406 packed ice
-  8 furnace
-  2 water bucket
-  140 jack o'lantern
-  140 dirt
-  10 chest
-  9999? stone or cobblestone (mixing is fine)
-  2 hopper
-  12 torch
-  32 fence post
+  1 computer (advanced or not) TODO: add to itemIds
+  1 advanced monitor TODO: add to itemIds
+  180 packed ice
+  2 furnace
+  2 water bucket (buckets returned)
+  36 jack o'lantern
+  36 dirt
+  8 chest
+  1260? stone, cobblestone, moon turf, moon dirt, or moon rock (mixing is fine) TODO: confirm quantity
+  1 hopper
   2 wireless modem
-  2 turtle
+  4 wired modems (in block form) TODO: add to itemIds
+  12? modem cable TODO: add to itemIds TODO: confirm quantity
+  1 turtle (advanced or not)
   1 diamond pickaxe
   1 oak sapling (more is better)
-  A bunch of fuel for the turtles - not sure how much yet
+  A bunch of fuel for the turtle - not sure how much yet

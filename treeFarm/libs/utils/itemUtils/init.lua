@@ -1,6 +1,8 @@
 local itemIds = require("treeFarm.libs.utils.itemUtils.itemIds")
 -- TODO: reimplement various utilities using the other utilities
 
+-- TODO: allow plethora to use this
+
 -- internal utility
 local function itemIdArgCheck(itemIdArg, argPosition)
   argChecker(2, argPosition, {"number"}, 2)
