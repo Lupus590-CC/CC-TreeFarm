@@ -20,7 +20,7 @@ end
 
 
 
--- TODO: furnace manager watchdog for if the furnace manager forwards an error to us
+-- TODO: arm manager watchdog for if the farm manager forwards an error to us
 local function farmerWatchdog()
   -- listen for specific rednet messages
   -- mark the screen if one such message is recived

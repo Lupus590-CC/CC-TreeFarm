@@ -6,6 +6,8 @@ local task = require("treeFarm.libs.taskManager")
 
 -- TODO: first pair with remote and then mark out farm
 
+-- TODO: make this a semi-intelligent 3d printer?
+
 local function placeTreePodium() -- TODO: fuel checks
   -- if fuel level is less than 20 + reserve then abort -- NOTE: don't worry, should never happen
 
@@ -38,6 +40,7 @@ local function placeTreePodium() -- TODO: fuel checks
   utils.itemUtils.selectItemByIdOrEmptySlot(itemIds.dirt)
   turtle.place()
 
+  -- TODO: skip roof here and do later?
   -- place height cap (prevent trees growing too big)
   for i = 1, 6 do
     turtle.up()

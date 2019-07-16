@@ -8,6 +8,24 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 
 -- TODO: inventory checks
 
+local function dumpInv()
+  itemUtils.forEachSlotWithItem(itemIds.log, function() turtle.dropDown() end)
+  -- merge sapling stacks
+  itemUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.transferTo(1) end) -- TODO: test this where the first slot is not saplings or is saplings and full
+  -- and dump excess saplings
+  turtle.select(1)
+  local skippedFirst = false
+  local function skipFirst()
+    if skippedFirst then
+      return true
+    end
+    skippedFirst = true
+    return false
+  end
+  itemUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.dropDown() end, skipFirst)
+end
+
+
 local function chopTree() -- TODO: fuel checks - use implied fuel checks?
   -- TODO: what if we fill our inventory with wood?
     -- just call the empty function, it doesn't matter if we don't empty everything and fill up again quickly, we can empty anywere and let the water catch it
@@ -58,7 +76,6 @@ checkpoint.add("chopTree", chopTree)
 
 local function doTreeLine()
   -- TODO: fuel checks and unloading
-  -- NOTE: breaking leaves can put saplings into the turtle
   local atEndOfLine = false
   repeat
     while turtle.forward() do
@@ -69,22 +86,29 @@ local function doTreeLine()
         checkpoint.reach("chopTree")
         chopTree()
       elseif blockId.name == itemIds.leaves.name then
+        itemUtils.selectItemByIdOrEmptySlot(itemIds.sapling)
+        -- breaking leaves can put saplings into the turtle
         turtle.dig()
       else
-        atEndOfLine = true -- TODO: use a bounding box
+        atEndOfLine = true
       end
     end
   until atEndOfLine
+  checkpoint.reach("chopAllTrees")
+end
+checkpoint.add("doTreeLine", doTreeLine)
+
+-- TODO: how to do this unload safe?
+local function moveToNextTreeLine()
+
 end
 
-function updateTreePositions()
-  -- if pulled event is a notification then
-    -- read the file (could I just pass the new table via the event?)
+local function chopAllTrees()
+  -- TODO: implement
 end
+checkpoint.add("chopAllTrees", chopAllTrees)
 
--- TODO: move to next line
 
--- TODO: detect full inventory and dropoff
 
 
 -- TODO: restock
@@ -92,7 +116,7 @@ end
 
 
 local function run()
-  -- TODO: pcall things and for any uncaught errors, stop and spin, when the remote connects message the error
+  -- TODO: pcall things and for any uncaught errors, message the furnace manager
 end
 
 local farmManager = {

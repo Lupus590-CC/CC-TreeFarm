@@ -99,6 +99,7 @@ local function selectItemByIdWithFreeSpaceOrEmptySlot(itemId, allowFullSlots)
 end
 
 -- items which give more fuel than targetFuelValue are not eligible
+-- TODO: change how refueling works entirely to not use wood and only use saplings when given permission from the furnace manager
 local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #homeOnly
   -- TODO: add an argument to skip saplings?
   argChecker(1, targetFuelValue, {"number", "nil"})

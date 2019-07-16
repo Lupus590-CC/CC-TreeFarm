@@ -16,8 +16,7 @@ end
 
 
 
--- TODO: identify computer type and launch correct part of program
--- ask user instead?
+
 if pocket then
   require("treeFarm.remote").run()
 elseif turtle then -- If furnace manager is a normal computer than this will change
@@ -29,7 +28,7 @@ elseif turtle then -- If furnace manager is a normal computer than this will cha
 
   local function hasPickaxe()
     -- TODO: try peripheral.getType #homeOnly
-    -- make sure to keep the modem if it's found
+    -- make sure to keep the modem attached
     return false
   end
 
@@ -41,11 +40,9 @@ elseif turtle then -- If furnace manager is a normal computer than this will cha
       -- TODO: mark as built
     end
 
-  else
-    -- launch furnace program
-    local furnaceManager = require("treeFarm.furnaceManager")
-    local furnaceManager.run()
   end
 else
-  error("program is not compatible with this device", 0)
+  -- launch furnace program
+  local furnaceManager = require("treeFarm.furnaceManager")
+  local furnaceManager.run()
 end
