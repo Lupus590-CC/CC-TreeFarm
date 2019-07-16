@@ -5,6 +5,8 @@ TODO: second turtle restock chest
 
 usesful reference: https://squiddev-cc.github.io/plethora/methods.html
 https://tweaked.cc/
+https://wiki.computercraft.cc/Main_Page
+http://www.computercraft.info/wiki/Main_Page
 
 torches instead of jackolanterns?
     put on the side to block the turtle going down to detect absent sapling?
