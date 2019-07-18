@@ -27,7 +27,7 @@ end
 
 
 local function chopTree() -- TODO: fuel checks - use implied fuel checks?
-
+  -- TODO: equip pickaxe (could have block scanner equiped)
   local hasBlock, blockId = turtle.inspect()
   while hasBlock and blockId.name == itemIds.log.name then
     hasBlock, blockId = turtle.inspectUp()
@@ -70,6 +70,8 @@ checkpoint.add("chopTree", chopTree)
 -- scan for trees and missing saplings
 local function scanForWork()
   -- TODO: implement
+
+  -- move to center of chunk (scanner range limitation means we need to be in the center)
 
   -- if we detect a tree then we go to it and chop it
 
