@@ -27,8 +27,6 @@ end
 
 
 local function chopTree() -- TODO: fuel checks - use implied fuel checks?
-  -- TODO: what if we fill our inventory with wood?
-    -- just call the empty function, it doesn't matter if we don't empty everything and fill up again quickly, we can empty anywere and let the water catch it
 
   local hasBlock, blockId = turtle.inspect()
   while hasBlock and blockId.name == itemIds.log.name then
@@ -65,64 +63,44 @@ local function chopTree() -- TODO: fuel checks - use implied fuel checks?
     turtle.place()
   end
 
-  hasBlock, blockId = turtle.inspect()
-  if blockId.name == itemIds.sapling.name then -- TODO: what if we didn't place the sapling? move this to do tree line?
-    turtle.up()
-  end
-
-  checkpoint.reach("doTreeLine")
+  checkpoint.reach("scanForWork")
 end
 checkpoint.add("chopTree", chopTree)
 
-local function doTreeLine()
-  -- TODO: fuel checks and unloading
-  local atEndOfLine = false
-  repeat
-    while turtle.forward() do
-    end
-    local hasBlock, blockId = turtle.inspect()
-    if hasBlock then
-      if blockId.name == itemIds.log.name then
-        checkpoint.reach("chopTree")
-        chopTree()
-      elseif blockId.name == itemIds.leaves.name then
-        itemUtils.selectItemByIdOrEmptySlot(itemIds.sapling)
-        -- breaking leaves can put saplings into the turtle
-        turtle.dig()
-      else
-        atEndOfLine = true
-      end
-    end
-  until atEndOfLine
-  checkpoint.reach("chopAllTrees")
-end
-checkpoint.add("doTreeLine", doTreeLine)
-
--- TODO: how to do this unload safe?
-local function moveToNextTreeLine()
-
-end
-
-local function chopAllTrees()
+-- scan for trees and missing saplings
+local function scanForWork()
   -- TODO: implement
+
+  -- if we detect a tree then we go to it and chop it
+
+  -- if we detect a missing sapling then we go to plant it
+
+  -- if saplings or fuel looks low then restock
 end
-checkpoint.add("chopAllTrees", chopAllTrees)
+checkpoint.add("scanForWork", scanForWork)
 
+local function restock()
+  -- TODO: implement
 
+  -- dump inventory first?
 
+  -- go to chests
 
--- TODO: restock
+  -- grab saplings -- TODO: how do we diffienciate which chest is the fule and which is the saplings?
 
+  -- grab fuel and refuel aggressivly
+end
 
 
 local function run()
   -- TODO: pcall things and for any uncaught errors, message the furnace manager
+  -- run checkpoint
 end
 
 local farmManager = {
   chopTree = chopTree,
-  doTreeLine = doTreeLine,
-  updateTreePositions = updateTreePositions,
+  scanForWork = scanForWork,
+  restocl = restock,
   run = run,
 }
 

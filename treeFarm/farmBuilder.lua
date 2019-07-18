@@ -11,7 +11,7 @@ local task = require("treeFarm.libs.taskManager")
 local function placeTreePodium() -- TODO: fuel checks
   -- if fuel level is less than 20 + reserve then abort -- NOTE: don't worry, should never happen
 
-  -- TODO: make unload safe
+  -- TODO: make unload safe?
 
   -- move check to before? this func is called?
   if not (utils.itemUtils.selectItemById(itemIds.dirt)
@@ -56,28 +56,32 @@ local function placeTreePodium() -- TODO: fuel checks
   utils.itemUtils.selectItemByIdOrEmptySlot(itemIds.cobblestone)
   -- even if we placed stone it will be cobble when we dig it
   turtle.dig()
-
-
-
-
-  --TODO: send message that location is built
-  -- not needed if single turtle (which is starting to sound like the better idea)
   utils.rednetutils.sendToServer({messageType="build", built="podium",
   loc=table.pack(lama.getLocation())})
-
-  -- TODO: update bounding box
-
 end
 
-local function updateTreePositions()
-  -- write to file
-  -- queue event
+local function placeWater()
+  -- TODO: implement
+  itemUtils.selectItemById(itemIds.waterBucket)
+  turtle.placeDown()
+  turtle.forward()
+  turtle.forward()
+  while true do
+    itemUtils.selectItemById(itemIds.waterBucket)
+    turtle.placeDown()
+    turtle.back()
+    itemUtils.selectItemById(itemIds.bucket)
+    turtle.placeDown() -- refill the bucket with the infinite water we just made
+    turtle.forward()
+    if not turtle.forward() then -- if we can't go forward then we are finished
+      return
+    end
+  end
 end
 
--- TODO: build while waiting for things to grow
--- arguably maintaining the farm and building a podium are different Hive tasks
-
--- when building the water ways, make sure that the boundry has a wall, we don't want the water flowing the wrong way
+local function placeStaticBlocks()
+  -- TODO: implement
+end
 
 
 local function run()
@@ -86,7 +90,6 @@ end
 
 local farmBuilder = {
   placeTreePodium = placeTreePodium,
-  updateTreePositions = updateTreePositions,
   run = run,
 }
 

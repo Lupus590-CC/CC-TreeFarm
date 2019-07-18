@@ -8,11 +8,9 @@ https://tweaked.cc/
 https://wiki.computercraft.cc/Main_Page
 http://www.computercraft.info/wiki/Main_Page
 
-torches instead of jackolanterns?
-    put on the side to block the turtle going down to detect absent sapling?
-
 to make use of the block sensor the farmer could swap out the pickaxe and swap back as needed
   if we want big trees then I need to use it to detect lone logs instead of tree trunks
+  NOTE: what is the range of the scanner? #homeOnly
 
 use one of those schematic builders?
 
@@ -23,17 +21,6 @@ neual interface for status updates
 allow the moon turf instead of cobble
 
 can saplings be planted on moon turf? no
-
-NOTE: important notes #veryHigh
-can redesign farm
-  change size?
-can also use plethora stuff
-  block sensor
-  entity sensor for saplings?
-  laser gun instead of pickaxe?
-    requires enchant, enchants are not allowed in a thinking pack
-
-just build all in ne go? it will be a lot easier
 
 TODO: try out unit testing stuff #homeOnly #high
   write tests for checkpoint
