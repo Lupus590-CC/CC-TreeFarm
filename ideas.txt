@@ -1,7 +1,9 @@
 TODO: organise this file
 
-TODO: second turtle restock chest
-  one for saplings one for fuel
+second turtle restock chest?
+  one for saplings one for fuel?
+  no, turtle should be able to wrap the chest to get what it needs
+    if not then the furnace manager could always keep only a few of each item in there
 
 usesful reference: https://squiddev-cc.github.io/plethora/methods.html
 https://tweaked.cc/

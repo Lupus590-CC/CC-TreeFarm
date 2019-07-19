@@ -4,6 +4,8 @@
   -- still have multiple farming turtles?
 
  -- TODO: take from config
+ -- multiple server names? remote has one and the furnace has one?
+ -- turtle and furnace manager pair like bluetooth
 local serverName = "lupus590TreeFarm"
 local protocolName = "lupus590TreeFarm"
 

@@ -61,7 +61,6 @@ local function placeTreePodium() -- TODO: fuel checks
 end
 
 local function placeWater()
-  -- TODO: implement
   itemUtils.selectItemById(itemIds.waterBucket)
   turtle.placeDown()
   turtle.forward()

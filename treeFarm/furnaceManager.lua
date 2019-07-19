@@ -5,11 +5,11 @@ local itemIds = itemUtils.itemIds
 local daemonManager = require("treeFarm.libs.daemonManager")
 local config = require("treeFarm.libs.config")
 local taskManager = require("treeFarm.libs.taskManager")
+local checkpoint = require("treeFarm.libs.checkpoint")
 
 -- TODO: with plethora the furnace manager could be a computer
 
--- TODO: how to diffienciate input from output and locate the turtle restock chests
--- will have to ask the user
+
 
 local function fuelValueForFurnace(turtleFuelValue)
   argChecker(1, turtleFuelValue, {"number"})
@@ -17,10 +17,14 @@ local function fuelValueForFurnace(turtleFuelValue)
 end
 
 
+local function init()
+  -- TODO: how to diffienciate input from output and locate the turtle restock chests
+  -- will have to ask the user
+  -- ask user to put unique item into each chest and to label them
+end
 
 
-
--- TODO: arm manager watchdog for if the farm manager forwards an error to us
+-- TODO: farm manager watchdog for if the farm manager forwards an error to us
 local function farmerWatchdog()
   -- listen for specific rednet messages
   -- mark the screen if one such message is recived
