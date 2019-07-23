@@ -42,6 +42,8 @@ local function dumpInv()
 
   }
 
+
+  -- TODO: dump excess of stack
   -- dump junk
   local function keepThis()
     local _, currentItem = turtle.getItemDetail()

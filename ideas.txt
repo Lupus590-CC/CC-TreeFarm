@@ -1,5 +1,7 @@
 TODO: organise this file
 
+NOTE: pickaxe doesn't show up when equipped and scanner has a different name
+
 second turtle restock chest?
   one for saplings one for fuel?
   no, turtle should be able to wrap the chest to get what it needs

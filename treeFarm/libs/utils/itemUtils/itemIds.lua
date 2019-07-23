@@ -9,9 +9,9 @@ local itemIds = {
   log = { name = "minecraft:log", damage = 0, fuelValue = 15,
     maxStackSize = 64, },
   wirelessModem = { name = "ComputerCraft:CC-Peripheral", damage = 1,
-    maxStackSize = 64, },
+    maxStackSize = 64, equippedName = "modem"},
   diamondPickaxe = { name = "minecraft:diamond_pickaxe", damage = 0,
-    maxStackSize = 1, },
+    maxStackSize = 1, }, -- why doesn't this have an equip name?!?!?
   chest = { name = "minecraft:chest", damage = 0, maxStackSize = 64, },
   torch = { name = "minecraft:torch", damage = 0, maxStackSize = 64, },
   furnace = { name = "minecraft:furnace", damage = 0, maxStackSize = 64, },
@@ -38,7 +38,7 @@ local itemIds = {
   moonDirt = { name = "galacticraftcore:basic_block_moon", damage = 3, maxStackSize = 64, },
   moonTurf = { name = "galacticraftcore:basic_block_moon", damage = 5, maxStackSize = 64, },
   moonRock = { name = "galacticraftcore:basic_block_moon", damage = 4, maxStackSize = 64, },
-  blockScanner = { name = "plethora:scanner", damage = 0, maxStackSize = 64, }, -- TODO: check this #homeOnly
+  blockScanner = { name = "plethora:module", damage = 2, maxStackSize = 64, equippedName = "plethora:scanner"},
 }
 
 for k, v in pairs(itemIds) do
