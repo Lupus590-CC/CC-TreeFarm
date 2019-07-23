@@ -20,7 +20,7 @@ local itemIds = {
   packedIce = { name = "minecraft:packed_ice", damage = 0, maxStackSize = 64, },
   waterBucket = { name = "minecraft:water_bucket", damage = 0,
     maxStackSize = 1, },
-  tone = { name = "minecraft:stone", damage = 0, maxStackSize = 64 },
+  stone = { name = "minecraft:stone", damage = 0, maxStackSize = 64 },
   cobblestone = { name = "minecraft:cobblestone", damage = 0,
     maxStackSize = 64, },
   coalCoke = { name = "Railcraft:fuel.coke", damage = 0, fuelValue = 160,
@@ -38,6 +38,7 @@ local itemIds = {
   moonDirt = { name = "galacticraftcore:basic_block_moon", damage = 3, maxStackSize = 64, },
   moonTurf = { name = "galacticraftcore:basic_block_moon", damage = 5, maxStackSize = 64, },
   moonRock = { name = "galacticraftcore:basic_block_moon", damage = 4, maxStackSize = 64, },
+  blockScanner = { name = "plethora:scanner", damage = 0, maxStackSize = 64, }, -- TODO: check this #homeOnly
 }
 
 for k, v in pairs(itemIds) do

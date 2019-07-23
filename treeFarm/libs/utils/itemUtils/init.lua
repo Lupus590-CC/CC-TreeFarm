@@ -1,7 +1,7 @@
 local itemIds = require("treeFarm.libs.utils.itemUtils.itemIds")
--- TODO: reimplement various utilities using the other utilities
 
 -- TODO: allow plethora to use this
+
 
 -- internal utility
 local function itemIdArgCheck(itemIdArg, argPosition)
@@ -34,48 +34,102 @@ setmetatable(reverseItemLookup, {
   end
 })
 
+local function forEachSlot(func, stopFunc)
+  argChecker(1, func, {"function"})
+  argChecker(2, stopFunc, {"function", "nil"})
+
+  for i = 1, 16 do
+    if stopFunc and stopFunc() then
+      return
+    end
+    turtle.select(i)
+    func(i)
+  end
+end
+
+local function forEachSlotSkippingEmpty(func, stopFunc)
+  argChecker(1, func, {"function"})
+  argChecker(2, stopFunc, {"function", "nil"})
+
+  local f = function(slotId)
+    if turtle.getItemCount() > 0 then
+      func(slotId)
+    end
+  end
+
+  forEachSlot(f, stopFunc)
+end
+
+local function itemEqualityComparer(itemId1, itemId2)
+  itemIdArgCheck(itemId1,1)
+  itemIdArgCheck(itemId2,2)
+  if itemId1.name == itemId2.name and itemId1.damage == itemId2.damage then
+    return true
+  end
+  return false
+end
+
+local function forEachSlotWithItem(itemId, func, extentionCriteria, stopFunc)
+  itemIdArgCheck(itemId,1)
+  argChecker(2, func, {"function"})
+  argChecker(3, extentionCriteria, {"function", "nil"})
+  extentionCriteria = extentionCriteria or function() return true end
+  argChecker(4, stopFunc, {"function", "nil"})
+
+
+  local f = function(slotId)
+    local currentItem = turtle.getItemDetail()
+    if type(currentItem) == "table"
+      and itemEqualityComparer(currentItem, itemId)
+      and extentionCriteria(slotId, currentItem)
+    then
+      func(slotId, currentItem)
+    end
+  end
+
+  forEachSlotSkippingEmpty(f, stopFunc)
+end
+
 local function selectItemById(itemId, extentionCriteria)
   itemIdArgCheck(itemId,1)
   argChecker(2, extentionCriteria, {"function", "nil"})
   extentionCriteria = extentionCriteria or function() return true end
 
-  local function checkCurrectItem()
-    local currentItem = turtle.getItemDetail()
-    if type(currentItem) == "table" and currentItem.name == itemId.name
-    and currentItem.damage == itemId.damage and extentionCriteria(currentItem)
-    then
-      return true
-    end
-    return false
-  end
-
   -- if the current slot has it don't bother searching
-  if checkCurrectItem() then
+  local currentItem = turtle.getItemDetail()
+  if type(currentItem) == "table"
+    and itemEqualityComparer(currentItem, itemId)
+  then
     return true
   end
 
-  for i = 1, 16 do
-    turtle.select(i)
-    if checkCurrectItem() then
-      return true
-    end
+  local stop = false
+  local stopFunc = function() return stop end
+  local func = function() stop = true end
+
+  forEachSlotWithItem(itemId, func, extentionCriteria, stopFunc)
+end
+
+local function currentSlotIsEmpty()
+  if turtle.getItemCount() == 0 then
+    return true
   end
   return false
 end
 
 local function selectEmptySlot()
   -- if the current slot is empty don't bother searching
-  if turtle.getItemCount() == 0 then
-    return true
+  currentSlotIsEmpty()
+
+  local stop = false
+  local stopFunc = function() return stop end
+  local func = function()
+    if currentSlotIsEmpty() then
+      stop = true
+    end
   end
 
-  for i = 1, 16 do
-      turtle.select(i)
-      if turtle.getItemCount() == 0 then
-        return true
-      end
-  end
-  return false
+  forEachSlot(func, stopFunc)
 end
 
  -- by default full slots are not deemed valid for selection
@@ -83,7 +137,6 @@ local function selectItemByIdWithFreeSpaceOrEmptySlot(itemId, allowFullSlots)
   itemIdArgCheck(itemId,1)
   argChecker(2, allowFullSlots, {"boolean", "nil"})
 
-  local vetoFullSlots = nil
 
   -- if the stack is full then don't select it (when we call
       -- selectItemByIdOrEmptySlot we are likely wanting to dig something)
@@ -142,44 +195,6 @@ local function countItemQuantityById(itemId)
   return count
 end
 
-local function forEachSlot(func)
-  argChecker(1, func, {"function"})
-
-  for i = 1, 16 do
-    turtle.select(i)
-    func(i)
-  end
-end
-
-local function forEachSlotSkippingEmpty(func)
-  argChecker(1, func, {"function"})
-
-  local f = function(slotId)
-    if turtle.getItemCount() > 0 then
-      func(slotId)
-    end
-  end
-
-  forEachSlot(f)
-end
-
-local function forEachSlotWithItem(itemId, func, extentionCriteria)
-  itemIdArgCheck(itemId,1)
-  argChecker(1, func, {"function"})
-  argChecker(2, extentionCriteria, {"function", "nil"})
-  extentionCriteria = extentionCriteria or function() return true end
-
-  local f = function(slotId)
-    local currentItem = turtle.getItemDetail()
-    if type(currentItem) == "table" and currentItem.name == itemId.name
-    and currentItem.damage == itemId.damage and extentionCriteria(slotId, currentItem)
-    then
-      func(slotId, currentItem)
-    end
-  end
-
-  forEachSlotSkippingEmpty(f)
-end
 
 local function getFreeSpaceCount()
   local count = 0
@@ -187,19 +202,39 @@ local function getFreeSpaceCount()
   return 16 - count
 end
 
+-- implicitly preserves the wireless modem
+local function equipItemWithId(itemId)
+  -- will peripheral.getType(side:string):string tell me that there is a pickaxe on that side?
+  -- TODO: check currently equipped peripherals
+  if alreadyEquiped then
+    return true, "already equipped"
+  end
+  if selectItemById(itemId) then
+    -- TODO: find non-modem side and equip to that side
+    if equipped then
+      return true, "equipped"
+    else
+      return false, "can't equip that"
+    end
+  end
+  return false, "couldn't find that"
+end
+
 local itemUtils = {
   itemIds = itemIds,
   reverseItemLookup = reverseItemLookup,
+  forEachSlot = forEachSlot,
+  forEachSlotSkippingEmpty = forEachSlotSkippingEmpty,
+  itemEqualityComparer = itemEqualityComparer,
+  forEachSlotWithItem = forEachSlotWithItem,
   selectItemById = selectItemById,
+  currentSlotIsEmpty = currentSlotIsEmpty,
   selectEmptySlot = selectEmptySlot,
   selectItemByIdWithFreeSpaceOrEmptySlot = selectItemByIdWithFreeSpaceOrEmptySlot,
   selectBestFuel = selectBestFuel,
   countItemQuantityById = countItemQuantityById,
-  forEachSlot = forEachSlot,
-  forEachSlotSkippingEmpty = forEachSlotSkippingEmpty,
-  forEachSlotWithItem = forEachSlotWithItem,
   getFreeSpaceCount = getFreeSpaceCount,
-
+  equipItemWithId = equipItemWithId,
 
 }
 

@@ -5,6 +5,9 @@ local itemUtils = require("treeFarm.libs.utils.itemUtils")
 local itemIds = itemUtils.itemIds
 local checkpoint = require("treeFarm.libs.checkpoint")
 
+-- 1,1,1 is the restock chest
+-- 3,0,3 first tree
+-- 13,0,13 last tree
 
 -- TODO: inventory checks
 
@@ -23,6 +26,38 @@ local function dumpInv()
     return false
   end
   itemUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.dropDown() end, skipFirst)
+
+  local keepItems = {
+    itemId.charcoal,
+    itemId.coal,
+    itemId.log,
+    itemId.wirelessModem,
+    itemId.diamondPickaxe,
+    itemId.coalCoke,
+    itemId.coalCokeBlock,
+    itemId.lavaBucket,
+    itemId.coalBlock,
+    itemId.sapling,
+    itemId.blockScanner,
+
+  }
+
+  -- dump junk
+  local function keepThis()
+    local _, currentItem = turtle.getItemDetail()
+    for k, v in pairs(keepItems) do
+      if itemUtils.itemEqualityComparer(currentItem, v) then
+        return true
+      end
+    end
+    return false
+  end
+
+  itemUtils.forEachSlotSkippingEmpty(function(_)
+    if not keepThis() then
+       turtle.dropDown()
+    end
+  end)
 end
 
 
