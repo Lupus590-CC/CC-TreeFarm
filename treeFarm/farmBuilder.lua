@@ -12,13 +12,12 @@ local function placeTreePodium() -- TODO: fuel checks
   -- if fuel level is less than 20 + reserve then abort -- NOTE: don't worry, should never happen
 
   -- TODO: make unload safe?
+  -- hard to do, can we use coord and y level?
 
   -- move check to before? this func is called?
   if not (utils.itemUtils.selectItemById(itemIds.dirt)
   and utils.itemUtils.selectItemById(itemIds.jackOLantern)
-  and (utils.itemUtils.selectItemById(itemIds.cobblestone)
-  or utils.itemUtils.selectItemById(itemIds.stone)
-  and utils.itemUtils.selectEmptySlot()))
+  and utils.itemUtils.selectScaffoldBlock())
   then
     return false, "bad inventory" -- TODO: let caller sort out stocking?
   end
@@ -28,8 +27,7 @@ local function placeTreePodium() -- TODO: fuel checks
   turtle.back() -- current location is where we need to build
 
 
-  local _ = utils.itemUtils.selectItemById(itemIds.cobblestone)
-  or utils.itemUtils.selectItemById(itemIds.stone)
+  local _ = utils.itemUtils.selectScaffoldBlock()
   turtle.place()
 
   turtle.up()
@@ -40,24 +38,15 @@ local function placeTreePodium() -- TODO: fuel checks
   utils.itemUtils.selectItemByIdOrEmptySlot(itemIds.dirt)
   turtle.place()
 
-  -- TODO: skip roof here and do later?
-  -- place height cap (prevent trees growing too big)
-  for i = 1, 6 do
-    turtle.up()
-  end
-  local _ = utils.itemUtils.selectItemById(itemIds.stone)
-  or utils.itemUtils.selectItemById(itemIds.cobblestone)
-  turtle.place()
-
-  --TODO: replace with go down until stone or cobblestone found
-  for i = 1, 8 do
+  local _, item = turtle.inspect()
+  while itemUtils.itemEqualityComparer(item, itemIds.dirt)
+    or itemUtils.itemEqualityComparer(item, itemIds.jackOLantern) do
     turtle.down()
   end
-  utils.itemUtils.selectItemByIdOrEmptySlot(itemIds.cobblestone)
-  -- even if we placed stone it will be cobble when we dig it
+
+  _, item = turtle.inspect()
+  utils.itemUtils.selectForDigging(item)
   turtle.dig()
-  utils.rednetutils.sendToServer({messageType="build", built="podium",
-  loc=table.pack(lama.getLocation())})
 end
 
 local function placeWater()
@@ -80,6 +69,7 @@ end
 
 local function placeStaticBlocks()
   -- TODO: implement
+  -- layers?
 end
 
 
@@ -89,6 +79,7 @@ end
 
 local farmBuilder = {
   placeTreePodium = placeTreePodium,
+  placeWater = placeWater,
   run = run,
 }
 

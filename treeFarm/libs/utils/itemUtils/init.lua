@@ -133,22 +133,16 @@ local function selectEmptySlot()
 end
 
  -- by default full slots are not deemed valid for selection
-local function selectItemByIdWithFreeSpaceOrEmptySlot(itemId, allowFullSlots)
+local function selectForDigging(itemId)
   itemIdArgCheck(itemId,1)
-  argChecker(2, allowFullSlots, {"boolean", "nil"})
 
-
-  -- if the stack is full then don't select it (when we call
-      -- selectItemByIdOrEmptySlot we are likely wanting to dig something)
-  local function vetoFullSlotsFunc(currentItem)
-    return not reverseItemLookup(currentItem).maxStackSize == currentItem.count
+  item = reverseItemLookup(item)
+  if item.digsInto then
+    item = item.digsInto
+    -- stone turns into cobble when we dig it
   end
 
-  if allowFullSlots then
-    vetoFullSlotsFunc = nil
-  end
-
-  return selectItemById(selectItemById, vetoFullSlotsFunc) or selectEmptySlot()
+  return selectItemById(selectItemById) or selectEmptySlot()
 end
 
 -- items which give more fuel than targetFuelValue are not eligible
@@ -220,6 +214,46 @@ local function equipItemWithId(itemId)
   return false, "couldn't find that"
 end
 
+local function selectByTagPriority(tag)
+  local validBlocks = {}
+  for _, v in pairs(itemIds) do
+    if v[tag] then
+      validBlocks[v[tag]] = 0
+    end
+  end
+  local func = function(slotNumber)
+    local _, item = turtle.getItemDetail()
+    local reversedItem = reverseItemLookup(item)
+    if reversedItem[tag] then
+      validBlocks[reversedItem[tag]] = slotNumber
+    end
+  end
+
+  forEachSlotSkippingEmpty(func)
+
+  local bestSlot;
+  for _, slotNumber in ipairs(validBlocks) do
+    if slotNumber > 0 then
+      bestSlot = slotNumber
+      break;
+    end
+  end
+  if bestSlot then
+    turtle.select(bestSlot)
+    return true
+  else
+    return false
+  end
+end
+
+local function selectScaffoldBlock()
+  return selectByTagPriority("scaffoldBlock")
+end
+
+local function selectBuildingBlock()
+  return selectByTagPriority("buildingBlock")
+end
+
 local itemUtils = {
   itemIds = itemIds,
   reverseItemLookup = reverseItemLookup,
@@ -230,11 +264,14 @@ local itemUtils = {
   selectItemById = selectItemById,
   currentSlotIsEmpty = currentSlotIsEmpty,
   selectEmptySlot = selectEmptySlot,
-  selectItemByIdWithFreeSpaceOrEmptySlot = selectItemByIdWithFreeSpaceOrEmptySlot,
+  selectForDigging = selectForDigging,
   selectBestFuel = selectBestFuel,
   countItemQuantityById = countItemQuantityById,
   getFreeSpaceCount = getFreeSpaceCount,
   equipItemWithId = equipItemWithId,
+  selectByTagPriority = selectByTagPriority,
+  selectScaffoldBlock = selectScaffoldBlock,
+  selectBuildingBlock = selectBuildingBlock,
 
 }
 
