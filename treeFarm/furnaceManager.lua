@@ -19,6 +19,10 @@ end
 -- NOTE: don't fill the turtle refuel chest, just keep a stack of both items in there.
 
 local function init()
+  -- link to the turtle
+
+  -- discover chests
+
   -- TODO: how to diffienciate input from output and locate the turtle restock chests
   -- will have to ask the user
   -- ask user to put unique item into each chest and to label them
