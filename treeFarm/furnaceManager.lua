@@ -22,6 +22,8 @@ local function init()
   -- TODO: how to diffienciate input from output and locate the turtle restock chests
   -- will have to ask the user
   -- ask user to put unique item into each chest and to label them
+
+  -- NOTE: i can tell automatically, get the turtle to drop and suck from the chests, the two that change in the right way are the refuel and drop off chests
 end
 
 local function emptyCollectionChest()
