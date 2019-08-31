@@ -23,7 +23,7 @@ local function init()
   -- will have to ask the user
   -- ask user to put unique item into each chest and to label them
 
-  -- NOTE: i can tell automatically, get the turtle to drop and suck from the chests, the two that change in the right way are the refuel and drop off chests
+  -- NOTE: i can tell automatically, get the turtle to drop and suck from the chests, the two that change in the right way are the refuel and drop off chests. the others are output
 end
 
 local function emptyCollectionChest()
