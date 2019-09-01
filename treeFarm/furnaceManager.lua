@@ -7,8 +7,11 @@ local config = require("treeFarm.libs.config")
 local taskManager = require("treeFarm.libs.taskManager")
 local checkpoint = require("treeFarm.libs.checkpoint")
 
-
+-- maps peripheral names
 local chestMap = {}
+local furnaces = {}
+local wirelessModem
+local monitor
 
 
 local function fuelValueForFurnace(turtleFuelValue)
@@ -19,15 +22,23 @@ end
 -- NOTE: don't fill the turtle refuel chest, just keep a stack of both items in there.
 
 local function init()
-  -- link to the turtle
+  -- check confog for peripheral map
 
-  -- discover chests
+  -- if nothing is mapped yet then
+    -- link to the turtle
 
-  -- TODO: how to diffienciate input from output and locate the turtle restock chests
-  -- will have to ask the user
-  -- ask user to put unique item into each chest and to label them
-
-  -- NOTE: i can tell automatically, get the turtle to drop and suck from the chests, the two that change in the right way are the refuel and drop off chests. the others are output
+    -- discover chests
+    local peripherals = peripheral.getNames()
+    -- filter names for chests
+    -- turtle drops 3 items
+    -- the chest which gains 3 items in the input chest
+    -- move one item to each other chest
+    -- the turtle sucks an item from the output chest
+    -- the chest now missing an item which is not the input chest is the refuel chest
+    -- every other chest is an output chest
+  -- else wrap the peripherals
+    -- where to put variable names for these wrapped peripherals?
+    -- have each function wrap its own?
 end
 
 local function emptyCollectionChest()
