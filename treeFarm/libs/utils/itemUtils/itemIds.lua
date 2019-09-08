@@ -1,4 +1,5 @@
 local itemIds = { -- TODO: remove non-charcoal fuels?
+-- TODO: save to file and allow override?
   dirt = { name = "minecraft:dirt", damage = 0, maxStackSize = 64 },
   jackOLantern = { name = "minecraft:lit_pumpkin", damage = 0, maxStackSize = 64, },
   charcoal = { name= "minecraft:coal", damage = 1, fuelValue = 80, maxStackSize = 64, },
