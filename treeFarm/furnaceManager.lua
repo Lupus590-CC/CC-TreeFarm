@@ -24,15 +24,39 @@ end
 local function init()
   -- check confog for peripheral map
 
-  -- if nothing is mapped yet then
-    -- link to the turtle
+  -- TODO: if nothing is mapped yet then
+
+  -- TODO: write on monitor to tell player to now open the chests
+
+    -- TODO: link to the turtle
 
     -- discover chests
     local peripherals = peripheral.getNames()
-    -- filter names for chests
-    -- turtle drops 3 items
-    -- the chest which gains 3 items in the input chest
-    -- move one item to each other chest
+    -- filter names for chests and get their initual state
+    local chestStates = {}
+    for _, peripheralName in pairs(peripheral) do
+      if string.find(peripheralName, "chest") then
+          chestStates[peripheralName] = peripheral.call(peripheralName, "list")
+      end
+    end
+
+    -- TODO: turtle drops 3 items
+    -- the chest which has different items in the input chest
+    for chestName, oldState in pairs(chestStates) do
+      local newState = peripheral.call(k, "list")
+      for slot, item in pairs(oldState) do
+        if newState[slot] ~= item then
+          chestMap.input = chestName
+          chestStates[chestName] = nil
+          break
+        end
+      end
+      if chestMap.input then -- early exit
+        break
+      end
+    end
+    -- TODO: move one item to each other chests
+
     -- the turtle sucks an item from the output chest
     -- the chest now missing an item which is not the input chest is the refuel chest
     -- every other chest is an output chest
