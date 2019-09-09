@@ -5,12 +5,12 @@ local itemIds = itemUtils.itemIds
 local daemonManager = require("treeFarm.libs.daemonManager")
 local config = require("treeFarm.libs.config")
 local taskManager = require("treeFarm.libs.taskManager")
-local checkpoint = require("treeFarm.libs.checkpoint")
+local checkpoint = require("treeFarm.libs.checkpoint") -- do I need this here? I could just parallel all of the functions
 
 -- maps peripheral names
 local chestMap = {}
 local furnaces = {}
-local wirelessModem
+local wirelessModem -- NOTE: should I move the wireless modemodem onto the computer or just upstairs?
 local monitor
 
 
@@ -30,7 +30,7 @@ local function init()
 
     -- TODO: link to the turtle
 
-    -- discover chests
+    -- discover peripherals
     local peripherals = peripheral.getNames()
     -- filter names for chests and get their initual state
     local chestStates = {}
@@ -39,6 +39,9 @@ local function init()
           chestStates[peripheralName] = peripheral.call(peripheralName, "list")
       end
     end
+
+    -- TODO: bind the non-chest peripherals
+    
 
     -- TODO: turtle drops 3 items
     -- the chest which has different items in the input chest
@@ -56,11 +59,10 @@ local function init()
       end
     end
     -- TODO: move one item to each other chests
-
     -- the turtle sucks an item from the output chest
     -- the chest now missing an item which is not the input chest is the refuel chest
     -- every other chest is an output chest
-  -- else wrap the peripherals
+  -- else wrap the peripherals from the config
     -- where to put variable names for these wrapped peripherals?
     -- have each function wrap its own?
 end
