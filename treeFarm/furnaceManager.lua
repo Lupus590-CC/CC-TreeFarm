@@ -41,14 +41,14 @@ local function init()
     end
 
     -- TODO: bind the non-chest peripherals
-    
+
 
     -- TODO: turtle drops 3 items
     -- the chest which has different items in the input chest
     for chestName, oldState in pairs(chestStates) do
-      local newState = peripheral.call(k, "list")
+      local newState = peripheral.call(chestName, "list")
       for slot, item in pairs(oldState) do
-        if newState[slot] ~= item then
+        if newState[slot] ~= item then -- TODO: item is a table, this will always fail
           chestMap.input = chestName
           chestStates[chestName] = nil
           break
@@ -62,6 +62,12 @@ local function init()
     -- the turtle sucks an item from the output chest
     -- the chest now missing an item which is not the input chest is the refuel chest
     -- every other chest is an output chest
+    chestMap.output = {}
+    for chestName in pairs(chestStates) do
+      table.insert(chestMap.output, chestName) -- TODO: can I virtually combine of the output chests like a RAID on several HDD
+      -- meta table methods on the chestMap.output table?
+      chestStates[chestName] = nil
+    end
   -- else wrap the peripherals from the config
     -- where to put variable names for these wrapped peripherals?
     -- have each function wrap its own?
