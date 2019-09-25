@@ -22,26 +22,39 @@ end
 -- NOTE: don't fill the turtle refuel chest, just keep a stack of both items in there.
 
 local function init()
-  -- check confog for peripheral map
+  -- check config for peripheral map
 
   -- TODO: if nothing is mapped yet then
 
-  -- TODO: write on monitor to tell player to now open the chests
 
-    -- TODO: link to the turtle
+
+
 
     -- discover peripherals
-    local peripherals = peripheral.getNames()
-    -- filter names for chests and get their initual state
+
+    -- bind the non-chest peripherals
+    monitor = peripheral.find("monitor") -- TODO: test this #homeOnly
+    wirelessModem = peripheral.find("modem", function(_, m) return m.isWireless() end) -- TODO: test this #homeOnly
+    furnaces = table.pack(peripheral.find("furnace")) -- TODO: test this #homeOnly
+
+    -- TODO: link to the turtle
+    monitor.clear()
+    monitor.write("Waiting to pair with turtle, pairing code: "..os.computerId()) -- TODO: test this #homeOnly
+
+
+
+    monitor.clear()
+    monitor.write("Please don't open the chests, chest mapping in progress")
+
+
+    -- filter names for chests and get their inital state
     local chestStates = {}
+    local peripherals = peripheral.getNames()
     for _, peripheralName in pairs(peripheral) do
       if string.find(peripheralName, "chest") then
           chestStates[peripheralName] = peripheral.call(peripheralName, "list")
       end
     end
-
-    -- TODO: bind the non-chest peripherals
-
 
     -- TODO: turtle drops 3 items
     -- the chest which has different items in the input chest
@@ -68,6 +81,11 @@ local function init()
       -- meta table methods on the chestMap.output table?
       chestStates[chestName] = nil
     end
+
+    -- TODO: update monitor to say that chest mapping is complete
+
+    -- TODO: save maps (only need to save chests, the others can be rediscovered on next load)
+
   -- else wrap the peripherals from the config
     -- where to put variable names for these wrapped peripherals?
     -- have each function wrap its own?
