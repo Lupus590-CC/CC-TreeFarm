@@ -9,7 +9,7 @@ local checkpoint = require("treeFarm.libs.checkpoint") -- do I need this here? I
 
 -- maps peripheral names
 local chestMapFile = ".chestMap"
-local chestMap = {}
+local chests = {}
 local furnaces = {}
 local wirelessModem -- NOTE: should I move the wireless modemodem onto the computer or just upstairs?
 local monitor
@@ -24,6 +24,7 @@ end
 
 local function init()
   -- check config for peripheral map
+  local chestMap = {}  -- NOTE: does plethora's item movement need peripheral names? if yes then this needs to be global to this file and it's not worth maintaining the chests table (or I could add a name item to the chests table?)
   local ok, data =  config.load(chestMapFile)
   if ok then
     timers = data
@@ -38,10 +39,10 @@ local function init()
 
   -- discover peripherals
 
-    -- bind the non-chest peripherals
-    monitor = peripheral.find("monitor") -- TODO: test this #homeOnly
-    wirelessModem = peripheral.find("modem", function(_, m) return m.isWireless() end) -- TODO: test this #homeOnly
-    furnaces = table.pack(peripheral.find("furnace")) -- TODO: test this #homeOnly
+  -- bind the non-chest peripherals
+  monitor = peripheral.find("monitor") -- TODO: test this #homeOnly
+  wirelessModem = peripheral.find("modem", function(_, m) return m.isWireless() end) -- TODO: test this #homeOnly
+  furnaces = table.pack(peripheral.find("furnace")) -- TODO: test this #homeOnly
 
 
 
@@ -73,7 +74,7 @@ local function init()
   end
 
   -- if nothing is mapped yet then start mapping
-  if not chestMap.input then
+  if (not chestMap.input) or (not chestMap.output) or (not chestMap.refuel) then
 
     monitor.clear()
     monitor.write("Please don't open the chests, chest mapping in progress")
@@ -88,9 +89,9 @@ local function init()
       end
     end
 
-    -- message the turtle to drop stuff
-    -- TODO: turtle drops 3 items
-    -- wait for turtle to say that it has dropped the stuff
+    -- TODO: message the turtle to drop stuff
+    -- TODO: wait for turtle to say that it has dropped the stuff
+    -- wait a few seconds for the items to get the chest
 
     -- the chest which has different items in the input chest
     for chestName, oldState in pairs(chestStates) do
@@ -106,11 +107,33 @@ local function init()
         break
       end
     end
-    -- TODO: move one item to each other chests
+    -- TODO: move one item to each of the other chests
 
 
-    -- the turtle sucks an item from the output chest
+    -- rescan the chest states
+    for chestName in pairs(chestStates) do
+      chestStates[chestName] = peripheral.call(chestName, "list")
+    end
+
+
+    -- TODO: message the turtle to remove an item from the refuel chest
+
     -- the chest now missing an item which is not the input chest is the refuel chest
+    for chestName, oldState in pairs(chestStates) do
+      local newState = peripheral.call(chestName, "list")
+      for slot, item in pairs(oldState) do
+        if newState[slot] ~= item then -- TODO: item is a table, this will always fail
+          chestMap.refuel = chestName
+          chestStates[chestName] = nil
+          break
+        end
+      end
+      if chestMap.refuel then -- early exit
+        break
+      end
+    end
+
+
     -- every other chest is an output chest
     chestMap.output = {}
     for chestName in pairs(chestStates) do
@@ -126,11 +149,19 @@ local function init()
     -- TODO: save maps (only need to save chests, the others can be rediscovered on next load)
     config.save(chestMapFile, chestMap)
 
-  else
-  -- else wrap the peripherals from the config
-    -- where to put variable names for these wrapped peripherals?
-    -- have each function wrap its own?
   end
+
+  -- wrap the chests
+  for chestRole, peripheralName in pairs(chestMap) do
+    if type(peripheralName) == "table" then
+      for k, v in pairs(chestMap) do
+        chests.output = peripheral.wrap(v)
+      end
+    else
+      chests[chestRole] = peripheral.wrap(peripheralName)
+    end
+  end
+
 end
 
 local function emptyCollectionChest()

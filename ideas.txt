@@ -69,6 +69,7 @@ Lost and found(including apples) and spare construction material chests
 if the system runs out of saplings then place more in the sapling chest
   saplings will get used as fuel for the turtles and furnaces with charcoal as a backup -- NOTE: this is not currently true
   what to do when the chests are full?
+    message the turtle to stop
 
 
 TODO: programmatic locations

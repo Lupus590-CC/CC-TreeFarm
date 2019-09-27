@@ -6,8 +6,8 @@
  -- TODO: take from config
  -- multiple server names? remote has one and the furnace has one?
  -- turtle and furnace manager pair like bluetooth
-local serverName = "lupus590TreeFarm"
-local protocolName = "lupus590TreeFarm"
+local serverName = "lupus590:TreeFarm"
+local protocolName = "lupus590:TreeFarm"
 
 local rednetUtils = {
   serverName = serverName,
