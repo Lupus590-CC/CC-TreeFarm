@@ -60,9 +60,10 @@ local function forEachSlotSkippingEmpty(func, stopFunc)
   forEachSlot(f, stopFunc)
 end
 
-local function itemEqualityComparer(itemId1, itemId2)
+local function itemEqualityComparer(itemId1, itemId2, testQuantity)
   itemIdArgCheck(itemId1,1)
   itemIdArgCheck(itemId2,2)
+  argChecker(3, testQuantity, {"boolean", "nil"})
   if itemId1.name == itemId2.name and itemId1.damage == itemId2.damage then
     return true
   end
@@ -154,18 +155,17 @@ local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #ho
 
   local bestFuelSlot
   local bestFuelValue = 0
-  for i = 1, 16 do -- TODO: use forEachSlotSkippingEmpty?
-      turtle.select(i)
-      local currentItem = turtle.getItemDetail()
-      if type(currentItem) == "table"
-      and reverseItemLookup(currentItem).fuelValue
-      and reverseItemLookup(currentItem).fuelValue > bestFuelValue
-      and reverseItemLookup(currentItem).fuelValue <= targetFuelValue
-      then
-        bestFuelSlot = i
-        bestFuelValue = reverseItemLookup(currentItem).fuelValue
-      end
-  end
+  forEachSlotSkippingEmpty(function(selectedSlot)
+    local currentItem = turtle.getItemDetail()
+    if type(currentItem) == "table"
+    and reverseItemLookup(currentItem).fuelValue
+    and reverseItemLookup(currentItem).fuelValue > bestFuelValue
+    and reverseItemLookup(currentItem).fuelValue <= targetFuelValue
+    then
+      bestFuelSlot = selectedSlot
+      bestFuelValue = reverseItemLookup(currentItem).fuelValue
+    end
+  end)
 
   if bestFuelSlot then
     turtle.select(bestFuelSlot)

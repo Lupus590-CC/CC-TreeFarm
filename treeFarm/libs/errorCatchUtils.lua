@@ -1,4 +1,5 @@
 -- TODO: add to snippets/random CC code github repo #homeOnly
+-- TODO: some libs copy this function, can this be prevented?
 local function argCheckerFunc(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
   if type(position) ~= "number" then
@@ -39,6 +40,7 @@ local function argCheckerFunc(position, value, validTypesList, level)
   .." got "..type(value), level)
 end
 
+-- TODO: indentation seems broken here
 local function tableCheckerFunc(positionInfo, tableToCheck, templateTable, rejectExtention, level)
   argChecker(1, positionInfo, {"string"})
  argChecker(2, tableToCheck, {"table"})
@@ -101,16 +103,21 @@ local function tableCheckerFunc(positionInfo, tableToCheck, templateTable, rejec
  end
 end
 
+local function blameCallerOnError(function, ...)
+
+end
 
 _ENV.argChecker = argCheckerFunc
 _ENV.tableChecker = tableCheckerFunc
+_ENV.blameCallerOnError = blameCallerOnErrorFunc
 
 
-local this = {
+local errorCatchUtils = {
   argChecker = argChecker,
   tableChecker = tableChecker,
+  blameCallerOnError = blameCallerOnError,
 }
 
 
 
-return this
+return errorCatchUtils

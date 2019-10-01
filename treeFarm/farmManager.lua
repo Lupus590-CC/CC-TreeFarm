@@ -1,5 +1,5 @@
 -- general management of the farm
-require("treeFarm.libs.argChecker")
+require("treeFarm.libs.errorCatchUtils")
 
 local itemUtils = require("treeFarm.libs.utils.itemUtils")
 local itemIds = itemUtils.itemIds

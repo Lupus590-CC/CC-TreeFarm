@@ -1,4 +1,4 @@
-require("treeFarm.libs.argChecker")
+require("treeFarm.libs.errorCatchUtils")
 local utils = require("treeFarm.libs.utils")
 local itemUtils = utils.itemUtils
 local itemIds = itemUtils.itemIds
@@ -11,9 +11,11 @@ local checkpoint = require("treeFarm.libs.checkpoint") -- do I need this here? I
 local chestMapFile = ".chestMap"
 local chests = {}
 local furnaces = {}
-local wirelessModem -- NOTE: should I move the wireless modemodem onto the computer or just upstairs?
+local wirelessModem -- NOTE: should I move the wireless modemodem onto the computer or just upstairs? code shouldn't care as I use peripheral.find
 local monitor
 
+
+local linkedTurtleId
 
 local function fuelValueForFurnace(turtleFuelValue)
   argChecker(1, turtleFuelValue, {"number"})
@@ -24,7 +26,7 @@ end
 
 local function init()
   -- check config for peripheral map
-  local chestMap = {}  -- NOTE: does plethora's item movement need peripheral names? if yes then this needs to be global to this file and it's not worth maintaining the chests table (or I could add a name item to the chests table?)
+  local chestMap = {}
   local ok, data =  config.load(chestMapFile)
   if ok then
     timers = data
@@ -48,7 +50,7 @@ local function init()
 
 
   -- if we have a turtle then test the connection to make sure it still exists
-  if turtle then -- TODO: proper check
+  if linkedTurtleId then -- TODO: proper check
     --ping the turtle, if no responce then unpair the turtle
   end
 
@@ -122,7 +124,7 @@ local function init()
     for chestName, oldState in pairs(chestStates) do
       local newState = peripheral.call(chestName, "list")
       for slot, item in pairs(oldState) do
-        if newState[slot] ~= item then -- TODO: item is a table, this will always fail
+        if type(newState[slot]) ~= type(item) or (type(newState[slot]) == "table" and type(item) == "table" and (not itemUtils.itemEqualityComparer(newState[slot], item, true))) then
           chestMap.refuel = chestName
           chestStates[chestName] = nil
           break
@@ -137,8 +139,7 @@ local function init()
     -- every other chest is an output chest
     chestMap.output = {}
     for chestName in pairs(chestStates) do
-      table.insert(chestMap.output, chestName) -- TODO: can I virtually combine of the output chests like a RAID on several HDD
-      -- meta table methods on the chestMap.output table?
+      table.insert(chestMap.output, chestName)
       chestStates[chestName] = nil
     end
 
@@ -146,19 +147,21 @@ local function init()
     monitor.clear()
     monitor.write("Chest mapping complete")
 
-    -- TODO: save maps (only need to save chests, the others can be rediscovered on next load)
+    -- save maps (only need to save chests, the others can be rediscovered on next load)
     config.save(chestMapFile, chestMap)
 
   end
 
   -- wrap the chests
   for chestRole, peripheralName in pairs(chestMap) do
-    if type(peripheralName) == "table" then
-      for k, v in pairs(chestMap) do
-        chests.output = peripheral.wrap(v)
+    if type(peripheralName) == "table" then -- output "chest" is a list of chests not a single chest
+      for k, v in ipairs(peripheralName) do
+        chests.output[k] = peripheral.wrap(v) -- TODO: can I virtually combine of the output chests like a RAID on several HDD
+        -- meta table methods on the chestMap.output table?
       end
     else
       chests[chestRole] = peripheral.wrap(peripheralName)
+      chests[chestRole].peripheralName = peripheralName -- TODO: test this #homeOnly
     end
   end
 
