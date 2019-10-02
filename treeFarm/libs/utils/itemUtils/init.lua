@@ -9,16 +9,7 @@ local function itemIdArgCheck(itemIdArg, argPosition)
 
   argChecker(argPosition, itemIdArg, {"table"}, 3)
   --argChecker(position, value, validTypesList, level)
-  -- NOTE: argChecker can't check the contents of a table
-  if type(itemIdArg.name) ~= "string" then
-    error("arg["..argPosition.."].name expected string, got "
-    ..type(itemIdArg.name),3)
-  end
-  --argChecker(position, value, validTypesList, level)
-  if type(itemIdArg.damage) ~= "number" then
-    error("arg["..argPosition.."].damage expected number, got "
-    ..type(itemIdArg.damage),3)
-  end
+  tableCheckerFunc(arg[1], itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
 end
 
 -- allows finding item info from the itemIds table using the details
@@ -60,11 +51,33 @@ local function forEachSlotSkippingEmpty(func, stopFunc)
   forEachSlot(f, stopFunc)
 end
 
-local function itemEqualityComparer(itemId1, itemId2, testQuantity)
+local function itemEqualityComparer(itemId1, itemId2)
   itemIdArgCheck(itemId1,1)
   itemIdArgCheck(itemId2,2)
-  argChecker(3, testQuantity, {"boolean", "nil"})
-  if itemId1.name == itemId2.name and itemId1.damage == itemId2.damage then
+  if itemId1 == itemId2 or (itemId1.name == itemId2.name and itemId1.damage == itemId2.damage) then
+    return true
+  end
+  return false
+end
+
+local function itemEqualityComparerWithQuantity(itemId1, itemId2)
+  argChecker(1, itemId1, {"table", "nil"})
+  argChecker(2, itemId2, {"table", "nil"})
+
+  local function quantityCheck(pos, item)
+    tableCheckerFunc("arg["..pos.."]", item, {quantity = {"number"})
+  end
+
+  if itemId1 then
+    itemIdArgCheck(itemId1,1)
+    quantityCheck(1, itemId1)
+  end
+  if itemId2 then
+    itemIdArgCheck(itemId2,2)
+    quantityCheck(2, itemId2)
+  end
+
+  if itemId1 == itemId2 or (itemId1.quantity == itemId2.quantity and itemEqualityComparer(itemId1, itemId2)) then
     return true
   end
   return false
@@ -198,7 +211,7 @@ end
 
 -- implicitly preserves the wireless modem
 local function equipItemWithId(itemId)
-  -- will peripheral.getType(side:string):string tell me that there is a pickaxe on that side?
+  -- will peripheral.getType(side:string):string tell me that there is a pickaxe on that side? nope
   -- TODO: check currently equipped peripherals
   if alreadyEquiped then
     return true, "already equipped"
@@ -260,6 +273,7 @@ local itemUtils = {
   forEachSlot = forEachSlot,
   forEachSlotSkippingEmpty = forEachSlotSkippingEmpty,
   itemEqualityComparer = itemEqualityComparer,
+  itemEqualityComparerWithQuantity = itemEqualityComparerWithQuantity,
   forEachSlotWithItem = forEachSlotWithItem,
   selectItemById = selectItemById,
   currentSlotIsEmpty = currentSlotIsEmpty,

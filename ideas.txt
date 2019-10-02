@@ -12,6 +12,9 @@ https://tweaked.cc/
 https://wiki.computercraft.cc/Main_Page
 http://www.computercraft.info/wiki/Main_Page
 
+TODO: safety move
+  move with location tracking (lama rewrite) and entity blocking waiting (if can't move because player/mob is in the way then wait for the player/mob to move)
+
 to make use of the block sensor the farmer could swap out the pickaxe and swap back as needed
   if we want big trees then I need to use it to detect lone logs instead of tree trunks
   NOTE: what is the range of the scanner? #homeOnly

@@ -50,16 +50,13 @@ local function init()
 
 
   -- if we have a turtle then test the connection to make sure it still exists
-  if linkedTurtleId then -- TODO: proper check
-    --ping the turtle, if no responce then unpair the turtle
+  if linkedTurtleId then
+    --TODO: ping the turtle, if no responce then unpair the turtle
   end
 
 
-  -- TODO: if turtle not paired
-  -- change to while not turtle
-  if not turtle then -- TODO: proper check
+  if not linkedTurtleId then
 
-    -- TODO: link to the turtle
     monitor.clear()
     monitor.write("Waiting to pair with turtle, pairing code: "..os.computerId().."\nplease access turtle and pair") -- TODO: test this #homeOnly
 
@@ -95,11 +92,12 @@ local function init()
     -- TODO: wait for turtle to say that it has dropped the stuff
     -- wait a few seconds for the items to get the chest
 
+
     -- the chest which has different items in the input chest
     for chestName, oldState in pairs(chestStates) do
       local newState = peripheral.call(chestName, "list")
       for slot, item in pairs(oldState) do
-        if newState[slot] ~= item then -- TODO: item is a table, this will always fail
+        if itemUtils.itemEqualityComparerWithQuantity(newState[slot], item) then
           chestMap.input = chestName
           chestStates[chestName] = nil
           break
@@ -124,7 +122,7 @@ local function init()
     for chestName, oldState in pairs(chestStates) do
       local newState = peripheral.call(chestName, "list")
       for slot, item in pairs(oldState) do
-        if type(newState[slot]) ~= type(item) or (type(newState[slot]) == "table" and type(item) == "table" and (not itemUtils.itemEqualityComparer(newState[slot], item, true))) then
+        if itemUtils.itemEqualityComparerWithQuantity(newState[slot], item) then
           chestMap.refuel = chestName
           chestStates[chestName] = nil
           break
@@ -168,7 +166,7 @@ local function init()
 end
 
 local function emptyCollectionChest()
-  -- TODO: implement
+  -- TODO: implement emptyCollectionChest
   -- for each slot in the imput chest
     -- if the item stack is saplings then put as much as possible in the turtle's refuel chest and move the rest to the output chests
     -- elseif the item is logs then move half of it to the furnaces input (make multiples of 8) and the other half to the output chests
@@ -177,18 +175,18 @@ local function emptyCollectionChest()
 end
 
 local function refuelfurnaces() -- NOTE: can I get this to use different fuels?
-  -- TODO: implement
+  -- TODO: implement refuelfurnaces
   -- if a furnace has 8 items or more that will not get smelted due to insufficent fuel then search output chests and furnace output slots and add a charcoal
 end
 
 local function emptyFurnaces()
-  -- TODO: implement
+  -- TODO: implement emptyFurnaces
   -- just dump everything in the output slot into the output chests
   -- don't forget the turtle refuel chest
 end
 
 local function refillTurtleChest()
-  -- TODO: implement
+  -- TODO: implement refillTurtleChest
   -- move stuff from the output chests to fill the turtle chest
 end
 

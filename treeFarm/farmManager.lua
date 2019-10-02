@@ -121,13 +121,25 @@ checkpoint.add("scanForWork", scanForWork)
 local function restock()
   -- TODO: implement
 
-  -- dump inventory first?
+  -- go towards chest but stop one block away over the water
 
-  -- go to chests
+  -- dump inventory - not dumping first incase we need to use the wood as fuel
+  dumpInv()
 
-  -- grab saplings -- TODO: how do we diffienciate which chest is the fule and which is the saplings?
+  -- go over chest and wrap it with plethora
+  turtle.forwards() -- TODO: fuel check
+  local chest = peripheral.wrap("down")
+
+  -- grab saplings
 
   -- grab fuel and refuel aggressivly
+  while (not fullyRefueled) and chestHasFuel do
+    -- grab fuel
+    -- refuel
+  end
+
+  -- grab enough more fuel to have a stack
+
 end
 
 
