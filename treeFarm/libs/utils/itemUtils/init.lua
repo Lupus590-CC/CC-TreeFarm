@@ -60,24 +60,24 @@ local function itemEqualityComparer(itemId1, itemId2)
   return false
 end
 
-local function itemEqualityComparerWithQuantity(itemId1, itemId2)
+local function itemEqualityComparerWithCount(itemId1, itemId2)
   argChecker(1, itemId1, {"table", "nil"})
   argChecker(2, itemId2, {"table", "nil"})
 
-  local function quantityCheck(pos, item)
-    tableCheckerFunc("arg["..pos.."]", item, {quantity = {"number"})
+  local function countCheck(pos, item)
+    tableCheckerFunc("arg["..pos.."]", item, {count = {"number"})
   end
 
   if itemId1 then
     itemIdArgCheck(itemId1,1)
-    quantityCheck(1, itemId1)
+    countCheck(1, itemId1)
   end
   if itemId2 then
     itemIdArgCheck(itemId2,2)
-    quantityCheck(2, itemId2)
+    countCheck(2, itemId2)
   end
 
-  if itemId1 == itemId2 or (itemId1.quantity == itemId2.quantity and itemEqualityComparer(itemId1, itemId2)) then
+  if itemId1 == itemId2 or (itemId1.count == itemId2.count and itemEqualityComparer(itemId1, itemId2)) then
     return true
   end
   return false
@@ -188,7 +188,7 @@ local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #ho
   return false
 end
 
-local function countItemQuantityById(itemId)
+local function getItemCountById(itemId)
   itemIdArgCheck(itemId,1)
   local count = 0
   for i = 1, 16 do
@@ -273,14 +273,14 @@ local itemUtils = {
   forEachSlot = forEachSlot,
   forEachSlotSkippingEmpty = forEachSlotSkippingEmpty,
   itemEqualityComparer = itemEqualityComparer,
-  itemEqualityComparerWithQuantity = itemEqualityComparerWithQuantity,
+  itemEqualityComparerWithCount = itemEqualityComparerWithCount,
   forEachSlotWithItem = forEachSlotWithItem,
   selectItemById = selectItemById,
   currentSlotIsEmpty = currentSlotIsEmpty,
   selectEmptySlot = selectEmptySlot,
   selectForDigging = selectForDigging,
   selectBestFuel = selectBestFuel,
-  countItemQuantityById = countItemQuantityById,
+  getItemCountById = getItemCountById,
   getFreeSpaceCount = getFreeSpaceCount,
   equipItemWithId = equipItemWithId,
   selectByTagPriority = selectByTagPriority,
