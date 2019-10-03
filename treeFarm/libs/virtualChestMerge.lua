@@ -84,22 +84,104 @@ end
 
 local listOfVirtualperipherals = {}
 
+local function translateSlot(virtualPeripheral, virtualSlot)
+  argChecker(1, virtualSlot, {"number"})
+  if virtualSlot > virtualPeripheral.size() or virtualSlot < 1 then
+    error("arg[1] number out of range, must be between 1 and "..virtualPeripheral.size())
+  end
+
+  local scannedSize = 0
+  for k, v in ipairs(virtualPeripheral._backingPeripherals) do
+    local currentBackerSize = virtualPeripheral._backingPeripherals[k].size()
+    if virtualSlot < scannedSize + currentBackerSize then
+      -- this is our backer peripheral
+      return backingPeripherals[k], virtualSlot-size -- peripheralWithVirtualSlot, physicalSlotNumber
+    end
+    scannedSize = scannedSize + currentBackerSize
+  end
+  error("virtualChestMerge:translateSlot got to that line that we shouldn't have been able to get to")
+end
+
 -- wrap all
 local function wrap(...) : table
   -- TODO: how to validate that the args are valid peripherals
   for k, v in ipairs(arg)
-    argChecker(k, v, {"string", "table"})
+    argChecker(k, v, {"string"})
   end
 
-  -- if we were given peripheral names then convert those to peripherals
+  local backingPeripherals = {}
   for k, v in ipairs(arg)
-    if type(v) == "string" then
-      arg[k] = peripheral.wrap(v)
+    if not peripheral.isPresent(v) then
+      error("arg["..k.."] not a valid peripheral side/name")
     end
+    backingPeripherals[k] = peripheral.wrap(v)
+    backingPeripherals[k].peripheralName = v
   end
 
-  -- TODO: create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
-  local virtualPeripheral
+  -- create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
+
+  local virtualPeripheral = {}
+
+  local function virtualPeripheral.size()
+    local total = 0
+    for k, v in ipairs(backingPeripherals) do
+      total = total + backingPeripherals[k].size()
+    end
+    return total
+  end
+
+  local function virtualPeripheral.getItem(slot)
+    argChecker(1, slot, {"number"})
+    if slot > size() or slot < 1 then
+      error("arg[1] number out of range, must be between 1 and "..size())
+    end
+
+    -- locate backer with this slot
+    local backer, trueSlot = translateSlot(virtualPeripheral, slot)
+    return backer.getItem(trueSlot)
+  end
+
+  local function virtualPeripheral.getItemMeta(slot)
+    argChecker(1, slot, {"number"})
+    if slot > size() or slot < 1 then
+      error("arg[1] number out of range, must be between 1 and "..size())
+    end
+
+    -- locate backer with this slot
+    local backer, trueSlot = translateSlot(virtualPeripheral, slot)
+    return backer.getItemMeta(trueSlot)
+  end
+
+  local function virtualPeripheral.list()
+    local list = {}
+    local listSize = 0
+    for k, v in ipairs(backingPeripherals) do
+      local currentBackerSize = backingPeripherals[k].size()
+      local additions = backingPeripherals[k].list()
+      for i=1, currentBackerSize do
+        list[listSize+i] = additions[i]
+      end
+      listSize = listSize + currentBackerSize
+    end
+    return list
+  end
+
+  local function virtualPeripheral.pullItems(fromName:string, fromSlot:int[, limit:int[, toSlot:int]]):int -- TODO: implement
+
+  end
+
+  local function virtualPeripheral.pushItems(toName:string, fromSlot:int[, limit:int[, toSlot:int]]):int -- TODO: implement
+
+  end
+
+
+
+
+
+  virtualPeripheral._backingPeripherals = backingPeripherals, -- lua needs read only tables which play nice
+  virtualPeripheral._translateSlot = function(slot)
+    return translateSlot(virtualPeripheral, slot)
+  end
 
   return virtualPeripheral
 end
@@ -108,3 +190,5 @@ end
 local virtualChestMerge = {
   wrap = wrap,
 }
+
+return virtualChestMerge
