@@ -84,7 +84,7 @@ local function argChecker(position, value, validTypesList, level)
   .." got "..type(value), level)
 end
 
-local virtualPeripherals = {}
+local virtualPeripheralList = {}
 
 local function translateSlot(virtualPeripheral, virtualSlot)
   argChecker(1, virtualSlot, {"number"})
@@ -138,8 +138,8 @@ local function wrap(...)
 
   local function virtualPeripheral.getItem(slot)
     argChecker(1, slot, {"number"})
-    if slot > size() or slot < 1 then
-      error("arg[1] number out of range, must be between 1 and "..size())
+    if slot > virtualPeripheral.size() or slot < 1 then
+      error("arg[1] number out of range, must be between 1 and "..virtualPeripheral.size())
     end
 
     -- locate backer with this slot
@@ -149,8 +149,8 @@ local function wrap(...)
 
   local function virtualPeripheral.getItemMeta(slot)
     argChecker(1, slot, {"number"})
-    if slot > size() or slot < 1 then
-      error("arg[1] number out of range, must be between 1 and "..size())
+    if slot > virtualPeripheral.size() or slot < 1 then
+      error("arg[1] number out of range, must be between 1 and "..virtualPeripheral.size())
     end
 
     -- locate backer with this slot
@@ -172,15 +172,43 @@ local function wrap(...)
     return list
   end
 
-  local function virtualPeripheral.pullItems(fromName:string, fromSlot:int[, limit:int[, toSlot:int]]):int -- TODO: implement
-
-  end
-
   local function virtualPeripheral.pushItems(toName:string, fromSlot:int[, limit:int[, toSlot:int]]):int -- TODO: implement
+    argChecker(1, fromName, {"string"})
+    argChecker(2, fromSlot, {"number"})
+    argChecker(3, limit, {"number", "nil"})
+    argChecker(4, toSlot, {"number", "nil"})
+
+    fromSlot = fromSlot and math.floor(fromSlot) -- TODO: enforce range
+    limit = limit and math.floor(limit) -- TODO: enforce greater than 0
+    toSlot = toSlot and math.floor(toSlot) -- TODO: enforce range against remote
+    -- NOTE: if toSlot is nil then use first available slot
+    -- if limit is nil then do the stack
+
+    -- NOTE: may be junk code
+    if limit then
+      mustBeInt(3, limit)
+    else
+      local item = virtualPeripheral.getItemMeta(fromSlot)
+      if item then
+        limit = item.count
+      else
+        return 0 -- nothing to move
+      end
+    end
+    if toSlot then
+      mustBeInt(4, toSlot)
+      -- must be between 1 and size of remote chest
+    end
+
 
   end
 
+  local function virtualPeripheral.pullItems(fromName:string, fromSlot:int[, limit:int[, toSlot:int]]):int -- TODO: implement
+    -- NOTE: get the other one to push?
 
+
+
+  end
 
 
 
