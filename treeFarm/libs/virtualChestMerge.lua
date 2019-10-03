@@ -1,14 +1,16 @@
 --[[
--- @Name: VrtualChestMerge
+-- @Name: VirtualChestMerge
 -- @Author: Lupus590
 -- @License: MIT
 -- @URL: https://github.com/CC-Hive/Checkpoint
 --
 -- If you are interested in the above format: http://www.computercraft.info/forums2/index.php?/topic/18630-rfc-standard-for-program-metadata-for-graphical-shells-use/
 --
---  Makes multiple plethora inventories look like one big inventory
+-- Makes multiple plethora inventories look like one big inventory
 --
--- VrtualChestMerge's License:
+-- None, probably have to wrap every inventory that will interact with the merged one so that the single inventories can push to the merged inventory peripheral name string
+--
+-- VirtualChestMerge's License:
 --
 --  The MIT License (MIT)
 --
@@ -33,7 +35,7 @@
 -- ]]
 
 
--- NOTE: probably have to wrap every inventory that will interact with the merged one so that the single inventories can push to the merged inventory peripheral name string
+
 
 
 -- bonus, also works for fluids
@@ -82,7 +84,7 @@ local function argChecker(position, value, validTypesList, level)
   .." got "..type(value), level)
 end
 
-local listOfVirtualperipherals = {}
+local virtualPeripherals = {}
 
 local function translateSlot(virtualPeripheral, virtualSlot)
   argChecker(1, virtualSlot, {"number"})
@@ -103,16 +105,20 @@ local function translateSlot(virtualPeripheral, virtualSlot)
 end
 
 -- wrap all
-local function wrap(...) : table
-  -- TODO: how to validate that the args are valid peripherals
+local function wrap(...)
   for k, v in ipairs(arg)
     argChecker(k, v, {"string"})
   end
 
+  -- TODO: prevent wrapping peripherals which are part of a virtual peripheral?
+
   local backingPeripherals = {}
   for k, v in ipairs(arg)
+    if virtualPeripheral[v] then
+      error("arg["..k.."] is a virtual peripheral and can not be wrapped again",2) -- TODO: should I try to support this?
+    end
     if not peripheral.isPresent(v) then
-      error("arg["..k.."] not a valid peripheral side/name")
+      error("arg["..k.."] not a valid peripheral side/name, got"..v)
     end
     backingPeripherals[k] = peripheral.wrap(v)
     backingPeripherals[k].peripheralName = v
@@ -182,6 +188,17 @@ local function wrap(...) : table
   virtualPeripheral._translateSlot = function(slot)
     return translateSlot(virtualPeripheral, slot)
   end
+
+  virtualPeripheral._Name = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
+
+  virtual
+
+  local function notImplemented()
+    error("Sorry but this method is not implemented on virtualItemHandler, feel free to override this if you know what you want to do instead.",2)
+  end
+
+  virtualPeripheral.drop = notImplemented
+  virtualPeripheral.suck = notImplemented
 
   return virtualPeripheral
 end
