@@ -84,20 +84,39 @@ local function argChecker(position, value, validTypesList, level)
   .." got "..type(value), level)
 end
 
+local function numberRangeChecker(argPosition, value, lowerBound, upperBound, level)
+  argChecker(1, argPosition, {"number"})
+  argChecker(2, value, {"number"})
+  argChecker(3, lowerBound, {"number", "nil"})
+  argChecker(4, upperBound, {"number", "nil"})
+  argChecker(5, level, {"number", "nil"})
+  level = level and level +1 or 3
+
+  if lowerBound > upperBound then
+    local temp = upperBound
+    upperBound = lowerBound
+    lowerBound = temp
+  end
+
+  if value < lowerBound or value > upperBound then
+    error("arg["..argPosition.."] must be between "..lowerBound.." and "..upperBound,level)
+  end
+end
+
 local virtualPeripheralList = {}
 
-local function translateSlot(virtualPeripheral, virtualSlot)
+local function translateSlot(virtualPeripheral, virtualSlot) -- returns peripheralWithVirtualSlot, physicalSlotNumber
   argChecker(1, virtualSlot, {"number"})
   if virtualSlot > virtualPeripheral.size() or virtualSlot < 1 then
     error("arg[1] number out of range, must be between 1 and "..virtualPeripheral.size())
   end
 
   local scannedSize = 0
-  for k, v in ipairs(virtualPeripheral._backingPeripherals) do
-    local currentBackerSize = virtualPeripheral._backingPeripherals[k].size()
+  for k, v in ipairs(virtualPeripheral._backingPeripheralsList) do
+    local currentBackerSize = virtualPeripheral._backingPeripheralsList[k].size()
     if virtualSlot < scannedSize + currentBackerSize then
       -- this is our backer peripheral
-      return backingPeripherals[k], virtualSlot-size -- peripheralWithVirtualSlot, physicalSlotNumber
+      return backingPeripheralsList[k], virtualSlot-size -- peripheralWithVirtualSlot, physicalSlotNumber
     end
     scannedSize = scannedSize + currentBackerSize
   end
@@ -106,64 +125,66 @@ end
 
 -- wrap all
 local function wrap(...)
-  for k, v in ipairs(arg)
+  for k, v in ipairs(arg) do
     argChecker(k, v, {"string"})
   end
 
   -- TODO: prevent wrapping peripherals which are part of a virtual peripheral?
 
-  local backingPeripherals = {}
-  for k, v in ipairs(arg)
-    if virtualPeripheral[v] then
+  local backingPeripheralsList = {}
+  for k, v in ipairs(arg) do
+    if virtualPeripheralList[v] then
       error("arg["..k.."] is a virtual peripheral and can not be wrapped again",2) -- TODO: should I try to support this?
+      -- TODO: test if this really causes issues #homeOnly
     end
     if not peripheral.isPresent(v) then
       error("arg["..k.."] not a valid peripheral side/name, got"..v)
     end
-    backingPeripherals[k] = peripheral.wrap(v)
-    backingPeripherals[k].peripheralName = v
+    backingPeripheralsList[k] = peripheral.wrap(v)
+    backingPeripheralsList[k]._peripheralName = v
+    backingPeripheralsList[k]._id = k
   end
 
   -- create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
 
-  local virtualPeripheral = {}
+  local thisVirtualPeripheral = {}
 
-  local function virtualPeripheral.size()
+  function thisVirtualPeripheral.size()
     local total = 0
-    for k, v in ipairs(backingPeripherals) do
-      total = total + backingPeripherals[k].size()
+    for k, v in ipairs(backingPeripheralsList) do
+      total = total + backingPeripheralsList[k].size()
     end
     return total
   end
 
-  local function virtualPeripheral.getItem(slot)
+  function thisVirtualPeripheral.getItem(slot)
     argChecker(1, slot, {"number"})
-    if slot > virtualPeripheral.size() or slot < 1 then
-      error("arg[1] number out of range, must be between 1 and "..virtualPeripheral.size())
+    if slot > thisVirtualPeripheral.size() or slot < 1 then
+      error("arg[1] number out of range, must be between 1 and "..thisVirtualPeripheral.size())
     end
 
     -- locate backer with this slot
-    local backer, trueSlot = translateSlot(virtualPeripheral, slot)
+    local backer, trueSlot = translateSlot(thisVirtualPeripheral, slot)
     return backer.getItem(trueSlot)
   end
 
-  local function virtualPeripheral.getItemMeta(slot)
+  function thisVirtualPeripheral.getItemMeta(slot)
     argChecker(1, slot, {"number"})
-    if slot > virtualPeripheral.size() or slot < 1 then
-      error("arg[1] number out of range, must be between 1 and "..virtualPeripheral.size())
+    if slot > thisVirtualPeripheral.size() or slot < 1 then
+      error("arg[1] number out of range, must be between 1 and "..thisVirtualPeripheral.size())
     end
 
     -- locate backer with this slot
-    local backer, trueSlot = translateSlot(virtualPeripheral, slot)
+    local backer, trueSlot = translateSlot(thisVirtualPeripheral, slot)
     return backer.getItemMeta(trueSlot)
   end
 
-  local function virtualPeripheral.list()
+  function thisVirtualPeripheral.list()
     local list = {}
     local listSize = 0
-    for k, v in ipairs(backingPeripherals) do
-      local currentBackerSize = backingPeripherals[k].size()
-      local additions = backingPeripherals[k].list()
+    for k, v in ipairs(backingPeripheralsList) do
+      local currentBackerSize = backingPeripheralsList[k].size()
+      local additions = backingPeripheralsList[k].list()
       for i=1, currentBackerSize do
         list[listSize+i] = additions[i]
       end
@@ -172,39 +193,52 @@ local function wrap(...)
     return list
   end
 
-  local function virtualPeripheral.pushItems(toName:string, fromSlot:int[, limit:int[, toSlot:int]]):int -- TODO: implement
-    argChecker(1, fromName, {"string"})
-    argChecker(2, fromSlot, {"number"})
+  function thisVirtualPeripheral.pushItems(virtualToName:string, virtualFromSlot:int[, limit:int[, virtualToSlot:int]]):int -- return value = count moved -- TODO: implement
+    argChecker(1, virtualToName, {"string"})
+    argChecker(2, virtualFromSlot, {"number"})
     argChecker(3, limit, {"number", "nil"})
-    argChecker(4, toSlot, {"number", "nil"})
+    argChecker(4, virtualToSlot, {"number", "nil"})
 
-    fromSlot = fromSlot and math.floor(fromSlot) -- TODO: enforce range
-    limit = limit and math.floor(limit) -- TODO: enforce greater than 0
-    toSlot = toSlot and math.floor(toSlot) -- TODO: enforce range against remote
-    -- NOTE: if toSlot is nil then use first available slot
-    -- if limit is nil then do the stack
+    virtualFromSlot = math.floor(virtualFromSlot)
+    numberRangeChecker(2, virtualFromSlot, 1, thisVirtualPeripheral.size())
+    limit = limit and math.floor(limit)
+    virtualToSlot = virtualToSlot and function()
+      local r = math.floor(virtualToSlot)
+      numberRangeChecker(4, r, 1, virtualPeripheralList[virtualToName].size())
+      return r
+    end()
 
-    -- NOTE: may be junk code
-    if limit then
-      mustBeInt(3, limit)
-    else
-      local item = virtualPeripheral.getItemMeta(fromSlot)
+    local realFromPeripheral, realFromSlot = translateSlot(thisVirtualPeripheral, virtualFromSlot)
+
+    if not limit then
+      local item = realFromPeripheral.getItemMeta(realFromSlot)
       if item then
         limit = item.count
       else
         return 0 -- nothing to move
       end
     end
-    if toSlot then
-      mustBeInt(4, toSlot)
-      -- must be between 1 and size of remote chest
+    if limit < 1 then
+      error("arg[3] limit must be 1 or greater")
     end
 
 
+
+    if virtualToSlot then
+      local realToPeripheral, realToSlot = translateSlot(virtualToName, virtualToSlot)
+
+      return realFromPeripheral.pushItems(realToPeripheral._peripheralName, realFromSlot, limit, realToSlot)
+    end
+
+    -- TODO: virtual slot is nil
+    -- NOTE: if virtualToSlot is nil then use first available slot
+    -- NOTE: if virtualToSlot is nil and the first used slot is too small then it overflows until the limit is reached or the chest is full
+    -- NOTE: if virtualToSlot has a value and that slot is too small then it moves as much as it can
+
   end
 
-  local function virtualPeripheral.pullItems(fromName:string, fromSlot:int[, limit:int[, toSlot:int]]):int -- TODO: implement
-    -- NOTE: get the other one to push?
+  function thisVirtualPeripheral.pullItems(virtualFromName:string, virtualFromSlot:int[, limit:int[, virtualToSlot:int]]):int -- TODO: implement
+    -- NOTE: get the remote to push?
 
 
 
@@ -212,23 +246,23 @@ local function wrap(...)
 
 
 
-  virtualPeripheral._backingPeripherals = backingPeripherals, -- lua needs read only tables which play nice
-  virtualPeripheral._translateSlot = function(slot)
-    return translateSlot(virtualPeripheral, slot)
+  thisVirtualPeripheral._backingPeripheralsList = backingPeripheralsList, -- lua needs read only tables which play nice
+  thisVirtualPeripheral._translateSlot = function(slot)
+    return translateSlot(thisVirtualPeripheral, slot)
   end
 
-  virtualPeripheral._Name = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
-
-  virtual
+  thisVirtualPeripheral._Name = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
 
   local function notImplemented()
     error("Sorry but this method is not implemented on virtualItemHandler, feel free to override this if you know what you want to do instead.",2)
   end
 
-  virtualPeripheral.drop = notImplemented
-  virtualPeripheral.suck = notImplemented
+  thisVirtualPeripheral.drop = notImplemented
+  thisVirtualPeripheral.suck = notImplemented
 
-  return virtualPeripheral
+  thisVirtualPeripheralList[thisVirtualPeripheral._Name] = thisVirtualPeripheral
+
+  return thisVirtualPeripheral
 end
 
 

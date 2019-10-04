@@ -1,6 +1,6 @@
 -- TODO: add to snippets/random CC code github repo #homeOnly
 -- TODO: some libs copy this function, can this be prevented?
-local function argCheckerFunc(position, value, validTypesList, level)
+local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
   if type(position) ~= "number" then
     error("argChecker: arg[1] expected number got "..type(position),2)
@@ -40,7 +40,7 @@ local function argCheckerFunc(position, value, validTypesList, level)
   .." got "..type(value), level)
 end
 
-local function tableCheckerFunc(positionInfo, tableToCheck, templateTable, rejectExtention, level)
+local function tableChecker(positionInfo, tableToCheck, templateTable, rejectExtention, level)
   argChecker(1, positionInfo, {"string"})
   argChecker(2, tableToCheck, {"table"})
   argChecker(3, templateTable, {"table"})
@@ -102,19 +102,40 @@ local function tableCheckerFunc(positionInfo, tableToCheck, templateTable, rejec
   end
 end
 
-local function blameCallerOnError(function, ...)
-  -- TODO: implement blameCallerOnError?
+local function numberRangeChecker(argPosition, value, lowerBound, upperBound, level)
+  argChecker(1, argPosition, {"number"})
+  argChecker(2, value, {"number"})
+  argChecker(3, lowerBound, {"number", "nil"})
+  argChecker(4, upperBound, {"number", "nil"})
+  argChecker(5, level, {"number", "nil"})
+  level = level and level +1 or 3
+
+  if lowerBound > upperBound then
+    local temp = upperBound
+    upperBound = lowerBound
+    lowerBound = temp
+  end
+
+  if value < lowerBound or value > upperBound then
+    error("arg["..argPosition.."] must be between "..lowerBound.." and "..upperBound,level)
+  end
 end
 
-_ENV.argChecker = argCheckerFunc
-_ENV.tableChecker = tableCheckerFunc
-_ENV.blameCallerOnError = blameCallerOnErrorFunc
+--[[local function blameCallerOnError(function, ...)
+  -- TODO: implement blameCallerOnError?
+end]]
+
+_ENV.argChecker = argChecker
+_ENV.tableChecker = tableChecker
+_ENV.numberRangeChecker = numberRangeChecker
+--_ENV.blameCallerOnError = blameCallerOnError
 
 
 local errorCatchUtils = {
   argChecker = argChecker,
   tableChecker = tableChecker,
-  blameCallerOnError = blameCallerOnError,
+  numberRangeChecker = numberRangeChecker,
+  --blameCallerOnError = blameCallerOnError,
 }
 
 
