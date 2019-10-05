@@ -38,12 +38,9 @@ local function argChecker(position, value, validTypesList, level)
   if not validTypesList[1] then
     error("argChecker: arg[3] table must contain at least one element",2)
   end
-  for k, v in pairs(validTypesList) do
-    if type(k) ~= "number" then
-      error("argChecker: arg[3] non-numeric index "..k.." in table",2)
-    end
+  for k, v in ipairs(validTypesList) do
     if type(v) ~= "string" then
-      error("argChecker: arg[3]["..k.."] expected string got "..type(v),2)
+      error("argChecker: arg[3]["..tostring(k).."] expected string got "..type(v),2)
     end
   end
   if type(level) ~= "nil" and type(level) ~= "number" then
@@ -65,7 +62,7 @@ local function argChecker(position, value, validTypesList, level)
       expectedTypes = table.concat(validTypesList, ", ", 1, #validTypesList - 1) .. " or " .. validTypesList[#validTypesList]
   end
 
-  error("arg["..position.."] expected "..expectedTypes
+  error("arg["..tostring(position).."] expected "..expectedTypes
   .." got "..type(value), level)
 end
 

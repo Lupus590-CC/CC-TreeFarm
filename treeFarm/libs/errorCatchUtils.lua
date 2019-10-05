@@ -36,7 +36,7 @@ local function argChecker(position, value, validTypesList, level)
       expectedTypes = table.concat(validTypesList, ", ", 1, #validTypesList - 1) .. " or " .. validTypesList[#validTypesList]
   end
 
-  error("arg["..tosting(position).."] expected "..expectedTypes
+  error("arg["..tostring(position).."] expected "..expectedTypes
   .." got "..type(value), level)
 end
 

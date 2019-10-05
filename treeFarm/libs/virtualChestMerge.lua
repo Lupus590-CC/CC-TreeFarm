@@ -80,7 +80,7 @@ local function argChecker(position, value, validTypesList, level)
       expectedTypes = table.concat(validTypesList, ", ", 1, #validTypesList - 1) .. " or " .. validTypesList[#validTypesList]
   end
 
-  error("arg["..tosting(position).."] expected "..expectedTypes
+  error("arg["..tostring(position).."] expected "..expectedTypes
   .." got "..type(value), level)
 end
 
@@ -116,7 +116,7 @@ local function translateSlot(virtualPeripheral, virtualSlot) -- returns peripher
     local currentBackerSize = virtualPeripheral._backingPeripheralsList[k].size()
     if virtualSlot < scannedSize + currentBackerSize then
       -- this is our backer peripheral
-      return backingPeripheralsList[k], virtualSlot-size -- peripheralWithVirtualSlot, physicalSlotNumber
+      return virtualPeripheral._backingPeripheralsList[k], virtualSlot-scannedSize -- peripheralWithVirtualSlot, physicalSlotNumber
     end
     scannedSize = scannedSize + currentBackerSize
   end
@@ -198,14 +198,20 @@ local function wrap(...)
     argChecker(3, limit, {"number", "nil"})
     argChecker(4, virtualToSlot, {"number", "nil"})
 
+    local virtualToPeripheral = virtualPeripheralList[virtualToName]
+
+    if not virtualToPeripheral then
+      error("arg[1] no virtual peripheral with name "..virtualToName,2)
+    end
+
     virtualFromSlot = math.floor(virtualFromSlot)
     numberRangeChecker(2, virtualFromSlot, 1, thisVirtualPeripheral.size())
     limit = limit and math.floor(limit)
-    virtualToSlot = virtualToSlot and function()
+    virtualToSlot = virtualToSlot and (function()
       local r = math.floor(virtualToSlot)
-      numberRangeChecker(4, r, 1, virtualPeripheralList[virtualToName].size())
+      numberRangeChecker(4, r, 1, virtualToPeripheral.size())
       return r
-    end()
+    end)()
 
     local realFromPeripheral, realFromSlot = translateSlot(thisVirtualPeripheral, virtualFromSlot)
 
@@ -222,12 +228,12 @@ local function wrap(...)
     end
 
     if virtualToSlot then
-      local realToPeripheral, realToSlot = translateSlot(virtualToName, virtualToSlot)
+      local realToPeripheral, realToSlot = translateSlot(virtualToPeripheral, virtualToSlot)
 
       return realFromPeripheral.pushItems(realToPeripheral._peripheralName, realFromSlot, limit, realToSlot)
     end
 
-    local targets = virtualPeripheralList[virtualToName]._backingPeripheralsList
+    local targets = virtualToPeripheral._backingPeripheralsList
     local totalMoved = 0
     for i = 1, #targets do
       local moved = realFromPeripheral.pushItems(targets[i]._peripheralName, realFromSlot, limit)
@@ -241,19 +247,25 @@ local function wrap(...)
   end
 
   function thisVirtualPeripheral.pullItems(virtualFromName, virtualFromSlot, limit, virtualToSlot)
-    argChecker(1, virtualFromName, {"string"})
+    argChecker(1, virtualToName, {"string"})
     argChecker(2, virtualFromSlot, {"number"})
     argChecker(3, limit, {"number", "nil"})
     argChecker(4, virtualToSlot, {"number", "nil"})
 
+    local virtualToPeripheral = virtualPeripheralList[virtualToName]
+
+    if not virtualToPeripheral then
+      error("arg[1] no virtual peripheral with name "..virtualToName,2)
+    end
+
     virtualFromSlot = math.floor(virtualFromSlot)
     numberRangeChecker(2, virtualFromSlot, 1, thisVirtualPeripheral.size())
     limit = limit and math.floor(limit)
-    virtualToSlot = virtualToSlot and function()
+    virtualToSlot = virtualToSlot and (function()
       local r = math.floor(virtualToSlot)
-      numberRangeChecker(4, r, 1, virtualPeripheralList[virtualFromName].size())
+      numberRangeChecker(4, r, 1, virtualToPeripheral.size())
       return r
-    end()
+    end)()
 
     local realFromPeripheral, realFromSlot = translateSlot(thisVirtualPeripheral, virtualFromSlot)
 
@@ -270,12 +282,12 @@ local function wrap(...)
     end
 
     if virtualToSlot then
-      local realToPeripheral, realToSlot = translateSlot(virtualFromName, virtualToSlot)
+      local realToPeripheral, realToSlot = translateSlot(virtualToPeripheral, virtualToSlot)
 
-      return realFromPeripheral.pushItems(realToPeripheral._peripheralName, realFromSlot, limit, realToSlot)
+      return realToPeripheral.pullItems(realFromPeripheral._peripheralName, realFromSlot, limit, realToSlot)
     end
 
-    local targets = virtualPeripheralList[virtualFromName]._backingPeripheralsList
+    local targets = virtualFromPeripheral._backingPeripheralsList
     local totalMoved = 0
     for i = 1, #targets do
       local moved = realToPeripheral.pullItems(targets[i]._peripheralName, realFromSlot, limit)
@@ -290,7 +302,7 @@ local function wrap(...)
 
 
 
-  thisVirtualPeripheral._backingPeripheralsList = backingPeripheralsList, -- lua needs read only tables which play nice
+  thisVirtualPeripheral._backingPeripheralsList = backingPeripheralsList -- lua needs read only tables which play nice
   thisVirtualPeripheral._translateSlot = function(slot)
     return translateSlot(thisVirtualPeripheral, slot)
   end
@@ -304,7 +316,7 @@ local function wrap(...)
   thisVirtualPeripheral.drop = notImplemented
   thisVirtualPeripheral.suck = notImplemented
 
-  thisVirtualPeripheralList[thisVirtualPeripheral._Name] = thisVirtualPeripheral
+  virtualPeripheralList[thisVirtualPeripheral._Name] = thisVirtualPeripheral
 
   return thisVirtualPeripheral
 end
