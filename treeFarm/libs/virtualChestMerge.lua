@@ -114,11 +114,11 @@ local function translateSlot(virtualPeripheral, virtualSlot) -- returns peripher
   end
 
   local scannedSize = 0
-  for k, v in ipairs(virtualPeripheral._backingPeripheralsList) do
-    local currentBackerSize = virtualPeripheral._backingPeripheralsList[k].size()
+  for k, v in ipairs(virtualPeripheral._backingPeripheralList) do
+    local currentBackerSize = virtualPeripheral._backingPeripheralList[k].size()
     if virtualSlot <= scannedSize + currentBackerSize then
       -- this is our backer peripheral
-      return virtualPeripheral._backingPeripheralsList[k], virtualSlot-scannedSize -- peripheralWithVirtualSlot, physicalSlotNumber
+      return virtualPeripheral._backingPeripheralList[k], virtualSlot-scannedSize -- peripheralWithVirtualSlot, physicalSlotNumber
     end
     scannedSize = scannedSize + currentBackerSize
   end
@@ -235,7 +235,7 @@ local function wrap(...)
       return realFromPeripheral.pushItems(realToPeripheral._peripheralName, realFromSlot, limit, realToSlot)
     end
 
-    local targets = virtualToPeripheral._backingPeripheralsList
+    local targets = virtualToPeripheral._backingPeripheralList
     local totalMoved = 0
     for i = 1, #targets do
       local moved = realFromPeripheral.pushItems(targets[i]._peripheralName, realFromSlot, limit)
@@ -289,7 +289,7 @@ local function wrap(...)
       return realToPeripheral.pullItems(realFromPeripheral._peripheralName, realFromSlot, limit, realToSlot)
     end
 
-    local targets = thisVirtualPeripheral._backingPeripheralsList
+    local targets = thisVirtualPeripheral._backingPeripheralList
     local totalMoved = 0
     for i = 1, #targets do
       local moved = targets[i].pullItems(realFromPeripheral._peripheralName, realFromSlot, limit)
@@ -304,7 +304,7 @@ local function wrap(...)
 
 
 
-  thisVirtualPeripheral._backingPeripheralsList = backingPeripheralsList -- lua needs read only tables which play nice
+  thisVirtualPeripheral._backingPeripheralList = backingPeripheralsList -- lua needs read only tables which play nice
   thisVirtualPeripheral._translateSlot = function(slot)
     local ok, err
     ok, err, slot = pcall(translateSlot, thisVirtualPeripheral, slot)
