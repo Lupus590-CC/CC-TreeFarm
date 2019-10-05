@@ -116,7 +116,7 @@ local function translateSlot(virtualPeripheral, virtualSlot) -- returns peripher
   local scannedSize = 0
   for k, v in ipairs(virtualPeripheral._backingPeripheralsList) do
     local currentBackerSize = virtualPeripheral._backingPeripheralsList[k].size()
-    if virtualSlot < scannedSize + currentBackerSize then
+    if virtualSlot <= scannedSize + currentBackerSize then
       -- this is our backer peripheral
       return virtualPeripheral._backingPeripheralsList[k], virtualSlot-scannedSize -- peripheralWithVirtualSlot, physicalSlotNumber
     end
