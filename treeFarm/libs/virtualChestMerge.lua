@@ -131,14 +131,8 @@ local function wrap(...)
     argChecker(k, v, {"string"})
   end
 
-  -- TODO: prevent wrapping peripherals which are part of a virtual peripheral?
-
   local backingPeripheralsList = {}
   for k, v in ipairs(arg) do
-    --[[
-    if virtualPeripheralList[v] then
-      error("arg["..k.."] is a virtual peripheral and can not be wrapped again",2) -- TODO: should I try to support this? errors on line 145 with attempt to index nil, the peripheral.wrap returns nil and push and pull fails
-    end--]]
     if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
       error("arg["..k.."] not a valid peripheral side/name, got"..v)
     end
