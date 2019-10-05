@@ -135,14 +135,14 @@ local function wrap(...)
 
   local backingPeripheralsList = {}
   for k, v in ipairs(arg) do
+    --[[
     if virtualPeripheralList[v] then
-      error("arg["..k.."] is a virtual peripheral and can not be wrapped again",2) -- TODO: should I try to support this?
-      -- TODO: test if this really causes issues #homeOnly
-    end
-    if not peripheral.isPresent(v) then
+      error("arg["..k.."] is a virtual peripheral and can not be wrapped again",2) -- TODO: should I try to support this? errors on line 145 with attempt to index nil, the peripheral.wrap returns nil and push and pull fails
+    end--]]
+    if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
       error("arg["..k.."] not a valid peripheral side/name, got"..v)
     end
-    backingPeripheralsList[k] = peripheral.wrap(v)
+    backingPeripheralsList[k] = peripheral.wrap(v) or virtualPeripheralList[v]
     backingPeripheralsList[k]._peripheralName = v
   end
 
@@ -215,7 +215,11 @@ local function wrap(...)
       return r
     end)()
 
-    local realFromPeripheral, realFromSlot = translateSlot(thisVirtualPeripheral, virtualFromSlot)
+    local realFromPeripheral = thisVirtualPeripheral
+    local realFromSlot = virtualFromSlot
+    repeat
+      realFromPeripheral, realFromSlot= translateSlot(realFromPeripheral, realFromSlot)
+    until not realFromPeripheral._isVirtual
 
     if not limit then
       local item = realFromPeripheral.getItemMeta(realFromSlot)
@@ -230,7 +234,11 @@ local function wrap(...)
     end
 
     if virtualToSlot then
-      local realToPeripheral, realToSlot = translateSlot(virtualToPeripheral, virtualToSlot)
+      local realToPeripheral = virtualToPeripheral
+      local realToSlot = virtualToSlot
+      repeat
+        realToPeripheral, realToSlot= translateSlot(realToPeripheral, realToSlot)
+      until not realToPeripheral._isVirtual
 
       return realFromPeripheral.pushItems(realToPeripheral._peripheralName, realFromSlot, limit, realToSlot)
     end
@@ -238,7 +246,12 @@ local function wrap(...)
     local targets = virtualToPeripheral._backingPeripheralList
     local totalMoved = 0
     for i = 1, #targets do
-      local moved = realFromPeripheral.pushItems(targets[i]._peripheralName, realFromSlot, limit)
+      local moved = 0
+      if targets[i]._isVirtual then
+        moved = thisVirtualPeripheral.pushItems(targets[i]._peripheralName, virtualFromSlot, limit)
+      else
+        moved = realFromPeripheral.pushItems(targets[i]._peripheralName, realFromSlot, limit)
+      end
       totalMoved = totalMoved + moved
       limit = limit - moved
       if limit == 0 then
@@ -269,7 +282,11 @@ local function wrap(...)
       return r
     end)()
 
-    local realFromPeripheral, realFromSlot = translateSlot(virtualFromPeripheral, virtualFromSlot)
+    local realFromPeripheral = virtualFromPeripheral
+    local realFromSlot = virtualFromSlot
+    repeat
+      realFromPeripheral, realFromSlot= translateSlot(realFromPeripheral, realFromSlot)
+    until not realFromPeripheral._isVirtual
 
     if not limit then
       local item = realFromPeripheral.getItemMeta(realFromSlot)
@@ -284,7 +301,11 @@ local function wrap(...)
     end
 
     if virtualToSlot then
-      local realToPeripheral, realToSlot = translateSlot(thisVirtualPeripheral, virtualToSlot)
+      local realToPeripheral = thisVirtualPeripheral
+      local realToSlot = virtualToSlot
+      repeat
+        realToPeripheral, realToSlot= translateSlot(realToPeripheral, realToSlot)
+      until not realToPeripheral._isVirtual
 
       return realToPeripheral.pullItems(realFromPeripheral._peripheralName, realFromSlot, limit, realToSlot)
     end
@@ -292,7 +313,12 @@ local function wrap(...)
     local targets = thisVirtualPeripheral._backingPeripheralList
     local totalMoved = 0
     for i = 1, #targets do
-      local moved = targets[i].pullItems(realFromPeripheral._peripheralName, realFromSlot, limit)
+      local moved = 0
+      if targets[i]._isVirtual then
+        moved = thisVirtualPeripheral.pullItems(targets[i]._peripheralName, virtualFromSlot, limit)
+      else
+        moved = targets[i].pullItems(realFromPeripheral._peripheralName, realFromSlot, limit)
+      end
       totalMoved = totalMoved + moved
       limit = limit - moved
       if limit == 0 then
@@ -306,16 +332,19 @@ local function wrap(...)
 
   thisVirtualPeripheral._backingPeripheralList = backingPeripheralsList -- lua needs read only tables which play nice
   thisVirtualPeripheral._translateSlot = function(slot)
-    local ok, err
-    ok, err, slot = pcall(translateSlot, thisVirtualPeripheral, slot)
+    local ok, peripheralOrErr
+    ok, peripheral, slot = pcall(translateSlot, thisVirtualPeripheral, slot)
     if not ok then
-      err = string.sub(err, 8)
+      err = string.sub(peripheralOrErr, 8)
       error(err, 2)
     end
-    return slot
+    local peripheral = peripheralOrErr
+    return peripheral, slot
   end
 
   thisVirtualPeripheral._peripheralName = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
+
+  thisVirtualPeripheral._isVirtual = true
 
   local function notImplemented()
     error("Sorry but this method is not implemented on virtualItemHandler, feel free to override this if you know what you want to do instead.",2)
