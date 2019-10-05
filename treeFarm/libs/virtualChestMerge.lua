@@ -142,7 +142,6 @@ local function wrap(...)
     end
     backingPeripheralsList[k] = peripheral.wrap(v)
     backingPeripheralsList[k]._peripheralName = v
-    backingPeripheralsList[k]._id = k
   end
 
   -- create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
@@ -193,7 +192,7 @@ local function wrap(...)
     return list
   end
 
-  function thisVirtualPeripheral.pushItems(virtualToName:string, virtualFromSlot:int[, limit:int[, virtualToSlot:int]]):int -- return value = count moved -- TODO: implement
+  function thisVirtualPeripheral.pushItems(virtualToName, virtualFromSlot, limit, virtualToSlot)
     argChecker(1, virtualToName, {"string"})
     argChecker(2, virtualFromSlot, {"number"})
     argChecker(3, limit, {"number", "nil"})
@@ -222,26 +221,71 @@ local function wrap(...)
       error("arg[3] limit must be 1 or greater")
     end
 
-
-
     if virtualToSlot then
       local realToPeripheral, realToSlot = translateSlot(virtualToName, virtualToSlot)
 
       return realFromPeripheral.pushItems(realToPeripheral._peripheralName, realFromSlot, limit, realToSlot)
     end
 
-    -- TODO: virtual slot is nil
-    -- NOTE: if virtualToSlot is nil then use first available slot
-    -- NOTE: if virtualToSlot is nil and the first used slot is too small then it overflows until the limit is reached or the chest is full
-    -- NOTE: if virtualToSlot has a value and that slot is too small then it moves as much as it can
-
+    local targets = virtualPeripheralList[virtualToName]._backingPeripheralsList
+    local totalMoved = 0
+    for i = 1, #targets do
+      local moved = realFromPeripheral.pushItems(targets[i]._peripheralName, realFromSlot, limit)
+      totalMoved = totalMoved + moved
+      limit = limit - moved
+      if limit == 0 then
+        break
+      end
+    end
+    return totalMoved
   end
 
-  function thisVirtualPeripheral.pullItems(virtualFromName:string, virtualFromSlot:int[, limit:int[, virtualToSlot:int]]):int -- TODO: implement
-    -- NOTE: get the remote to push?
+  function thisVirtualPeripheral.pullItems(virtualFromName, virtualFromSlot, limit, virtualToSlot)
+    argChecker(1, virtualFromName, {"string"})
+    argChecker(2, virtualFromSlot, {"number"})
+    argChecker(3, limit, {"number", "nil"})
+    argChecker(4, virtualToSlot, {"number", "nil"})
 
+    virtualFromSlot = math.floor(virtualFromSlot)
+    numberRangeChecker(2, virtualFromSlot, 1, thisVirtualPeripheral.size())
+    limit = limit and math.floor(limit)
+    virtualToSlot = virtualToSlot and function()
+      local r = math.floor(virtualToSlot)
+      numberRangeChecker(4, r, 1, virtualPeripheralList[virtualFromName].size())
+      return r
+    end()
 
+    local realFromPeripheral, realFromSlot = translateSlot(thisVirtualPeripheral, virtualFromSlot)
 
+    if not limit then
+      local item = realFromPeripheral.getItemMeta(realFromSlot)
+      if item then
+        limit = item.count
+      else
+        return 0 -- nothing to move
+      end
+    end
+    if limit < 1 then
+      error("arg[3] limit must be 1 or greater")
+    end
+
+    if virtualToSlot then
+      local realToPeripheral, realToSlot = translateSlot(virtualFromName, virtualToSlot)
+
+      return realFromPeripheral.pushItems(realToPeripheral._peripheralName, realFromSlot, limit, realToSlot)
+    end
+
+    local targets = virtualPeripheralList[virtualFromName]._backingPeripheralsList
+    local totalMoved = 0
+    for i = 1, #targets do
+      local moved = realToPeripheral.pullItems(targets[i]._peripheralName, realFromSlot, limit)
+      totalMoved = totalMoved + moved
+      limit = limit - moved
+      if limit == 0 then
+        break
+      end
+    end
+    return totalMoved
   end
 
 
