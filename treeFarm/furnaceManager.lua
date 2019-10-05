@@ -42,9 +42,9 @@ local function init()
   -- discover peripherals
 
   -- bind the non-chest peripherals
-  monitor = peripheral.find("monitor") -- TODO: test this #homeOnly
-  wirelessModem = peripheral.find("modem", function(_, m) return m.isWireless() end) -- TODO: test this #homeOnly
-  furnaces = table.pack(peripheral.find("furnace")) -- TODO: test this #homeOnly
+  monitor = peripheral.find("monitor")
+  wirelessModem = peripheral.find("modem", function(_, m) return m.isWireless() end)
+  furnaces = table.pack(peripheral.find("minecraft:furnace"))
 
 
 
@@ -58,7 +58,7 @@ local function init()
   if not linkedTurtleId then
 
     monitor.clear()
-    monitor.write("Waiting to pair with turtle, pairing code: "..os.computerId().."\nplease access turtle and pair") -- TODO: test this #homeOnly
+    monitor.write("Waiting to pair with turtle, pairing code: "..os.getComputerID().."\nplease access turtle and pair")
 
     -- TODO: how to do pairing
     -- rednet host stuff? unhost once paired (will unhosting disrupt the turtle?)
@@ -159,7 +159,7 @@ local function init()
       end
     else
       chests[chestRole] = peripheral.wrap(peripheralName)
-      chests[chestRole].peripheralName = peripheralName -- TODO: test this #homeOnly
+      chests[chestRole].peripheralName = peripheralName
     end
   end
 

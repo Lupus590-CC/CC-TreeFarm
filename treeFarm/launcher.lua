@@ -27,7 +27,7 @@ elseif turtle then -- If furnace manager is a normal computer than this will cha
 
 
   local function hasPickaxe()
-    -- TODO: try peripheral.getType #homeOnly
+    -- TODO: only way to detect an euiped tool is to unequip it and getItemDetail then reequip it
     -- make sure to keep the modem attached
     return false
   end
