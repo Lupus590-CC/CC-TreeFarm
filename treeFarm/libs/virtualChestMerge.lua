@@ -315,7 +315,7 @@ local function wrap(...)
     return slot
   end
 
-  thisVirtualPeripheral._Name = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
+  thisVirtualPeripheral._peripheralName = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
 
   local function notImplemented()
     error("Sorry but this method is not implemented on virtualItemHandler, feel free to override this if you know what you want to do instead.",2)
@@ -324,7 +324,7 @@ local function wrap(...)
   thisVirtualPeripheral.drop = notImplemented
   thisVirtualPeripheral.suck = notImplemented
 
-  virtualPeripheralList[thisVirtualPeripheral._Name] = thisVirtualPeripheral
+  virtualPeripheralList[thisVirtualPeripheral._peripheralName] = thisVirtualPeripheral
 
   return thisVirtualPeripheral
 end
