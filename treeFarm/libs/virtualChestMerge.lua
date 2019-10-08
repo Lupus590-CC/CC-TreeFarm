@@ -44,6 +44,8 @@
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.items.IItemHandler
 -- https://squiddev-cc.github.io/plethora/methods.html#org.squiddev.plethora.integration.MethodTransferLocations
 
+-- TODO: there is quite a bit of duplicated code, can this be reduced?
+
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
   if type(position) ~= "number" then
@@ -127,12 +129,9 @@ end
 
 -- wrap all
 local function wrap(...)
-  for k, v in ipairs(arg) do
-    argChecker(k, v, {"string"})
-  end
-
   local backingPeripheralsList = {}
   for k, v in ipairs(arg) do
+    argChecker(k, v, {"string"})
     if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
       error("arg["..k.."] not a valid peripheral side/name, got"..v)
     end
@@ -194,7 +193,18 @@ local function wrap(...)
     argChecker(3, limit, {"number", "nil"})
     argChecker(4, virtualToSlot, {"number", "nil"})
 
-    local virtualToPeripheral = virtualPeripheralList[virtualToName]
+    local virtualToPeripheral = virtualPeripheralList[virtualToName] or (function()
+      -- make a fake virtualPeripheral so that we can unwrap it latter, because the item manipulation assumes that the remote peripheral is virtual
+      if !peripheral.isPresent(virtualToName) then
+        return nil
+      end
+      local realPeripheralName = virtualToName
+      local p = peripheral.wrap(realPeripheralName)
+      p._backingPeripheralList = {p} -- circular loop, will the break things?
+      p._peripheralName = realPeripheralName
+      return p
+    end)() -- TODO: should allow virtual to interact with real peripherals 'directly' #homeOnly
+    -- TODO: copy to pullItems
 
     if not virtualToPeripheral then
       error("arg[1] no virtual peripheral with name "..virtualToName,2)
@@ -344,6 +354,7 @@ local function wrap(...)
     error("Sorry but this method is not implemented on virtualItemHandler, feel free to override this if you know what you want to do instead.",2)
   end
 
+  -- TODO: should I add this to any other functions I find (like if a furnace got wrapped then stub the getFuelTicks function)?
   thisVirtualPeripheral.drop = notImplemented
   thisVirtualPeripheral.suck = notImplemented
 

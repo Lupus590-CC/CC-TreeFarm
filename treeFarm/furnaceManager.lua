@@ -6,16 +6,21 @@ local daemonManager = require("treeFarm.libs.daemonManager")
 local config = require("treeFarm.libs.config")
 local taskManager = require("treeFarm.libs.taskManager")
 local checkpoint = require("treeFarm.libs.checkpoint") -- do I need this here? I could just parallel all of the functions
+local virtualChestMerge = require("treeFarm.libs.virtualChestMerge")
 
 -- maps peripheral names
 local chestMapFile = ".chestMap"
-local chests = {}
+local chests = {} -- input, output, refuel
 local furnaces = {}
 local wirelessModem -- NOTE: should I move the wireless modemodem onto the computer or just upstairs? code shouldn't care as I use peripheral.find
 local monitor
 
+-- TODO: test furnace slots
+local furnaceInputSlotNumber = 1
+local furnaceFuelSlotNumber = 2
+local furnaceOutputSlotNumber = 3
 
-local linkedTurtleId
+local linkedTurtleId = "manualTesting" -- TODO: change to nil and implement turtle pairing and communicating
 
 local function fuelValueForFurnace(turtleFuelValue)
   argChecker(1, turtleFuelValue, {"number"})
@@ -45,6 +50,13 @@ local function init()
   monitor = peripheral.find("monitor")
   wirelessModem = peripheral.find("modem", function(_, m) return m.isWireless() end)
   furnaces = table.pack(peripheral.find("minecraft:furnace"))
+  local peripherals = peripheral.getNames()
+  for k, peripheralName in pairs(peripherals) do
+    if string.find(peripheralName, "furnace") then
+        furnaces[k] = virtualChestMerge.wrap(peripheralName)
+        furnaces[k]._peripheralName = peripheralName
+    end
+  end
 
 
 
@@ -52,6 +64,9 @@ local function init()
   -- if we have a turtle then test the connection to make sure it still exists
   if linkedTurtleId then
     --TODO: ping the turtle, if no responce then unpair the turtle
+    monitor.clear()
+    monitor.write("Player is standing in for the turtle for init testing, click the monitor to continue")
+    os.pullEvent("monitor_touch")
   end
 
 
@@ -69,29 +84,35 @@ local function init()
     -- computer broadcast "I am ready to pair, here is my id"
     -- turtle directly "I want to pair with you, here's my id"
     -- computer broadcast "I have paired with a turtle with id"
-
   end
 
   -- if nothing is mapped yet then start mapping
   if (not chestMap.input) or (not chestMap.output) or (not chestMap.refuel) then
 
     monitor.clear()
-    monitor.write("Please don't open the chests, chest mapping in progress")
+    monitor.write("Please don't open the chests or drop items into the water stream, chest mapping in progress")
 
 
     -- filter names for chests and get their inital state
     local chestStates = {}
-    local peripherals = peripheral.getNames()
-    for _, peripheralName in pairs(peripheral) do
+    for _, peripheralName in pairs(peripherals) do
       if string.find(peripheralName, "chest") then
           chestStates[peripheralName] = peripheral.call(peripheralName, "list")
       end
     end
 
     -- TODO: message the turtle to drop stuff
+    -- need to tell the turtle how many chests we have so that it can drop atleast that many items (could get away with one less as one will be the input chest)
     -- TODO: wait for turtle to say that it has dropped the stuff
-    -- wait a few seconds for the items to get the chest
 
+    -- TODO: what if the turtle doesn't have enough items to drop?
+
+    monitor.clear()
+    monitor.write("waiting for drop signal")
+    os.pullEvent("monitor_touch")
+
+    -- wait a few seconds for the items to get the chest
+    sleep(5) -- TODO: time how long it takes for items to move from the turtles best drop position #homeOnly
 
     -- the chest which has different items in the input chest
     for chestName, oldState in pairs(chestStates) do
@@ -107,16 +128,25 @@ local function init()
         break
       end
     end
-    -- TODO: move one item to each of the other chests
 
-
-    -- rescan the chest states
+    -- move one item to each of the other chests and rescan the chest states
     for chestName in pairs(chestStates) do
+      local fromSlot
+      for k in pairs(peripheral.call(chestName, "list")) do -- any slot with an item will do
+        if type(k) == "number" then
+          fromSlot = k
+          break
+        end
+      end
+      peripheral.call(chestMap.input, "pushItem", chestName, fromSlot, 1)
       chestStates[chestName] = peripheral.call(chestName, "list")
     end
 
 
     -- TODO: message the turtle to remove an item from the refuel chest
+    monitor.clear()
+    monitor.write("waiting for turtle to remove item from refuel chest")
+    os.pullEvent("monitor_touch")
 
     -- the chest now missing an item which is not the input chest is the refuel chest
     for chestName, oldState in pairs(chestStates) do
@@ -153,16 +183,11 @@ local function init()
   -- wrap the chests
   for chestRole, peripheralName in pairs(chestMap) do
     if type(peripheralName) == "table" then -- output "chest" is a list of chests not a single chest
-      for k, v in ipairs(peripheralName) do
-        chests.output[k] = peripheral.wrap(v) -- TODO: can I virtually combine of the output chests like a RAID on several HDD
-        -- meta table methods on the chestMap.output table?
-      end
+      chests[chestRole] = virtualChestMerge.wrap(table.unpack(peripheralName))
     else
-      chests[chestRole] = peripheral.wrap(peripheralName)
-      chests[chestRole].peripheralName = peripheralName
+      chests[chestRole] = virtualChestMerge.wrap(peripheralName)
     end
   end
-
 end
 
 local function emptyCollectionChest()
@@ -174,20 +199,23 @@ local function emptyCollectionChest()
 
 end
 
+-- TODO: how much fuel to keep where?
+
 local function refuelfurnaces() -- NOTE: can I get this to use different fuels?
   -- TODO: implement refuelfurnaces
   -- if a furnace has 8 items or more that will not get smelted due to insufficent fuel then search output chests and furnace output slots and add a charcoal
 end
 
 local function emptyFurnaces()
-  -- TODO: implement emptyFurnaces
-  -- just dump everything in the output slot into the output chests
-  -- don't forget the turtle refuel chest
+  for k, v in ipairs(furnaces) do
+    chests.refuel.pullItems(v, furnaceOutputSlotNumber)
+  end
 end
 
 local function refillTurtleChest()
   -- TODO: implement refillTurtleChest
   -- move stuff from the output chests to fill the turtle chest
+  -- move oeverflow to output
 end
 
 -- TODO: farm manager watchdog for if the farm manager forwards an error to us
@@ -202,9 +230,6 @@ end
 
 
 local furnaceManager = {
-  loadThisFurnace = loadThisFurnace,
-  getResources = getResources,
-  putAwayNotWood = putAwayNotWood,
   run = run
 }
 
