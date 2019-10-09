@@ -87,7 +87,7 @@ local function init()
   end
 
   -- if nothing is mapped yet then start mapping
-  if (not chestMap.input) or (not chestMap.output) or (not chestMap.refuel) then
+  if not (chestMap.input and chestMap.output and chestMap.refuel and chestMap.sapling) then
 
     monitor.clear()
     monitor.write("Please don't open the chests or drop items into the water stream, chest mapping in progress")
@@ -159,6 +159,41 @@ local function init()
         end
       end
       if chestMap.refuel then -- early exit
+        break
+      end
+    end
+
+
+    -- move one item to each of the other chests and rescan the chest states
+    for chestName in pairs(chestStates) do
+      local fromSlot
+      for k in pairs(peripheral.call(chestName, "list")) do -- any slot with an item will do
+        if type(k) == "number" then
+          fromSlot = k
+          break
+        end
+      end
+      peripheral.call(chestMap.input, "pushItem", chestName, fromSlot, 1)
+      chestStates[chestName] = peripheral.call(chestName, "list")
+    end
+
+
+    -- TODO: message the turtle to remove an item from the sapling chest
+    monitor.clear()
+    monitor.write("waiting for turtle to remove item from sapling chest")
+    os.pullEvent("monitor_touch")
+
+    -- the chest now missing an item which is not the input chest is the sapling chest
+    for chestName, oldState in pairs(chestStates) do
+      local newState = peripheral.call(chestName, "list")
+      for slot, item in pairs(oldState) do
+        if itemUtils.itemEqualityComparerWithQuantity(newState[slot], item) then
+          chestMap.sapling = chestName
+          chestStates[chestName] = nil
+          break
+        end
+      end
+      if chestMap.sapling then -- early exit
         break
       end
     end
