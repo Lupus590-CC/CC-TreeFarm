@@ -350,14 +350,6 @@ local function wrap(...)
 
   thisVirtualPeripheral._isVirtual = true
 
-  local function notImplemented()
-    error("Sorry but this method is not implemented on virtualItemHandler, feel free to override this if you know what you want to do instead.",2)
-  end
-
-  -- TODO: should I add this to any other functions I find (like if a furnace got wrapped then stub the getFuelTicks function)?
-  thisVirtualPeripheral.drop = notImplemented
-  thisVirtualPeripheral.suck = notImplemented
-
   virtualPeripheralList[thisVirtualPeripheral._peripheralName] = thisVirtualPeripheral
 
   return thisVirtualPeripheral

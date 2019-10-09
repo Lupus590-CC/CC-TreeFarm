@@ -190,13 +190,39 @@ local function init()
   end
 end
 
-local function emptyCollectionChest()
-  -- TODO: implement emptyCollectionChest
-  -- for each slot in the imput chest
-    -- if the item stack is saplings then put as much as possible in the turtle's refuel chest and move the rest to the output chests
-    -- elseif the item is logs then move half of it to the furnaces input (make multiples of 8) and the other half to the output chests
-    -- else move the item to the output chests
+local function compactSlots(chest)
+  -- TODO: arg checker?
+  for k, v in pairs(chest.list()) do
+    chest.pushItem(chest._peripheralName, k) -- TODO: test this #homeOnly
+  end
+end
 
+local outputChestFull()
+  -- TODO: pause everything
+  -- stop the turtle and let the user know that the program has stopped because the output is full
+  monitor.clear()
+  monitor.write("PAUSED: Output inventory is full")
+  os.pullEvent("monitor_touch")
+  -- need an event which tells us that the output has space again
+end
+
+local function chestAndFurnaceManagmentLoop()
+  -- remove junk from the input chest
+  for slot, item in pairs(chest.input.list()) do
+    if not (itemUtils.itemEqualityComparer(item, itemIds.sapling) or itemUtils.itemEqualityComparer(item, itemIds.charcoal) or itemUtils.itemEqualityComparer(item, itemIds.log)) then
+      local moved = chest.input.pushItem(chest.output._peripheralName, slot)
+      if moved < item.count then
+        outputChestFull()
+      end
+    end
+  end
+  -- TODO: restock the refuel chest
+
+  -- TODO: empty out the output of the furnaces, only remove 8 at a time so that if the output is full then it won't waste fuel
+
+  -- TODO: refuel the furnaces
+
+  -- TODO: reload the furnaces, 8 at a time to use fuel efficiently
 end
 
 -- TODO: how much fuel to keep where?

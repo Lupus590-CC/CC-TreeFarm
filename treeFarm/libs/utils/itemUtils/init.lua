@@ -1,7 +1,9 @@
 local itemIds = require("treeFarm.libs.utils.itemUtils.itemIds")
 
 -- TODO: allow plethora to use this
-
+-- NOTE: a lot of this is very turtle specific
+-- TODO: convert to plethora and add a virtual plethora layer for the turtle inventory?
+-- NOTE: turtle can't fully emulate plethora
 
 -- internal utility
 local function itemIdArgCheck(itemIdArg, argPosition)

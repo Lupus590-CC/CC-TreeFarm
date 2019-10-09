@@ -1,4 +1,7 @@
-TODO: organise this file
+TODO: organise this file #high
+
+Does the turtle need an introspection module?
+  I could add another restock/refuel chest
 
 NOTE: pickaxe doesn't show up when equipped and scanner has a different name
 
