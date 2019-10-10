@@ -10,7 +10,7 @@ local virtualChestMerge = require("treeFarm.libs.virtualChestMerge")
 
 -- maps peripheral names
 local chestMapFile = ".chestMap"
-local chests = {} -- input, output, refuel
+local chests = {} -- input, output, charcoal, sapling, log
 local furnaces = {}
 local wirelessModem -- NOTE: should I move the wireless modemodem onto the computer or just upstairs? code shouldn't care as I use peripheral.find
 local monitor
@@ -27,7 +27,6 @@ local function fuelValueForFurnace(turtleFuelValue)
   return turtleFuelValue/10
 end
 
--- NOTE: don't fill the turtle refuel chest, just keep a stack of both items in there.
 
 local function init()
   -- check config for peripheral map
@@ -87,7 +86,7 @@ local function init()
   end
 
   -- if nothing is mapped yet then start mapping
-  if not (chestMap.input and chestMap.output and chestMap.refuel and chestMap.sapling) then
+  if not (chestMap.input and chestMap.output and chestMap.charcoal and chestMap.sapling) then
 
     monitor.clear()
     monitor.write("Please don't open the chests or drop items into the water stream, chest mapping in progress")
@@ -143,47 +142,32 @@ local function init()
     end
 
 
-    -- TODO: message the turtle to remove an item from the refuel chest
+    -- TODO: message the turtle to remove an item from the charcoal chest
     monitor.clear()
-    monitor.write("waiting for turtle to remove item from refuel chest")
+    monitor.write("waiting for turtle to remove item from charcoal chest")
     os.pullEvent("monitor_touch")
 
-    -- the chest now missing an item which is not the input chest is the refuel chest
+    -- the chest now missing an item is the charcoal chest
     for chestName, oldState in pairs(chestStates) do
       local newState = peripheral.call(chestName, "list")
       for slot, item in pairs(oldState) do
         if itemUtils.itemEqualityComparerWithQuantity(newState[slot], item) then
-          chestMap.refuel = chestName
+          chestMap.charcoal = chestName
           chestStates[chestName] = nil
           break
         end
       end
-      if chestMap.refuel then -- early exit
+      if chestMap.charcoal then -- early exit
         break
       end
     end
-
-
-    -- move one item to each of the other chests and rescan the chest states
-    for chestName in pairs(chestStates) do
-      local fromSlot
-      for k in pairs(peripheral.call(chestName, "list")) do -- any slot with an item will do
-        if type(k) == "number" then
-          fromSlot = k
-          break
-        end
-      end
-      peripheral.call(chestMap.input, "pushItem", chestName, fromSlot, 1)
-      chestStates[chestName] = peripheral.call(chestName, "list")
-    end
-
 
     -- TODO: message the turtle to remove an item from the sapling chest
     monitor.clear()
     monitor.write("waiting for turtle to remove item from sapling chest")
     os.pullEvent("monitor_touch")
 
-    -- the chest now missing an item which is not the input chest is the sapling chest
+    -- the chest now missing an item is the sapling chest
     for chestName, oldState in pairs(chestStates) do
       local newState = peripheral.call(chestName, "list")
       for slot, item in pairs(oldState) do
@@ -194,6 +178,26 @@ local function init()
         end
       end
       if chestMap.sapling then -- early exit
+        break
+      end
+    end
+
+    -- TODO: message the turtle to remove an item from the log chest
+    monitor.clear()
+    monitor.write("waiting for turtle to remove item from log chest")
+    os.pullEvent("monitor_touch")
+
+    -- the chest now missing an item is the log chest
+    for chestName, oldState in pairs(chestStates) do
+      local newState = peripheral.call(chestName, "list")
+      for slot, item in pairs(oldState) do
+        if itemUtils.itemEqualityComparerWithQuantity(newState[slot], item) then
+          chestMap.log = chestName
+          chestStates[chestName] = nil
+          break
+        end
+      end
+      if chestMap.log then -- early exit
         break
       end
     end
@@ -241,6 +245,7 @@ local outputChestFull()
   -- need an event which tells us that the output has space again
 end
 
+-- NOTE: SquidDev says that it should be safe to split up and parallelise this function
 local function chestAndFurnaceManagmentLoop()
   -- remove junk from the input chest
   for slot, item in pairs(chest.input.list()) do
@@ -251,14 +256,29 @@ local function chestAndFurnaceManagmentLoop()
       end
     end
   end
-  -- TODO: restock the refuel chest
+
+  -- if any of the other chests end up full then let it 'overflow' into the output chest
+
+  -- TODO: restock the charcoal chest
+
+  -- TODOL restock the sapling chest
 
   -- TODO: empty out the output of the furnaces, only remove 8 at a time so that if the output is full then it won't waste fuel
 
   -- TODO: refuel the furnaces
+  -- take from output first and then the charcoal chest
 
   -- TODO: reload the furnaces, 8 at a time to use fuel efficiently
+  -- TODO: add a furnace log intermediary chest?
+
+  -- TODO: restock the charcoal chest
+
+  -- TODOL restock the sapling chest
 end
+
+
+
+--[[ legacy junk
 
 -- TODO: how much fuel to keep where?
 
@@ -269,7 +289,7 @@ end
 
 local function emptyFurnaces()
   for k, v in ipairs(furnaces) do
-    chests.refuel.pullItems(v, furnaceOutputSlotNumber)
+    chests.charcoal.pullItems(v, furnaceOutputSlotNumber)
   end
 end
 
@@ -278,6 +298,9 @@ local function refillTurtleChest()
   -- move stuff from the output chests to fill the turtle chest
   -- move oeverflow to output
 end
+
+]]
+
 
 -- TODO: farm manager watchdog for if the farm manager forwards an error to us
 local function farmerWatchdog()
