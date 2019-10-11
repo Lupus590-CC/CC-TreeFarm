@@ -20,7 +20,7 @@ local furnaceInputSlotNumber = 1
 local furnaceFuelSlotNumber = 2
 local furnaceOutputSlotNumber = 3
 
-local linkedTurtleId = "manualTesting" -- TODO: change to nil and implement turtle pairing and communicating
+local linkedTurtleId = "manualTesting" -- TODO: change to nil and implement turtle pairing and communicating #turtle
 
 local function fuelValueForFurnace(turtleFuelValue)
   argChecker(1, turtleFuelValue, {"number"})
@@ -53,7 +53,6 @@ local function init()
   for k, peripheralName in pairs(peripherals) do
     if string.find(peripheralName, "furnace") then
         furnaces[k] = virtualChestMerge.wrap(peripheralName)
-        furnaces[k]._peripheralName = peripheralName
     end
   end
 
@@ -62,7 +61,7 @@ local function init()
 
   -- if we have a turtle then test the connection to make sure it still exists
   if linkedTurtleId then
-    --TODO: ping the turtle, if no responce then unpair the turtle
+    --TODO: ping the turtle, if no responce then unpair the turtle #turtle
     monitor.clear()
     monitor.write("Player is standing in for the turtle for init testing, click the monitor to continue")
     os.pullEvent("monitor_touch")
@@ -74,7 +73,7 @@ local function init()
     monitor.clear()
     monitor.write("Waiting to pair with turtle, pairing code: "..os.getComputerID().."\nplease access turtle and pair")
 
-    -- TODO: how to do pairing
+    -- TODO: how to do pairing #turtle
     -- rednet host stuff? unhost once paired (will unhosting disrupt the turtle?)
     -- how does bluetooth pair?
     -- other conputer handshake things
@@ -100,11 +99,11 @@ local function init()
       end
     end
 
-    -- TODO: message the turtle to drop stuff
+    -- TODO: message the turtle to drop stuff #turtle
     -- need to tell the turtle how many chests we have so that it can drop atleast that many items (could get away with one less as one will be the input chest)
-    -- TODO: wait for turtle to say that it has dropped the stuff
+    -- TODO: wait for turtle to say that it has dropped the stuff #turtle
 
-    -- TODO: what if the turtle doesn't have enough items to drop?
+    -- TODO: what if the turtle doesn't have enough items to drop? #turtle
 
     monitor.clear()
     monitor.write("waiting for drop signal")
@@ -142,7 +141,7 @@ local function init()
     end
 
 
-    -- TODO: message the turtle to remove an item from the charcoal chest
+    -- TODO: message the turtle to remove an item from the charcoal chest #turtle
     monitor.clear()
     monitor.write("waiting for turtle to remove item from charcoal chest")
     os.pullEvent("monitor_touch")
@@ -162,7 +161,7 @@ local function init()
       end
     end
 
-    -- TODO: message the turtle to remove an item from the sapling chest
+    -- TODO: message the turtle to remove an item from the sapling chest #turtle
     monitor.clear()
     monitor.write("waiting for turtle to remove item from sapling chest")
     os.pullEvent("monitor_touch")
@@ -182,7 +181,7 @@ local function init()
       end
     end
 
-    -- TODO: message the turtle to remove an item from the log chest
+    -- TODO: message the turtle to remove an item from the log chest #turtle
     monitor.clear()
     monitor.write("waiting for turtle to remove item from log chest")
     os.pullEvent("monitor_touch")
@@ -231,8 +230,8 @@ end
 
 local function compactSlots(chest)
   -- TODO: arg checker?
-  for k, v in pairs(chest.list()) do
-    chest.pushItem(chest._peripheralName, k) -- TODO: test this #homeOnly
+  for slot in pairs(chest.list()) do
+    chest.pushItem(chest._peripheralName, slot) -- TODO: test this #homeOnly
   end
 end
 
@@ -259,48 +258,151 @@ local function chestAndFurnaceManagmentLoop()
 
   -- if any of the other chests end up full then let it 'overflow' into the output chest
 
-  -- TODO: restock the charcoal chest
+  -- TODO: lots of repeated code here
+  -- restock the charcoal chest from the input chest
+  for slot, item in pairs(chest.input.list()) do
+    if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
+      local moved = chest.input.pushItem(chest.charcoal._peripheralName, slot)
+      if moved < item.count then
+        break -- chest full
+      end
+    end
+  end
 
-  -- TODOL restock the sapling chest
+  -- move any remaining charcoal to the output chest
+  for slot, item in pairs(chest.input.list()) do
+    if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
+      local moved = chest.input.pushItem(chest.output._peripheralName, slot)
+      if moved < item.count then
+        outputChestFull()
+      end
+    end
+  end
 
-  -- TODO: empty out the output of the furnaces, only remove 8 at a time so that if the output is full then it won't waste fuel
+  -- restock the sapling chest from the input chest
+  for slot, item in pairs(chest.input.list()) do
+    if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
+      local moved = chest.input.pushItem(chest.sapling._peripheralName, slot)
+      if moved < item.count then
+        break -- chest full
+      end
+    end
+  end
+
+  -- move any remaining saplings to the output chest
+  for slot, item in pairs(chest.input.list()) do
+    if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
+      local moved = chest.input.pushItem(chest.output._peripheralName, slot)
+      if moved < item.count then
+        outputChestFull()
+      end
+    end
+  end
+
+  -- restock the log chest from the input chest
+  for slot, item in pairs(chest.input.list()) do
+    if itemUtils.itemEqualityComparer(item, itemIds.log) then
+      local moved = chest.input.pushItem(chest.log._peripheralName, slot)
+      if moved < item.count then
+        break -- chest full
+      end
+    end
+  end
+
+  -- move any remaining logs to the output chest
+  for slot, item in pairs(chest.input.list()) do
+    if itemUtils.itemEqualityComparer(item, itemIds.log) then
+      local moved = chest.input.pushItem(chest.output._peripheralName, slot)
+      if moved < item.count then
+        outputChestFull()
+      end
+    end
+  end
+
+  -- empty out the output of the furnaces, only remove 8 at a time so that if the output is full then it won't waste fuel
+  for _, furnace in pairs(furnaces) do
+    local item = furnace.getItemMeta(furnaceOutputSlotNumber)
+    local currentCount = item and item.count or 0
+    local moveLimit = 0
+    while currentCount > moveLimit + 8 do
+      moveLimit = moveLimit + 8
+    end
+    if moveLimit > 0 then
+      furnace.pushItem(chests.charcoal._peripheralName, furnaceOutputSlotNumber, moveLimit)
+    end
+  end
+
+
+  -- restock the charcoal chest from the input chest
+  for slot, item in pairs(chest.input.list()) do
+    if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
+      local moved = chest.input.pushItem(chest.charcoal._peripheralName, slot)
+      if moved < item.count then
+        break -- chest full
+      end
+    end
+  end
+
+  -- move any remaining charcoal to the output chest
+  for slot, item in pairs(chest.input.list()) do
+    if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
+      local moved = chest.input.pushItem(chest.output._peripheralName, slot)
+      if moved < item.count then
+        outputChestFull()
+      end
+    end
+  end
+
 
   -- TODO: refuel the furnaces
-  -- take from output first and then the charcoal chest
+  -- if we frequently empty the charcoal chest then start pulling from output
+  for _, furnace in pairs(furnaces) do
+    for i = 1, chest.charcoal.size() do
+
+    end
+    local limit = 2
+    local moved = furnace.pullItem(chest.charcoal._peripheralName, 1, limit, furnaceInputSlotNumber)
+    if moved < limit then
+      for
+        furnace.pullItem(chest.output._peripheralName, 1, limit, furnaceInputSlotNumber)
+      end
+    end
+  end
 
   -- TODO: reload the furnaces, 8 at a time to use fuel efficiently
-  -- TODO: add a furnace log intermediary chest?
+  -- TODO: add a furnace log intermediary chest #homeOnly
+  --[[for _, furnace in pairs(furnaces) do
+    local item = furnace.getItemMeta(furnaceOutputSlotNumber)
+    local currentCount = item and item.count or 0
+    local moveLimit = 0
+    while currentCount > moveLimit + 8 do
+      moveLimit = moveLimit + 8
+    end
+    if moveLimit > 0 then
+      furnace.pushItem(chests.charcoal._peripheralName, furnaceOutputSlotNumber, moveLimit)
+    end
+  end]]
 
-  -- TODO: restock the charcoal chest
+  -- restock the charcoal chest from the output chest
+  for slot, item in pairs(chest.output.list()) do
+    if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
+      local moved = chest.input.pushItem(chest.charcoal._peripheralName, slot)
+      if moved < item.count then
+        break -- chest full
+      end
+    end
+  end
 
-  -- TODOL restock the sapling chest
-end
-
-
-
---[[ legacy junk
-
--- TODO: how much fuel to keep where?
-
-local function refuelfurnaces() -- NOTE: can I get this to use different fuels?
-  -- TODO: implement refuelfurnaces
-  -- if a furnace has 8 items or more that will not get smelted due to insufficent fuel then search output chests and furnace output slots and add a charcoal
-end
-
-local function emptyFurnaces()
-  for k, v in ipairs(furnaces) do
-    chests.charcoal.pullItems(v, furnaceOutputSlotNumber)
+  -- restock the sapling chest from the output chest
+  for slot, item in pairs(chest.output.list()) do
+    if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
+      local moved = chest.input.pushItem(chest.sapling._peripheralName, slot)
+      if moved < item.count then
+        break -- chest full
+      end
+    end
   end
 end
-
-local function refillTurtleChest()
-  -- TODO: implement refillTurtleChest
-  -- move stuff from the output chests to fill the turtle chest
-  -- move oeverflow to output
-end
-
-]]
-
 
 -- TODO: farm manager watchdog for if the farm manager forwards an error to us
 local function farmerWatchdog()
