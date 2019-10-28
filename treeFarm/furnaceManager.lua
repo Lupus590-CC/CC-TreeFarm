@@ -15,7 +15,6 @@ local furnaces = {}
 local wirelessModem -- NOTE: should I move the wireless modemodem onto the computer or just upstairs? code shouldn't care as I use peripheral.find
 local monitor
 
--- TODO: test furnace slots
 local furnaceInputSlotNumber = 1
 local furnaceFuelSlotNumber = 2
 local furnaceOutputSlotNumber = 3
