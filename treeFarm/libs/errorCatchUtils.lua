@@ -82,7 +82,7 @@ local function tableChecker(positionInfo, tableToCheck, templateTable, rejectExt
     end
 
     local validTypesList = templateTable[key]
-    if not elementIsValid(value, validTypesList) then
+    if validTypesList and not elementIsValid(value, validTypesList) then
       local expectedTypes
       if #validTypesList == 1 then
           expectedTypes = validTypesList[1]

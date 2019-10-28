@@ -110,7 +110,7 @@ local function init()
     os.pullEvent("monitor_touch")
 
     -- wait a few seconds for the items to get the chest
-    sleep(5) -- TODO: time how long it takes for items to move from the turtles best drop position #homeOnly
+    sleep(5)
 
     -- the chest which has different items in the input chest
     for chestName, oldState in pairs(chestStates) do
@@ -229,9 +229,9 @@ local function init()
 end
 
 local function compactSlots(chest)
-  -- TODO: arg checker?
+  tableChecker("arg[1]", chest, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
   for slot in pairs(chest.list()) do
-    chest.pushItems(chest._peripheralName, slot) -- TODO: test this #homeOnly
+    chest.pushItems(chest._peripheralName, slot)
   end
 end
 
