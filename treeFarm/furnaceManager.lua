@@ -12,7 +12,7 @@ local virtualChestMerge = require("treeFarm.libs.virtualChestMerge")
 local chestMapFile = ".chestMap"
 local chests = {} -- input, output, charcoal, sapling, log
 local furnaces = {}
-local wirelessModem -- NOTE: should I move the wireless modemodem onto the computer or just upstairs? code shouldn't care as I use peripheral.find
+local wirelessModem
 local monitor
 
 local furnaceInputSlotNumber = 1
