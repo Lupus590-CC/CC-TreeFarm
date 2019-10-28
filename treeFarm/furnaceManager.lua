@@ -136,7 +136,7 @@ local function init()
           break
         end
       end
-      peripheral.call(chestMap.input, "pushItem", chestName, fromSlot, 1)
+      peripheral.call(chestMap.input, "pushItems", chestName, fromSlot, 1)
       chestStates[chestName] = peripheral.call(chestName, "list")
     end
 
@@ -231,7 +231,7 @@ end
 local function compactSlots(chest)
   -- TODO: arg checker?
   for slot in pairs(chest.list()) do
-    chest.pushItem(chest._peripheralName, slot) -- TODO: test this #homeOnly
+    chest.pushItems(chest._peripheralName, slot) -- TODO: test this #homeOnly
   end
 end
 
@@ -249,7 +249,7 @@ local function chestAndFurnaceManagmentLoop()
   -- remove junk from the input chest
   for slot, item in pairs(chest.input.list()) do
     if not (itemUtils.itemEqualityComparer(item, itemIds.sapling) or itemUtils.itemEqualityComparer(item, itemIds.charcoal) or itemUtils.itemEqualityComparer(item, itemIds.log)) then
-      local moved = chest.input.pushItem(chest.output._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.output._peripheralName, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -262,7 +262,7 @@ local function chestAndFurnaceManagmentLoop()
   -- restock the charcoal chest from the input chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItem(chest.charcoal._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.charcoal._peripheralName, slot)
       if moved < item.count then
         break -- chest full
       end
@@ -272,7 +272,7 @@ local function chestAndFurnaceManagmentLoop()
   -- move any remaining charcoal to the output chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItem(chest.output._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.output._peripheralName, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -282,7 +282,7 @@ local function chestAndFurnaceManagmentLoop()
   -- restock the sapling chest from the input chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
-      local moved = chest.input.pushItem(chest.sapling._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.sapling._peripheralName, slot)
       if moved < item.count then
         break -- chest full
       end
@@ -292,7 +292,7 @@ local function chestAndFurnaceManagmentLoop()
   -- move any remaining saplings to the output chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
-      local moved = chest.input.pushItem(chest.output._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.output._peripheralName, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -302,7 +302,7 @@ local function chestAndFurnaceManagmentLoop()
   -- restock the log chest from the input chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.log) then
-      local moved = chest.input.pushItem(chest.log._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.log._peripheralName, slot)
       if moved < item.count then
         break -- chest full
       end
@@ -312,7 +312,7 @@ local function chestAndFurnaceManagmentLoop()
   -- move any remaining logs to the output chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.log) then
-      local moved = chest.input.pushItem(chest.output._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.output._peripheralName, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -328,7 +328,7 @@ local function chestAndFurnaceManagmentLoop()
       moveLimit = moveLimit + 8
     end
     if moveLimit > 0 then
-      furnace.pushItem(chests.charcoal._peripheralName, furnaceOutputSlotNumber, moveLimit)
+      furnace.pushItems(chests.charcoal._peripheralName, furnaceOutputSlotNumber, moveLimit)
     end
   end
 
@@ -336,7 +336,7 @@ local function chestAndFurnaceManagmentLoop()
   -- restock the charcoal chest from the input chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItem(chest.charcoal._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.charcoal._peripheralName, slot)
       if moved < item.count then
         break -- chest full
       end
@@ -346,7 +346,7 @@ local function chestAndFurnaceManagmentLoop()
   -- move any remaining charcoal to the output chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItem(chest.output._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.output._peripheralName, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -361,10 +361,10 @@ local function chestAndFurnaceManagmentLoop()
 
     end
     local limit = 2
-    local moved = furnace.pullItem(chest.charcoal._peripheralName, 1, limit, furnaceInputSlotNumber)
+    local moved = furnace.pullItems(chest.charcoal._peripheralName, 1, limit, furnaceInputSlotNumber)
     if moved < limit then
       for
-        furnace.pullItem(chest.output._peripheralName, 1, limit, furnaceInputSlotNumber)
+        furnace.pullItems(chest.output._peripheralName, 1, limit, furnaceInputSlotNumber)
       end
     end
   end
@@ -379,14 +379,14 @@ local function chestAndFurnaceManagmentLoop()
       moveLimit = moveLimit + 8
     end
     if moveLimit > 0 then
-      furnace.pushItem(chests.charcoal._peripheralName, furnaceOutputSlotNumber, moveLimit)
+      furnace.pushItems(chests.charcoal._peripheralName, furnaceOutputSlotNumber, moveLimit)
     end
   end]]
 
   -- restock the charcoal chest from the output chest
   for slot, item in pairs(chest.output.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItem(chest.charcoal._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.charcoal._peripheralName, slot)
       if moved < item.count then
         break -- chest full
       end
@@ -396,7 +396,7 @@ local function chestAndFurnaceManagmentLoop()
   -- restock the sapling chest from the output chest
   for slot, item in pairs(chest.output.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
-      local moved = chest.input.pushItem(chest.sapling._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.sapling._peripheralName, slot)
       if moved < item.count then
         break -- chest full
       end
