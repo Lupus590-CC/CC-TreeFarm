@@ -1,6 +1,7 @@
 require("treeFarm.libs.errorCatchUtils")
 local utils = require("treeFarm.libs.utils")
-local itemUtils = utils.itemUtils
+local invUtils = utils.invUtils -- TODO: use invUtils
+local itemUtils = invUtils.itemUtils
 local itemIds = itemUtils.itemIds
 local daemonManager = require("treeFarm.libs.daemonManager")
 local config = require("treeFarm.libs.config")
@@ -188,7 +189,7 @@ local function init()
     -- the chest now missing an item is the log chest
     for chestName, oldState in pairs(chestStates) do
       local newState = peripheral.call(chestName, "list")
-      for slot, item in pairs(oldState) do
+      for slot, item in pairs(oldState) do -- TODO: should be for each slot?
         if itemUtils.itemEqualityComparerWithQuantity(newState[slot], item) then
           chestMap.log = chestName
           chestStates[chestName] = nil
@@ -369,7 +370,7 @@ local function chestAndFurnaceManagmentLoop()
   end
 
   -- TODO: reload the furnaces, 8 at a time to use fuel efficiently
-  -- TODO: add a furnace log intermediary chest #homeOnly
+  -- TODO: add a furnace log intermediary chest and update the screenshots #homeOnly
   --[[for _, furnace in pairs(furnaces) do
     local item = furnace.getItemMeta(furnaceOutputSlotNumber)
     local currentCount = item and item.count or 0

@@ -8,7 +8,7 @@
 --
 -- Makes multiple plethora inventories look like one big inventory
 --
--- None, probably have to wrap every inventory that will interact with the merged one so that the single inventories can push to the merged inventory peripheral name string
+-- Note, you have to wrap every inventory that will interact with the merged one so that the single inventories can push to the merged inventory peripheral name string.
 --
 -- VirtualChestMerge's License:
 --
@@ -38,13 +38,16 @@
 
 
 
--- bonus, also works for fluids
+-- TODO: also works for fluids #bonus
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.common.capabilities.ICapabilityProvider
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.fluids.capability.IFluidHandler
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.items.IItemHandler
 -- https://squiddev-cc.github.io/plethora/methods.html#org.squiddev.plethora.integration.MethodTransferLocations
 
 -- TODO: there is quite a bit of duplicated code, can this be reduced?
+
+-- TODO: can some of the peripheral calls be done in parallel? someone on discord noticed a speed increase and some commands seemed slow in testing
+-- add a flag on the vitual peripheral to parallelise stuff which can be turned off later?
 
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this

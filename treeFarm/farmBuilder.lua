@@ -1,6 +1,9 @@
 -- build the tree farm
 require("treeFarm.libs.errorCatchUtils")
 local utils = require("treeFarm.libs.utils")
+local invUtils = utils.invUtils
+local itemUtils = invUtils.itemUtils
+local itemIds = itemUtils.itemIds
 local lama = require("treeFarm.libs.lama")
 local task = require("treeFarm.libs.taskManager")
 
@@ -15,9 +18,9 @@ local function placeTreePodium() -- TODO: fuel checks
   -- hard to do, can we use coord and y level?
 
   -- move check to before? this func is called?
-  if not (utils.itemUtils.selectItemById(itemIds.dirt)
-  and utils.itemUtils.selectItemById(itemIds.jackOLantern)
-  and utils.itemUtils.selectScaffoldBlock())
+  if not (invUtils.selectItemById(itemIds.dirt)
+  and invUtils.selectItemById(itemIds.jackOLantern)
+  and invUtils.selectScaffoldBlock())
   then
     return false, "bad inventory" -- TODO: let caller sort out stocking?
   end
@@ -27,15 +30,15 @@ local function placeTreePodium() -- TODO: fuel checks
   turtle.back() -- current location is where we need to build
 
 
-  local _ = utils.itemUtils.selectScaffoldBlock()
+  local _ = invUtils.selectScaffoldBlock()
   turtle.place()
 
   turtle.up()
-  utils.itemUtils.selectItemById(itemIds.jackOLantern)
+  invUtils.selectItemById(itemIds.jackOLantern)
   turtle.place()
 
   turtle.up()
-  utils.itemUtils.selectItemByIdOrEmptySlot(itemIds.dirt)
+  invUtils.selectItemByIdOrEmptySlot(itemIds.dirt)
   turtle.place()
 
   local _, item = turtle.inspect()
@@ -45,20 +48,20 @@ local function placeTreePodium() -- TODO: fuel checks
   end
 
   _, item = turtle.inspect()
-  utils.itemUtils.selectForDigging(item)
+  invUtils.selectForDigging(item)
   turtle.dig()
 end
 
 local function placeWater()
-  itemUtils.selectItemById(itemIds.waterBucket)
+  invUtils.selectItemById(itemIds.waterBucket)
   turtle.placeDown()
   turtle.forward()
   turtle.forward()
   while true do
-    itemUtils.selectItemById(itemIds.waterBucket)
+    invUtils.selectItemById(itemIds.waterBucket)
     turtle.placeDown()
     turtle.back()
-    itemUtils.selectItemById(itemIds.bucket)
+    invUtils.selectItemById(itemIds.bucket)
     turtle.placeDown() -- refill the bucket with the infinite water we just made
     turtle.forward()
     if not turtle.forward() then -- if we can't go forward then we are finished

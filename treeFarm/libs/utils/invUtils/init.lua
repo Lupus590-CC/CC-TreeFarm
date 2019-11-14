@@ -1,31 +1,32 @@
-local itemIds = require("treeFarm.libs.utils.itemUtils.itemIds")
+--wraps inventories and adds uility methods for them
+local itemUtils = require("treeFarm.libs.utils.invUtils.itemUtils")
 
 -- TODO: allow plethora to use this
 -- NOTE: a lot of this is very turtle specific
 -- TODO: convert to plethora and add a virtual plethora layer for the turtle inventory?
 -- NOTE: turtle can't fully emulate plethora
 
--- internal utility
-local function itemIdArgCheck(itemIdArg, argPosition)
-  argChecker(2, argPosition, {"number"}, 2)
+-- TODO: convert this to wrap inventories (including the turtle internl onw by mimicing plethora with it)
 
-  argChecker(argPosition, itemIdArg, {"table"}, 3)
-  --argChecker(position, value, validTypesList, level)
-  tableCheckerFunc(arg[1], itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
-end
+-- TODO: have the forEach functions be custom iterators
+--[[
+basic look:
 
--- allows finding item info from the itemIds table using the details
-  -- provided by turtle.getItemDetail
-local reverseItemLookup = {}
-for k, v in pairs(itemIds) do
-  reverseItemLookup[v.name..":"..tostring(v.damage)] = itemIds[k]
-end
-setmetatable(reverseItemLookup, {
-  __call = function(_self, itemId)
-    itemIdArgCheck(itemId, 1)
-    return reverseItemLookup[itemId.name..":"..tostring(itemId.damage)]
+local function eachSlot()
+  local currentSlot = 0
+  local invSize = this.size() -- this = the wrapped inventory
+  local function iterator()
+    currentSlot = currentSlot+1
+    if currentSlot > invSize then
+      return
+    end
+    return currentSlot, this.getItemMeta and this.getItemMeta(currentSlot) or this.getItem(currentSlot) -- if we can then we give the itemMeta (it contains all of the getItem stuff anyways) otherwise we give the normal item details
   end
-})
+
+  return iterator
+
+end
+--]]
 
 local function forEachSlot(func, stopFunc)
   argChecker(1, func, {"function"})
@@ -52,39 +53,6 @@ local function forEachSlotSkippingEmpty(func, stopFunc)
 
   forEachSlot(f, stopFunc)
 end
-
-local function itemEqualityComparer(itemId1, itemId2)
-  itemIdArgCheck(itemId1,1)
-  itemIdArgCheck(itemId2,2)
-  if itemId1 == itemId2 or (itemId1.name == itemId2.name and itemId1.damage == itemId2.damage) then
-    return true
-  end
-  return false
-end
-
-local function itemEqualityComparerWithCount(itemId1, itemId2)
-  argChecker(1, itemId1, {"table", "nil"})
-  argChecker(2, itemId2, {"table", "nil"})
-
-  local function countCheck(pos, item)
-    tableCheckerFunc("arg["..pos.."]", item, {count = {"number"})
-  end
-
-  if itemId1 then
-    itemIdArgCheck(itemId1,1)
-    countCheck(1, itemId1)
-  end
-  if itemId2 then
-    itemIdArgCheck(itemId2,2)
-    countCheck(2, itemId2)
-  end
-
-  if itemId1 == itemId2 or (itemId1.count == itemId2.count and itemEqualityComparer(itemId1, itemId2)) then
-    return true
-  end
-  return false
-end
-
 local function forEachSlotWithItem(itemId, func, extentionCriteria, stopFunc)
   itemIdArgCheck(itemId,1)
   argChecker(2, func, {"function"})
@@ -269,13 +237,38 @@ local function selectBuildingBlock()
   return selectByTagPriority("buildingBlock")
 end
 
-local itemUtils = {
-  itemIds = itemIds,
-  reverseItemLookup = reverseItemLookup,
+
+local turtleInventoryLikePlethoraInv = nil
+local function getTurtleInventoryLikePlethoraInv() -- TODO: implement
+  if turtleInventoryLikePlethoraInv then
+    return turtleInventoryLikePlethoraInv
+  end
+
+  if not turtle then
+    error("not a turtle")
+  end
+
+  --drop -- notImplementable?
+  --getitem
+  --getItemMeta -- notImplementable
+  --list
+  --pullItmes -- notImplementable?
+  -- pushItems -- notImplementable?
+  -- size
+  -- suck -- notImplementable?
+
+end
+
+local function wrap(inventory) -- TODO: implement
+
+  -- return a peripheral with the forEach and select methods on it
+
+end
+
+local invUtils = {
+  itemUtils = itemUtils,
   forEachSlot = forEachSlot,
   forEachSlotSkippingEmpty = forEachSlotSkippingEmpty,
-  itemEqualityComparer = itemEqualityComparer,
-  itemEqualityComparerWithCount = itemEqualityComparerWithCount,
   forEachSlotWithItem = forEachSlotWithItem,
   selectItemById = selectItemById,
   currentSlotIsEmpty = currentSlotIsEmpty,
@@ -288,7 +281,8 @@ local itemUtils = {
   selectByTagPriority = selectByTagPriority,
   selectScaffoldBlock = selectScaffoldBlock,
   selectBuildingBlock = selectBuildingBlock,
+  wrapTurtleInventoryLikePlethoraInv = wrapTurtleInventoryLikePlethoraInv
+  wrap = wrap
 
 }
-
-return itemUtils
+return invUtils

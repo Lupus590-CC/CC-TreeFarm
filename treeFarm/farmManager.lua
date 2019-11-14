@@ -1,7 +1,9 @@
 -- general management of the farm
 require("treeFarm.libs.errorCatchUtils")
 
-local itemUtils = require("treeFarm.libs.utils.itemUtils")
+local utils = require("treeFarm.libs.utils")
+local invUtils = utils.invUtils
+local itemUtils = invUtils.itemUtils
 local itemIds = itemUtils.itemIds
 local checkpoint = require("treeFarm.libs.checkpoint")
 
@@ -12,9 +14,9 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 -- TODO: inventory checks
 
 local function dumpInv()
-  itemUtils.forEachSlotWithItem(itemIds.log, function() turtle.dropDown() end)
+  invUtils.forEachSlotWithItem(itemIds.log, function() turtle.dropDown() end)
   -- merge sapling stacks
-  itemUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.transferTo(1) end) -- TODO: test this where the first slot is not saplings or is saplings and full
+  invUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.transferTo(1) end) -- TODO: test this where the first slot is not saplings or is saplings and full
   -- and dump excess saplings
   turtle.select(1)
   local skippedFirst = false
@@ -25,7 +27,7 @@ local function dumpInv()
     skippedFirst = true
     return false
   end
-  itemUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.dropDown() end, skipFirst)
+  invUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.dropDown() end, skipFirst)
 
   local keepItems = {
     itemId.charcoal,
@@ -55,7 +57,7 @@ local function dumpInv()
     return false
   end
 
-  itemUtils.forEachSlotSkippingEmpty(function(_)
+  invUtils.forEachSlotSkippingEmpty(function(_)
     if not keepThis() then
        turtle.dropDown()
     end
@@ -69,7 +71,7 @@ local function chopTree() -- TODO: fuel checks - use implied fuel checks?
   while hasBlock and blockId.name == itemIds.log.name then
     hasBlock, blockId = turtle.inspectUp()
     if hasBlock and blockId.name == itemIds.leaves.name then
-      if not itemUtils.selectItemByIdOrEmptySlot(itemId.log) then
+      if not invUtils.selectItemByIdOrEmptySlot(itemId.log) then
         dumpInv()
       end
       turtle.digUp()
@@ -82,7 +84,7 @@ local function chopTree() -- TODO: fuel checks - use implied fuel checks?
   while (not hasblock) or blockId.name == itemIds.leaves.name do
     hasBlock, blockId = turtle.inspect()
     if hasBlock and blockId.name == itemIds.log.name then
-      if not itemUtils.selectItemByIdOrEmptySlot(itemId.log) then
+      if not invUtils.selectItemByIdOrEmptySlot(itemId.log) then
         dumpInv()
       end
       turtle.dig()
@@ -96,7 +98,7 @@ local function chopTree() -- TODO: fuel checks - use implied fuel checks?
   end
 
   -- we scan for missing saplings later so we can afford to not have any it's just less effient
-  if itemUtils.selectItemById(itemIds.sapling) then
+  if invUtils.selectItemById(itemIds.sapling) then
     turtle.place()
   end
 
