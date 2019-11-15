@@ -25,7 +25,7 @@
 
 
 
--- TODO: messaging system
+-- TODO: add a messaging system?
   -- daemons receive as an event
   -- look at how rednet works?
   -- should a daemon be able to message itself?
@@ -154,7 +154,7 @@ local function terminateDaemon(daemonName)
   return false -- it won't die (it might on future resumes, no guarantee)
 end
 
-local function getListOfDaemonNames() -- NOTE: it's not clear from the function name that this returns the names of the deamons but not the deamons themselves.
+local function getListOfDaemonNames()
   local list = {}
   for k,v in pairs(daemons) do
     table.add(list,k) -- users can list them all with ipairs

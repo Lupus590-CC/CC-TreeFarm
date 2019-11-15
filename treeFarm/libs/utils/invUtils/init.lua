@@ -8,25 +8,8 @@ local itemUtils = require("treeFarm.libs.utils.invUtils.itemUtils")
 
 -- TODO: convert this to wrap inventories (including the turtle internl onw by mimicing plethora with it)
 
--- TODO: have the forEach functions be custom iterators
---[[
-basic look:
 
-local function eachSlot()
-  local currentSlot = 0
-  local invSize = this.size() -- this = the wrapped inventory
-  local function iterator()
-    currentSlot = currentSlot+1
-    if currentSlot > invSize then
-      return
-    end
-    return currentSlot, this.getItemMeta and this.getItemMeta(currentSlot) or this.getItem(currentSlot) -- if we can then we give the itemMeta (it contains all of the getItem stuff anyways) otherwise we give the normal item details
-  end
 
-  return iterator
-
-end
---]]
 
 local function forEachSlot(func, stopFunc)
   argChecker(1, func, {"function"})
@@ -239,7 +222,7 @@ end
 
 
 local turtleInventoryLikePlethoraInv = nil
-local function getTurtleInventoryLikePlethoraInv() -- TODO: implement
+local function getTurtleInventoryLikePlethoraInv()
   if turtleInventoryLikePlethoraInv then
     return turtleInventoryLikePlethoraInv
   end
@@ -248,39 +231,111 @@ local function getTurtleInventoryLikePlethoraInv() -- TODO: implement
     error("not a turtle")
   end
 
-  --drop -- notImplementable?
-  --getitem
-  --getItemMeta -- notImplementable
-  --list
-  --pullItmes -- notImplementable?
-  -- pushItems -- notImplementable?
-  -- size
-  -- suck -- notImplementable?
+  local turtleInventoryLikePlethoraInv = {}
+  turtleInventoryLikePlethoraInv.size = function()
+    return 16 -- TODO: avoid hard coded value
+  end
+  turtleInventoryLikePlethoraInv.getItem = function(slot)
+    argChecker(1, slot, {"number"})
+    numberRangeChecker(1, slot, 1, turtleInventoryLikePlethoraInv.size())
+    return turtle.getItemDetail(slot)
+  end
+  turtleInventoryLikePlethoraInv.list = function()
+    -- TODO: if it's empty does plethora return an empty table or nil?
+    -- documentation says that it only returns a table
+    local list = {}
+    for i = 1, turtleInventoryLikePlethoraInv.size() do
+      list[i] = turtleInventoryLikePlethoraInv.getItem(i)
+    end
+    return list
+  end
 
+  -- TODO: attempt to complete implementation
+  -- drop -- notImplementable? -- where does the chest drop too?
+  -- getItemMeta -- notImplementable
+  -- pullItmes -- notImplementable?
+  -- pushItems -- notImplementable?
+  -- suck -- notImplementable? -- where does the chest suck from?
+
+  turtleInventoryLikePlethoraInv._isThisTurtleInv = true
+
+  return turtleInventoryLikePlethoraInv
 end
 
 local function wrap(inventory) -- TODO: implement
 
-  -- return a peripheral with the forEach and select methods on it
+  inventory.eachSlot = function()
+    local currentSlot = 0
+    local invSize = inventory.size() -- this = the wrapped inventory
+    local function iterator()
+      currentSlot = currentSlot+1
+      if currentSlot > invSize then
+        return
+      end
+      if inventory._isThisTurtleInv then
+        turtle.select(i)
+      end
+      return currentSlot, inventory.getItemMeta and inventory.getItemMeta(currentSlot) or inventory.getItem(currentSlot) -- if we can then we give the itemMeta (it contains all of the getItem stuff anyways) otherwise we give the normal item details
+    end
 
-end
+    return iterator
+  end
 
-local invUtils = {
-  itemUtils = itemUtils,
-  forEachSlot = forEachSlot,
-  forEachSlotSkippingEmpty = forEachSlotSkippingEmpty,
+  inventory.forEachSlotSkippingEmpty = function() -- TODO: make this be forEachSlotwithItem with no args?
+    local eachSlotIterator = eachSlot()
+
+    local function iterator()
+      repeat
+        local slot, item = eachSlotIterator()
+
+        if slot == nil then
+          return
+        end
+      until item
+
+      return slot, item
+    end
+
+    return iterator
+  end
+
+  -- TODO: have the forEach functions be custom iterators
+  --[[ to convert:
+  may need to get rid of some of these
   forEachSlotWithItem = forEachSlotWithItem,
   selectItemById = selectItemById,
   currentSlotIsEmpty = currentSlotIsEmpty,
-  selectEmptySlot = selectEmptySlot,
-  selectForDigging = selectForDigging,
-  selectBestFuel = selectBestFuel,
+  selectEmptySlot = selectEmptySlot, -- findEmptySlot
+  selectForDigging = selectForDigging, -- findItemStackWithFreeSpace
+  selectBestFuel = selectBestFuel, -- findSlotWithBestFuel
   getItemCountById = getItemCountById,
   getFreeSpaceCount = getFreeSpaceCount,
   equipItemWithId = equipItemWithId,
   selectByTagPriority = selectByTagPriority,
   selectScaffoldBlock = selectScaffoldBlock,
   selectBuildingBlock = selectBuildingBlock,
+  ]]
+
+  return inventory
+end
+
+local invUtils = {
+  itemUtils = itemUtils,
+  -- TODO: cleanup
+  -- forEachSlot = forEachSlot,
+  -- forEachSlotSkippingEmpty = forEachSlotSkippingEmpty,
+  -- forEachSlotWithItem = forEachSlotWithItem,
+  -- selectItemById = selectItemById,
+  -- currentSlotIsEmpty = currentSlotIsEmpty,
+  -- selectEmptySlot = selectEmptySlot,
+  -- selectForDigging = selectForDigging,
+  -- selectBestFuel = selectBestFuel,
+  -- getItemCountById = getItemCountById,
+  -- getFreeSpaceCount = getFreeSpaceCount,
+  -- equipItemWithId = equipItemWithId,
+  -- selectByTagPriority = selectByTagPriority,
+  -- selectScaffoldBlock = selectScaffoldBlock,
+  -- selectBuildingBlock = selectBuildingBlock,
   wrapTurtleInventoryLikePlethoraInv = wrapTurtleInventoryLikePlethoraInv
   wrap = wrap
 

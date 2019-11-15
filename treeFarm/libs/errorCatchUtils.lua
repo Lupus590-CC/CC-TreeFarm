@@ -121,21 +121,17 @@ local function numberRangeChecker(argPosition, value, lowerBound, upperBound, le
   end
 end
 
---[[local function blameCallerOnError(function, ...)
-  -- TODO: implement blameCallerOnError?
-end]]
+
 
 _ENV.argChecker = argChecker
 _ENV.tableChecker = tableChecker
 _ENV.numberRangeChecker = numberRangeChecker
---_ENV.blameCallerOnError = blameCallerOnError
 
 
 local errorCatchUtils = {
   argChecker = argChecker,
   tableChecker = tableChecker,
   numberRangeChecker = numberRangeChecker,
-  --blameCallerOnError = blameCallerOnError,
 }
 
 

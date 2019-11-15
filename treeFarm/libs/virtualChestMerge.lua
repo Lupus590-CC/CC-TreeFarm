@@ -9,6 +9,7 @@
 -- Makes multiple plethora inventories look like one big inventory
 --
 -- Note, you have to wrap every inventory that will interact with the merged one so that the single inventories can push to the merged inventory peripheral name string.
+-- I'm working on allowing virtuals peripherals to interact with real ones directly
 --
 -- VirtualChestMerge's License:
 --
@@ -38,7 +39,7 @@
 
 
 
--- TODO: also works for fluids #bonus
+-- TODO: add fluid support #bonus
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.common.capabilities.ICapabilityProvider
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.fluids.capability.IFluidHandler
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.items.IItemHandler
@@ -156,9 +157,7 @@ local function wrap(...)
 
   function thisVirtualPeripheral.getItem(slot)
     argChecker(1, slot, {"number"})
-    if slot > thisVirtualPeripheral.size() or slot < 1 then
-      error("arg[1] number out of range, must be between 1 and "..thisVirtualPeripheral.size())
-    end
+    numberRangeChecker(1, slot, 1, thisVirtualPeripheral.size())
 
     -- locate backer with this slot
     local backer, trueSlot = translateSlot(thisVirtualPeripheral, slot)
@@ -167,9 +166,7 @@ local function wrap(...)
 
   function thisVirtualPeripheral.getItemMeta(slot)
     argChecker(1, slot, {"number"})
-    if slot > thisVirtualPeripheral.size() or slot < 1 then
-      error("arg[1] number out of range, must be between 1 and "..thisVirtualPeripheral.size())
-    end
+    numberRangeChecker(1, slot, 1, thisVirtualPeripheral.size())
 
     -- locate backer with this slot
     local backer, trueSlot = translateSlot(thisVirtualPeripheral, slot)
@@ -193,8 +190,10 @@ local function wrap(...)
   function thisVirtualPeripheral.pushItems(virtualToName, virtualFromSlot, limit, virtualToSlot)
     argChecker(1, virtualToName, {"string"})
     argChecker(2, virtualFromSlot, {"number"})
+    numberRangeChecker(1, virtualFromSlot, 1, thisVirtualPeripheral.size())
     argChecker(3, limit, {"number", "nil"})
     argChecker(4, virtualToSlot, {"number", "nil"})
+
 
     local virtualToPeripheral = virtualPeripheralList[virtualToName] or (function()
       -- make a fake virtualPeripheral so that we can unwrap it latter, because the item manipulation assumes that the remote peripheral is virtual
@@ -203,14 +202,18 @@ local function wrap(...)
       end
       local realPeripheralName = virtualToName
       local p = peripheral.wrap(realPeripheralName)
-      p._backingPeripheralList = {p} -- circular loop, will the break things?
+      p._backingPeripheralList = {p} -- circular loop, will this break things?
       p._peripheralName = realPeripheralName
       return p
-    end)() -- TODO: should allow virtual to interact with real peripherals 'directly' #homeOnly
-    -- TODO: copy to pullItems
+    end)() -- TODO: test this #homeOnly
+    -- should allow virtual to interact with real peripherals 'directly'
+    -- then copy to pullItems
 
     if not virtualToPeripheral then
       error("arg[1] no virtual peripheral with name "..virtualToName,2)
+    end
+    if virtualToSlot then
+      numberRangeChecker(1, virtualToSlot, 1, thisVirtualPeripheral.size())
     end
 
     virtualFromSlot = math.floor(virtualFromSlot)
@@ -278,6 +281,10 @@ local function wrap(...)
 
     if not virtualFromPeripheral then
       error("arg[1] no virtual peripheral with name "..virtualFromName,2)
+    end
+
+    if virtualToSlot then
+      numberRangeChecker(1, virtualToSlot, 1, thisVirtualPeripheral.size())
     end
 
     virtualFromSlot = math.floor(virtualFromSlot)
