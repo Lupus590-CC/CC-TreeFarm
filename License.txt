@@ -235,7 +235,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 daemon manager
 --------------
 
-Available from TODO: upload this to hive and place link here #homeOnly
+Available from https://github.com/CC-Hive/Main/blob/master/src/Shared/daemonManager.lua
 
 The MIT License (MIT)
 
@@ -291,7 +291,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Patience
 --------
 
-Available from TODO: upload this to hive and place link here #homeOnly
+Available from https://github.com/CC-Hive/Main/blob/master/src/Shared/patience.lua
 
 The MIT License (MIT)
 
