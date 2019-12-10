@@ -1,4 +1,3 @@
--- TODO: add to snippets/random CC code github repo #homeOnly
 -- TODO: some libs copy this function, can this be prevented?
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this

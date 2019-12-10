@@ -1,7 +1,5 @@
 TODO: organise this file #high
 
-TODO: add a furnace log intermediary chest #homeOnly
-
 NOTE: pickaxe doesn't show up when equipped and scanner has a different name
 
 usesful reference: https://squiddev-cc.github.io/plethora/methods.html
@@ -14,7 +12,8 @@ TODO: safety move
 
 to make use of the block sensor the farmer could swap out the pickaxe and swap back as needed
   if we want big trees then I need to use it to detect lone logs instead of tree trunks
-  NOTE: what is the range of the scanner? #homeOnly
+  what is the range of the scanner?
+    about the size of the farm
 
 use one of those schematic builders?
 
