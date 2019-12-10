@@ -38,7 +38,7 @@
 
 
 
-
+-- TODO: override peipheral api?
 -- TODO: add fluid support #bonus
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.common.capabilities.ICapabilityProvider
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.fluids.capability.IFluidHandler

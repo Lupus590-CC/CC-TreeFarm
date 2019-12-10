@@ -121,17 +121,25 @@ local function numberRangeChecker(argPosition, value, lowerBound, upperBound, le
   end
 end
 
+local function itemIdChecker(argPosition, itemIdArg)
+  argChecker(1, argPosition, {"number"}, 2)
 
+  argChecker(argPosition, itemIdArg, {"table"}, 3)
+  --argChecker(position, value, validTypesList, level)
+  tableCheckerFunc("arg["..argPosition.."]", itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
+end
 
 _ENV.argChecker = argChecker
 _ENV.tableChecker = tableChecker
 _ENV.numberRangeChecker = numberRangeChecker
+_ENV.itemIdChecker = itemIdChecker
 
 
 local errorCatchUtils = {
   argChecker = argChecker,
   tableChecker = tableChecker,
   numberRangeChecker = numberRangeChecker,
+  itemIdChecker = itemIdChecker
 }
 
 

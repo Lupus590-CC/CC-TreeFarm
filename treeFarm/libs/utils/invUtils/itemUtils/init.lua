@@ -2,13 +2,13 @@ local itemIds = require("treeFarm.libs.utils.invUtils.itemUtils.itemIds")
 
 
 
--- internal utility
-local function itemIdArgCheck(itemIdArg, argPosition)
-  argChecker(2, argPosition, {"number"}, 2)
+
+local function itemIdChecker(argPosition, itemIdArg)
+  argChecker(1, argPosition, {"number"}, 2)
 
   argChecker(argPosition, itemIdArg, {"table"}, 3)
   --argChecker(position, value, validTypesList, level)
-  tableCheckerFunc(arg[1], itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
+  tableCheckerFunc("arg["..argPosition.."]", itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
 end
 
 -- allows finding item info from the itemIds table using the details
@@ -19,14 +19,14 @@ for k, v in pairs(itemIds) do
 end
 setmetatable(reverseItemLookup, {
   __call = function(_self, itemId)
-    itemIdArgCheck(itemId, 1)
+    itemIdChecker(1, itemId)
     return reverseItemLookup[itemId.name..":"..tostring(itemId.damage)]
   end
 })
 
 local function itemEqualityComparer(itemId1, itemId2)
-  itemIdArgCheck(itemId1,1)
-  itemIdArgCheck(itemId2,2)
+  itemIdChecker(1, itemId1)
+  itemIdChecker(2, itemId2)
   if itemId1 == itemId2 or (itemId1.name == itemId2.name and itemId1.damage == itemId2.damage) then
     return true
   end
@@ -42,11 +42,11 @@ local function itemEqualityComparerWithCount(itemId1, itemId2)
   end
 
   if itemId1 then
-    itemIdArgCheck(itemId1,1)
+    itemIdChecker(1, itemId1)
     countCheck(1, itemId1)
   end
   if itemId2 then
-    itemIdArgCheck(itemId2,2)
+    itemIdChecker(2, itemId2)
     countCheck(2, itemId2)
   end
 
@@ -60,8 +60,8 @@ end
 
 local itemUtils = {
   itemIds = itemIds,
+  itemIdChecker = itemIdChecker,
   reverseItemLookup = reverseItemLookup,
-  itemIdArgCheck = itemIdArgCheck,
   itemEqualityComparer = itemEqualityComparer,
   itemEqualityComparerWithCount = itemEqualityComparerWithCount,
 

@@ -36,8 +36,9 @@ local function forEachSlotSkippingEmpty(func, stopFunc)
 
   forEachSlot(f, stopFunc)
 end
+
 local function forEachSlotWithItem(itemId, func, extentionCriteria, stopFunc)
-  itemIdArgCheck(itemId,1)
+  itemIdChecker(1, itemId)
   argChecker(2, func, {"function"})
   argChecker(3, extentionCriteria, {"function", "nil"})
   extentionCriteria = extentionCriteria or function() return true end
@@ -58,7 +59,7 @@ local function forEachSlotWithItem(itemId, func, extentionCriteria, stopFunc)
 end
 
 local function selectItemById(itemId, extentionCriteria)
-  itemIdArgCheck(itemId,1)
+  itemIdChecker(1, itemId)
   argChecker(2, extentionCriteria, {"function", "nil"})
   extentionCriteria = extentionCriteria or function() return true end
 
@@ -101,7 +102,7 @@ end
 
  -- by default full slots are not deemed valid for selection
 local function selectForDigging(itemId)
-  itemIdArgCheck(itemId,1)
+  itemIdChecker(1, itemId)
 
   item = reverseItemLookup(item)
   if item.digsInto then
@@ -142,7 +143,7 @@ local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #ho
 end
 
 local function getItemCountById(itemId)
-  itemIdArgCheck(itemId,1)
+  itemIdChecker(1, itemId)
   local count = 0
   for i = 1, 16 do
     turtle.select(i)
@@ -221,31 +222,31 @@ local function selectBuildingBlock()
 end
 
 
-local turtleInventoryLikePlethoraInv = nil
-local function getTurtleInventoryLikePlethoraInv()
-  if turtleInventoryLikePlethoraInv then
-    return turtleInventoryLikePlethoraInv
+local turtleInventoryAsPlethoraInv = nil
+local function getTurtleInventoryAsPlethoraInv()
+  if turtleInventoryAsPlethoraInv then
+    return turtleInventoryAsPlethoraInv
   end
 
   if not turtle then
     error("not a turtle")
   end
 
-  local turtleInventoryLikePlethoraInv = {}
-  turtleInventoryLikePlethoraInv.size = function()
+  turtleInventoryAsPlethoraInv = {}
+  turtleInventoryAsPlethoraInv.size = function()
     return 16 -- TODO: avoid hard coded value
   end
-  turtleInventoryLikePlethoraInv.getItem = function(slot)
+  turtleInventoryAsPlethoraInv.getItem = function(slot)
     argChecker(1, slot, {"number"})
-    numberRangeChecker(1, slot, 1, turtleInventoryLikePlethoraInv.size())
+    numberRangeChecker(1, slot, 1, turtleInventoryAsPlethoraInv.size())
     return turtle.getItemDetail(slot)
   end
-  turtleInventoryLikePlethoraInv.list = function()
+  turtleInventoryAsPlethoraInv.list = function()
     -- TODO: if it's empty does plethora return an empty table or nil?
     -- documentation says that it only returns a table
     local list = {}
-    for i = 1, turtleInventoryLikePlethoraInv.size() do
-      list[i] = turtleInventoryLikePlethoraInv.getItem(i)
+    for i = 1, turtleInventoryAsPlethoraInv.size() do
+      list[i] = turtleInventoryAsPlethoraInv.getItem(i)
     end
     return list
   end
@@ -257,16 +258,22 @@ local function getTurtleInventoryLikePlethoraInv()
   -- pushItems -- notImplementable?
   -- suck -- notImplementable? -- where does the chest suck from?
 
-  turtleInventoryLikePlethoraInv._isThisTurtleInv = true
+  turtleInventoryAsPlethoraInv._isThisTurtleInv = true
 
-  return turtleInventoryLikePlethoraInv
+  return turtleInventoryAsPlethoraInv
 end
 
 local function wrap(inventory) -- TODO: implement
+  if turtle then
+    inventory = inventory or getTurtleInventoryAsPlethoraInv()
+  end
+  argChecker(1, inventory, {"table"})
+  tableChecker("arg[1]", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})
+
 
   inventory.eachSlot = function()
     local currentSlot = 0
-    local invSize = inventory.size() -- this = the wrapped inventory
+    local invSize = inventory.size()
     local function iterator()
       currentSlot = currentSlot+1
       if currentSlot > invSize then
@@ -281,8 +288,9 @@ local function wrap(inventory) -- TODO: implement
     return iterator
   end
 
-  inventory.forEachSlotSkippingEmpty = function() -- TODO: make this be forEachSlotwithItem with no args?
-    local eachSlotIterator = eachSlot()
+  inventory.eachSlotSkippingEmpty = function() -- TODO: make this be forEachSlotWithItem with no args?
+
+    local eachSlotIterator = inventory.eachSlot()
 
     local function iterator()
       repeat
@@ -299,10 +307,35 @@ local function wrap(inventory) -- TODO: implement
     return iterator
   end
 
-  -- TODO: have the forEach functions be custom iterators
+  inventory.eachSlotWithItem = function(targetItem)
+    argChecker(1, targetItem, {"table", "nil"})
+    if not targetItem then
+      return inventory.eachSlotSkippingEmpty()
+    end
+
+    itemIdChecker(1, targetItem)
+    local eachSlotSkippingEmptyIterator = inventory.eachSlotSkippingEmpty()
+
+    local function iterator()
+      repeat
+        local slot, item = eachSlotSkippingEmptyIterator()
+
+        if slot == nil then
+          return
+        end
+      until itemEqualityComparer(item, targetItem)
+
+      return slot, item
+    end
+
+    return iterator
+  end
+
+
+
+
   --[[ to convert:
   may need to get rid of some of these
-  forEachSlotWithItem = forEachSlotWithItem,
   selectItemById = selectItemById,
   currentSlotIsEmpty = currentSlotIsEmpty,
   selectEmptySlot = selectEmptySlot, -- findEmptySlot
@@ -336,7 +369,8 @@ local invUtils = {
   -- selectByTagPriority = selectByTagPriority,
   -- selectScaffoldBlock = selectScaffoldBlock,
   -- selectBuildingBlock = selectBuildingBlock,
-  wrapTurtleInventoryLikePlethoraInv = wrapTurtleInventoryLikePlethoraInv
+  getTurtleInventoryAsPlethoraInv = getTurtleInventoryAsPlethoraInv,
+  wrapTurtleInventoryAsPlethoraInv = getTurtleInventoryAsPlethoraInv
   wrap = wrap
 
 }
