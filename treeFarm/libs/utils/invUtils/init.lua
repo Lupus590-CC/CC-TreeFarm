@@ -224,7 +224,7 @@ end
 
 local turtleInventoryAsPlethoraInv = nil
 local function getTurtleInventoryAsPlethoraInv()
-  if turtleInventoryAsPlethoraInv then
+  if turtleInventoryAsPlethoraInv then -- TODO: don't store this?
     return turtleInventoryAsPlethoraInv
   end
 
@@ -259,6 +259,7 @@ local function getTurtleInventoryAsPlethoraInv()
   -- suck -- notImplementable? -- where does the chest suck from?
 
   turtleInventoryAsPlethoraInv._isThisTurtleInv = true
+  turtleInventoryAsPlethoraInv.allowChangeOfSelectedSlot = true
 
   return turtleInventoryAsPlethoraInv
 end
@@ -279,31 +280,25 @@ local function wrap(inventory) -- TODO: implement
       if currentSlot > invSize then
         return
       end
-      if inventory._isThisTurtleInv then
+      if inventory.allowChangeOfSelectedSlot and inventory._isThisTurtleInv then
         turtle.select(i)
       end
       return currentSlot, inventory.getItemMeta and inventory.getItemMeta(currentSlot) or inventory.getItem(currentSlot) -- if we can then we give the itemMeta (it contains all of the getItem stuff anyways) otherwise we give the normal item details
     end
-
     return iterator
   end
 
   inventory.eachSlotSkippingEmpty = function() -- TODO: make this be forEachSlotWithItem with no args?
-
     local eachSlotIterator = inventory.eachSlot()
-
     local function iterator()
       repeat
         local slot, item = eachSlotIterator()
-
         if slot == nil then
           return
         end
       until item
-
       return slot, item
     end
-
     return iterator
   end
 
@@ -312,31 +307,37 @@ local function wrap(inventory) -- TODO: implement
     if not targetItem then
       return inventory.eachSlotSkippingEmpty()
     end
-
     itemIdChecker(1, targetItem)
     local eachSlotSkippingEmptyIterator = inventory.eachSlotSkippingEmpty()
-
     local function iterator()
       repeat
         local slot, item = eachSlotSkippingEmptyIterator()
-
         if slot == nil then
           return
         end
       until itemEqualityComparer(item, targetItem)
-
       return slot, item
     end
-
     return iterator
   end
 
+  inventory.findItemById = function(item)
+    itemArgChecker(1, item)
+    local iterator = inventory.eachSlotWithItem(item)
+    local slot, item = iterator()
+    return slot, item
+  end
 
-
+  inventory.slotIsEmpty = function(slot)
+    if turtle and inventory._isThisTurtleInv then
+      slot = slot or turtle.getSelectedSlot()
+    end
+    argChecker(1, slot, {"number"})
+    -- TODO: finish
+  end
 
   --[[ to convert:
   may need to get rid of some of these
-  selectItemById = selectItemById,
   currentSlotIsEmpty = currentSlotIsEmpty,
   selectEmptySlot = selectEmptySlot, -- findEmptySlot
   selectForDigging = selectForDigging, -- findItemStackWithFreeSpace

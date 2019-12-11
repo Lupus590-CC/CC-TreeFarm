@@ -1,4 +1,6 @@
 -- TODO: some libs copy this function, can this be prevented?
+  -- make this a standalone lib and have them depend on this?
+
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
   if type(position) ~= "number" then
@@ -128,6 +130,7 @@ local function itemIdChecker(argPosition, itemIdArg)
   tableCheckerFunc("arg["..argPosition.."]", itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
 end
 
+local _ENV = _ENV or getfenv()
 _ENV.argChecker = argChecker
 _ENV.tableChecker = tableChecker
 _ENV.numberRangeChecker = numberRangeChecker
