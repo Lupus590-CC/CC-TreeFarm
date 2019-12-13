@@ -13,6 +13,66 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 
 -- TODO: inventory checks
 
+-- by default full slots are not deemed valid for selection
+local function selectForDigging(itemId)
+ itemIdChecker(1, itemId)
+
+ item = reverseItemLookup(item)
+ if item.digsInto then
+   item = item.digsInto
+   -- stone turns into cobble when we dig it
+ end
+
+ return selectItemById(selectItemById) or selectEmptySlot()
+end
+
+-- items which give more fuel than targetFuelValue are not eligible
+-- TODO: change how refueling works entirely to not use wood and only use saplings when given permission from the furnace manager
+local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #homeOnly
+ -- TODO: add an argument to skip saplings?
+ argChecker(1, targetFuelValue, {"number", "nil"})
+ targetFuelValue = targetFuelValue or math.huge
+
+ local bestFuelSlot
+ local bestFuelValue = 0
+ forEachSlotSkippingEmpty(function(selectedSlot)
+   local currentItem = turtle.getItemDetail()
+   if type(currentItem) == "table"
+   and reverseItemLookup(currentItem).fuelValue
+   and reverseItemLookup(currentItem).fuelValue > bestFuelValue
+   and reverseItemLookup(currentItem).fuelValue <= targetFuelValue
+   then
+     bestFuelSlot = selectedSlot
+     bestFuelValue = reverseItemLookup(currentItem).fuelValue
+   end
+ end)
+
+ if bestFuelSlot then
+   turtle.select(bestFuelSlot)
+   return true
+ end
+
+ return false
+end
+
+-- implicitly preserves the wireless modem
+local function equipItemWithId(itemId)
+ -- will peripheral.getType(side:string):string tell me that there is a pickaxe on that side? nope
+ -- TODO: check currently equipped peripherals
+ if alreadyEquiped then
+   return true, "already equipped"
+ end
+ if selectItemById(itemId) then
+   -- TODO: find non-modem side and equip to that side
+   if equipped then
+     return true, "equipped"
+   else
+     return false, "can't equip that"
+   end
+ end
+ return false, "couldn't find that"
+end
+
 local function dumpInv()
   invUtils.forEachSlotWithItem(itemIds.log, function() turtle.dropDown() end)
   -- merge sapling stacks

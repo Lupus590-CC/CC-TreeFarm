@@ -1,3 +1,6 @@
+
+-- TODO: move file out of itemUtils?
+
 local itemIds = { -- TODO: remove non-charcoal fuels?
 -- TODO: save to file and allow override?
   dirt = { name = "minecraft:dirt", damage = 0, maxCount = 64 },
@@ -35,5 +38,22 @@ end
 
 itemIds.stone.digsInto = cobblestone
 
+
+-- allows finding item info from the itemIds table using the details
+  -- provided by turtle.getItemDetail
+local reverseItemLookup = {}
+for k, v in pairs(itemIds) do
+  reverseItemLookup[v.name..":"..tostring(v.damage)] = itemIds[k]
+end
+setmetatable(reverseItemLookup, {
+  __call = function(_self, itemId)
+    if itemId == nil then
+      itemId = _self
+      _self = reverseItemLookup
+    end
+    itemIdChecker(1, itemId)
+    return reverseItemLookup[itemId.name..":"..tostring(itemId.damage)]
+  end
+})
 
 return itemIds

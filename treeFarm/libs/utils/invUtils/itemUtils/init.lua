@@ -1,7 +1,3 @@
-local itemIds = require("treeFarm.libs.utils.invUtils.itemUtils.itemIds")
-
-
-
 
 local function itemIdChecker(argPosition, itemIdArg)
   argChecker(1, argPosition, {"number"}, 2)
@@ -10,19 +6,6 @@ local function itemIdChecker(argPosition, itemIdArg)
   --argChecker(position, value, validTypesList, level)
   tableCheckerFunc("arg["..argPosition.."]", itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
 end
-
--- allows finding item info from the itemIds table using the details
-  -- provided by turtle.getItemDetail
-local reverseItemLookup = {}
-for k, v in pairs(itemIds) do
-  reverseItemLookup[v.name..":"..tostring(v.damage)] = itemIds[k]
-end
-setmetatable(reverseItemLookup, {
-  __call = function(_self, itemId)
-    itemIdChecker(1, itemId)
-    return reverseItemLookup[itemId.name..":"..tostring(itemId.damage)]
-  end
-})
 
 local function itemEqualityComparer(itemId1, itemId2)
   itemIdChecker(1, itemId1)
@@ -56,15 +39,10 @@ local function itemEqualityComparerWithCount(itemId1, itemId2)
   return false
 end
 
-
-
 local itemUtils = {
-  itemIds = itemIds,
   itemIdChecker = itemIdChecker,
-  reverseItemLookup = reverseItemLookup,
   itemEqualityComparer = itemEqualityComparer,
   itemEqualityComparerWithCount = itemEqualityComparerWithCount,
-
 }
 
 return itemUtils

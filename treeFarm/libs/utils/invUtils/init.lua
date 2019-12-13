@@ -8,226 +8,7 @@ local itemUtils = require("treeFarm.libs.utils.invUtils.itemUtils")
 
 -- TODO: convert this to wrap inventories (including the turtle internl onw by mimicing plethora with it)
 
-
-
-
-local function forEachSlot(func, stopFunc)
-  argChecker(1, func, {"function"})
-  argChecker(2, stopFunc, {"function", "nil"})
-
-  for i = 1, 16 do
-    if stopFunc and stopFunc() then
-      return
-    end
-    turtle.select(i)
-    func(i)
-  end
-end
-
-local function forEachSlotSkippingEmpty(func, stopFunc)
-  argChecker(1, func, {"function"})
-  argChecker(2, stopFunc, {"function", "nil"})
-
-  local f = function(slotId)
-    if turtle.getItemCount() > 0 then
-      func(slotId)
-    end
-  end
-
-  forEachSlot(f, stopFunc)
-end
-
-local function forEachSlotWithItem(itemId, func, extentionCriteria, stopFunc)
-  itemIdChecker(1, itemId)
-  argChecker(2, func, {"function"})
-  argChecker(3, extentionCriteria, {"function", "nil"})
-  extentionCriteria = extentionCriteria or function() return true end
-  argChecker(4, stopFunc, {"function", "nil"})
-
-
-  local f = function(slotId)
-    local currentItem = turtle.getItemDetail()
-    if type(currentItem) == "table"
-      and itemEqualityComparer(currentItem, itemId)
-      and extentionCriteria(slotId, currentItem)
-    then
-      func(slotId, currentItem)
-    end
-  end
-
-  forEachSlotSkippingEmpty(f, stopFunc)
-end
-
-local function selectItemById(itemId, extentionCriteria)
-  itemIdChecker(1, itemId)
-  argChecker(2, extentionCriteria, {"function", "nil"})
-  extentionCriteria = extentionCriteria or function() return true end
-
-  -- if the current slot has it don't bother searching
-  local currentItem = turtle.getItemDetail()
-  if type(currentItem) == "table"
-    and itemEqualityComparer(currentItem, itemId)
-  then
-    return true
-  end
-
-  local stop = false
-  local stopFunc = function() return stop end
-  local func = function() stop = true end
-
-  forEachSlotWithItem(itemId, func, extentionCriteria, stopFunc)
-end
-
-local function currentSlotIsEmpty()
-  if turtle.getItemCount() == 0 then
-    return true
-  end
-  return false
-end
-
-local function selectEmptySlot()
-  -- if the current slot is empty don't bother searching
-  currentSlotIsEmpty()
-
-  local stop = false
-  local stopFunc = function() return stop end
-  local func = function()
-    if currentSlotIsEmpty() then
-      stop = true
-    end
-  end
-
-  forEachSlot(func, stopFunc)
-end
-
- -- by default full slots are not deemed valid for selection
-local function selectForDigging(itemId)
-  itemIdChecker(1, itemId)
-
-  item = reverseItemLookup(item)
-  if item.digsInto then
-    item = item.digsInto
-    -- stone turns into cobble when we dig it
-  end
-
-  return selectItemById(selectItemById) or selectEmptySlot()
-end
-
--- items which give more fuel than targetFuelValue are not eligible
--- TODO: change how refueling works entirely to not use wood and only use saplings when given permission from the furnace manager
-local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #homeOnly
-  -- TODO: add an argument to skip saplings?
-  argChecker(1, targetFuelValue, {"number", "nil"})
-  targetFuelValue = targetFuelValue or math.huge
-
-  local bestFuelSlot
-  local bestFuelValue = 0
-  forEachSlotSkippingEmpty(function(selectedSlot)
-    local currentItem = turtle.getItemDetail()
-    if type(currentItem) == "table"
-    and reverseItemLookup(currentItem).fuelValue
-    and reverseItemLookup(currentItem).fuelValue > bestFuelValue
-    and reverseItemLookup(currentItem).fuelValue <= targetFuelValue
-    then
-      bestFuelSlot = selectedSlot
-      bestFuelValue = reverseItemLookup(currentItem).fuelValue
-    end
-  end)
-
-  if bestFuelSlot then
-    turtle.select(bestFuelSlot)
-    return true
-  end
-
-  return false
-end
-
-local function getItemCountById(itemId)
-  itemIdChecker(1, itemId)
-  local count = 0
-  for i = 1, 16 do
-    turtle.select(i)
-    local currentItem = turtle.getItemDetail()
-    if currentItem and currentItem.name == itemId.name
-    and currentItem.damage == itemId.damage then
-      count = count + currentItem.count
-    end
-  end
-  return count
-end
-
-
-local function getFreeSpaceCount()
-  local count = 0
-  forEachSlotSkippingEmpty(function() count = count +1 end)
-  return 16 - count
-end
-
--- implicitly preserves the wireless modem
-local function equipItemWithId(itemId)
-  -- will peripheral.getType(side:string):string tell me that there is a pickaxe on that side? nope
-  -- TODO: check currently equipped peripherals
-  if alreadyEquiped then
-    return true, "already equipped"
-  end
-  if selectItemById(itemId) then
-    -- TODO: find non-modem side and equip to that side
-    if equipped then
-      return true, "equipped"
-    else
-      return false, "can't equip that"
-    end
-  end
-  return false, "couldn't find that"
-end
-
-local function selectByTagPriority(tag)
-  local validBlocks = {}
-  for _, v in pairs(itemIds) do
-    if v[tag] then
-      validBlocks[v[tag]] = 0
-    end
-  end
-  local func = function(slotNumber)
-    local _, item = turtle.getItemDetail()
-    local reversedItem = reverseItemLookup(item)
-    if reversedItem[tag] then
-      validBlocks[reversedItem[tag]] = slotNumber
-    end
-  end
-
-  forEachSlotSkippingEmpty(func)
-
-  local bestSlot;
-  for _, slotNumber in ipairs(validBlocks) do
-    if slotNumber > 0 then
-      bestSlot = slotNumber
-      break;
-    end
-  end
-  if bestSlot then
-    turtle.select(bestSlot)
-    return true
-  else
-    return false
-  end
-end
-
-local function selectScaffoldBlock()
-  return selectByTagPriority("scaffoldBlock")
-end
-
-local function selectBuildingBlock()
-  return selectByTagPriority("buildingBlock")
-end
-
-
-local turtleInventoryAsPlethoraInv = nil
-local function getTurtleInventoryAsPlethoraInv()
-  if turtleInventoryAsPlethoraInv then -- TODO: don't store this?
-    return turtleInventoryAsPlethoraInv
-  end
-
+local function wrapTurtleInventoryAsPlethoraInv()
   if not turtle then
     error("not a turtle")
   end
@@ -264,13 +45,12 @@ local function getTurtleInventoryAsPlethoraInv()
   return turtleInventoryAsPlethoraInv
 end
 
-local function wrap(inventory) -- TODO: implement
+local function wrap(inventory)
   if turtle then
-    inventory = inventory or getTurtleInventoryAsPlethoraInv()
+    inventory = inventory or wrapTurtleInventoryAsPlethoraInv()
   end
   argChecker(1, inventory, {"table"})
   tableChecker("arg[1]", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})
-
 
   inventory.eachSlot = function()
     local currentSlot = 0
@@ -288,7 +68,7 @@ local function wrap(inventory) -- TODO: implement
     return iterator
   end
 
-  inventory.eachSlotSkippingEmpty = function() -- TODO: make this be forEachSlotWithItem with no args?
+  inventory.eachSlotSkippingEmpty = function()
     local eachSlotIterator = inventory.eachSlot()
     local function iterator()
       repeat
@@ -333,45 +113,70 @@ local function wrap(inventory) -- TODO: implement
       slot = slot or turtle.getSelectedSlot()
     end
     argChecker(1, slot, {"number"})
-    -- TODO: finish
+    local item = inventory.getItem(slot)
+    if not item then
+      return true
+    end
+    return false
   end
 
-  --[[ to convert:
-  may need to get rid of some of these
-  currentSlotIsEmpty = currentSlotIsEmpty,
-  selectEmptySlot = selectEmptySlot, -- findEmptySlot
-  selectForDigging = selectForDigging, -- findItemStackWithFreeSpace
-  selectBestFuel = selectBestFuel, -- findSlotWithBestFuel
-  getItemCountById = getItemCountById,
-  getFreeSpaceCount = getFreeSpaceCount,
-  equipItemWithId = equipItemWithId,
-  selectByTagPriority = selectByTagPriority,
-  selectScaffoldBlock = selectScaffoldBlock,
-  selectBuildingBlock = selectBuildingBlock,
-  ]]
+  inventory.eachEmptySlot = function()
+    local eachSlotIterator = inventory.eachSlot()
+    local function iterator()
+      repeat
+        local slot, item = eachSlotIterator()
+        if slot == nil then
+          return
+        end
+      until not item
+      return slot
+    end
+    return iterator
+  end
+
+  inventory.findEmptySlot = function()
+    local iterator = inventory.eachEmptySlot()
+    local slot = iterator()
+    return slot
+  end
+
+  inventory.getTotalItemCount = function(item)
+    itemArgChecker(1, item)
+    local total = 0
+    for _, item in inventory.eachSlotWithItem(item)
+      total = total +item.count
+    end
+    return total
+  end
+
+  inventory.getFreeSpaceCount = function()
+    local total = 0
+    for _ in inventory.eachEmptySlot()
+      total = total + 1
+    end
+    return total
+  end
+
+  inventory.compactItemStacks = function(item)
+    itemArgChecker(1, item)
+
+    if turtle and inventory._isThisTurtleInv then
+      tableChecker("self", inventory, {list = {"function"}, pushItems = {"function"}})
+      -- TODO: investigate how turtles move items onto full or incompatable stacks
+    else
+      tableChecker("arg[1]", chest, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
+      for slot in pairs(inventory.list())
+        chest.pushItems(chest._peripheralName, slot)
+      end
+    end
+  end
 
   return inventory
 end
 
 local invUtils = {
   itemUtils = itemUtils,
-  -- TODO: cleanup
-  -- forEachSlot = forEachSlot,
-  -- forEachSlotSkippingEmpty = forEachSlotSkippingEmpty,
-  -- forEachSlotWithItem = forEachSlotWithItem,
-  -- selectItemById = selectItemById,
-  -- currentSlotIsEmpty = currentSlotIsEmpty,
-  -- selectEmptySlot = selectEmptySlot,
-  -- selectForDigging = selectForDigging,
-  -- selectBestFuel = selectBestFuel,
-  -- getItemCountById = getItemCountById,
-  -- getFreeSpaceCount = getFreeSpaceCount,
-  -- equipItemWithId = equipItemWithId,
-  -- selectByTagPriority = selectByTagPriority,
-  -- selectScaffoldBlock = selectScaffoldBlock,
-  -- selectBuildingBlock = selectBuildingBlock,
-  getTurtleInventoryAsPlethoraInv = getTurtleInventoryAsPlethoraInv,
-  wrapTurtleInventoryAsPlethoraInv = getTurtleInventoryAsPlethoraInv
+  wrapTurtleInventoryAsPlethoraInv = wrapTurtleInventoryAsPlethoraInv
   wrap = wrap
 
 }

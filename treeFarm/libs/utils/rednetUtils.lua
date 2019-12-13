@@ -8,7 +8,8 @@
  -- turtle and furnace manager pair like bluetooth
 local rootProtocol = "lupus590:TreeFarm"
 
-rednet.open() -- NOTE: does rednet use all modems or just the first one it finds?
+local modem = -- TODO: locate wireless modem
+rednet.open(modem)
 
 local function send(id, message, subProtocol)
   argChecker(1, id, {"number"})
@@ -19,7 +20,13 @@ local function send(id, message, subProtocol)
     subProtocol = ":"..subProtocol
   end
 
-  rednet.send(id, message, rootProtocol..subProtocol )
+  local fullProtocol = rootProtocol..subProtocol
+
+  rednet.send(id, message, fullProtocol)
+end
+
+local function pair(id)
+
 end
 
 local function ping(id)
@@ -34,7 +41,6 @@ local function ping(id)
   else
     return false
   end
-
 end
 
 local function run()
@@ -43,6 +49,9 @@ local function run()
 
     if message is ping then
       repond to ping
+    elseif message is pairing request then
+      check pairing state
+        pair if appropiate
     end
 
   end

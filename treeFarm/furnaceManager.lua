@@ -228,13 +228,6 @@ local function init()
   end
 end
 
-local function compactSlots(chest)
-  tableChecker("arg[1]", chest, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
-  for slot in pairs(chest.list()) do
-    chest.pushItems(chest._peripheralName, slot)
-  end
-end
-
 local outputChestFull()
   -- TODO: pause everything
   -- stop the turtle and let the user know that the program has stopped because the output is full
