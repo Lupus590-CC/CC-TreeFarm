@@ -1,12 +1,4 @@
 --wraps inventories and adds uility methods for them
-local itemUtils = require("treeFarm.libs.utils.invUtils.itemUtils")
-
--- TODO: allow plethora to use this
--- NOTE: a lot of this is very turtle specific
--- TODO: convert to plethora and add a virtual plethora layer for the turtle inventory?
--- NOTE: turtle can't fully emulate plethora
-
--- TODO: convert this to wrap inventories (including the turtle internl onw by mimicing plethora with it)
 
 local function wrapTurtleInventoryAsPlethoraInv()
   if not turtle then
@@ -175,7 +167,6 @@ local function wrap(inventory)
 end
 
 local invUtils = {
-  itemUtils = itemUtils,
   wrapTurtleInventoryAsPlethoraInv = wrapTurtleInventoryAsPlethoraInv
   wrap = wrap
 

@@ -11,19 +11,6 @@ local rootProtocol = "lupus590:TreeFarm"
 local modem = -- TODO: locate wireless modem
 rednet.open(modem)
 
-local function send(id, message, subProtocol)
-  argChecker(1, id, {"number"})
-  argChecker(1, id, {"number"})
-
-
-  if subProtocol and string.sub(subProtocol, 1, 1) ~=":" then
-    subProtocol = ":"..subProtocol
-  end
-
-  local fullProtocol = rootProtocol..subProtocol
-
-  rednet.send(id, message, fullProtocol)
-end
 
 local function pair(id)
 
@@ -59,7 +46,6 @@ end
 
 local rednetUtils = {
   rootProtocol = rootProtocol,
-  send = send,
   ping = ping,
   run = run,
 }

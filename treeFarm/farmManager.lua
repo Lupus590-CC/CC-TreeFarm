@@ -76,7 +76,7 @@ end
 local function dumpInv()
   invUtils.forEachSlotWithItem(itemIds.log, function() turtle.dropDown() end)
   -- merge sapling stacks
-  invUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.transferTo(1) end) -- TODO: test this where the first slot is not saplings or is saplings and full
+  invUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.transferTo(1) end) -- TODO: test this where the first slot is not saplings or is saplings and full #homeOnly
   -- and dump excess saplings
   turtle.select(1)
   local skippedFirst = false
