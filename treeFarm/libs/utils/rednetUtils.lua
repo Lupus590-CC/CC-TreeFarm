@@ -6,46 +6,81 @@
  -- TODO: take from config
  -- multiple server names? remote has one and the furnace has one?
  -- turtle and furnace manager pair like bluetooth
-local rootProtocol = "lupus590:TreeFarm"
 
 local modem = -- TODO: locate wireless modem
 rednet.open(modem)
 
+local protocolSeperator = "."
+local rootProtocol = "Lupus590"..protocolSeperator.."treeFarm"
+local pingProtocol = rootProtocol..protocolSeperator.."ping"
 
-local function pair(id)
+local function concatProtocols(...)
+  local protocols = table.pack(...)
 
+  local function trimProtocolSeperator(protocolToTrim)
+    -- first character
+    if string.sub(protocolToTrim,1,1) == protocolSeperator then
+      protocolToTrim = string.gsub(protocolToTrim, protocolSeperator, "", 1)
+    end
+
+    -- last character
+    local length = string.length(protocolToTrim)
+    if string.sub(protocolToTrim,length) == protocolSeperator then
+      protocolToTrim = string.sub(protocolToTrim, 1, length-1)
+    end
+    return protocolToTrim
+  end
+
+  for k, v in pairs(protocols)
+    argChecker(k, v, {"string"})
+    protocol[k] = trimProtocolSeperator(v)
+  end
+
+  -- if we only have one protocol then concat it with the root protocol
+  if #protocols == 1 then
+    protocol[2] = protocol[1]
+    protocol[1] = rootProtocol
+  end
+
+  return table.concat(protocols, protocolSeperator)
 end
 
-local function ping(id)
-  argChecker()
+local function ping(targetId, timeout)
+  argChecker(1, targetId, {"number"})
+  argChecker(2, timeout, {"number", "nil"})
+  timeout = timeout or 2 -- seconds
 
-  -- send ping message
+  local randomPayload = string.format("%08x", math.random(1, 2147483647)
+  local expectedResponce = "pong:"..randomPayload
+  rednet.send(targetId, "ping:"..randomPayload, pingProtocol)
 
-  -- listen for responce
+  local timerId = os.startTimer(timeout)
+  while true do
+    local event = table.pack(os.pullEvent())
 
-  if responce then
-    return true
-  else
-    return false
+    if event[1] == "rednet_message" and event[4] == pingProtocol
+    and event[2] == targetId and event[3] == expectedResponce then
+      os.cancelTimer(timerID)
+      return true -- remote responded correctly
+
+    elseif event[1] == "timer" and event[2] == timerID then
+      return false -- no responce
+    end
   end
 end
 
 local function run()
   while true do
-    local message = table.pack(rednet.recive())
+    local sender, message, protocol = rednet.receive()
 
-    if message is ping then
-      repond to ping
-    elseif message is pairing request then
-      check pairing state
-        pair if appropiate
+    if protocol == pingProtocol and string.sub(message, 1, 5) == "ping:" then
+      rednet.send(sender, "pong:"..string.sub(message, 6), pingProtocol)
     end
-
   end
 end
 
 local rednetUtils = {
-  rootProtocol = rootProtocol,
+  concatProtocols = concatProtocols,
   ping = ping,
   run = run,
 }
