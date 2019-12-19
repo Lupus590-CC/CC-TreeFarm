@@ -104,6 +104,7 @@ local function init()
     -- TODO: wait for turtle to say that it has dropped the stuff #turtle
 
     -- TODO: what if the turtle doesn't have enough items to drop? #turtle
+      -- have the turtle message as if an error accured
 
     monitor.clear()
     monitor.write("waiting for drop signal")
