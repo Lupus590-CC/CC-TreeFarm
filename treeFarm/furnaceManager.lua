@@ -1,7 +1,7 @@
 require("treeFarm.libs.errorCatchUtils")
 local utils = require("treeFarm.libs.utils")
 local invUtils = utils.invUtils -- TODO: use invUtils
-local itemUtils = invUtils.itemUtils
+local itemUtils = utils.itemUtils
 local itemIds = require("treeFarm.libs.itemIds")
 local daemonManager = require("treeFarm.libs.daemonManager")
 local config = require("treeFarm.libs.config")
