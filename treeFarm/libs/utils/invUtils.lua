@@ -41,8 +41,18 @@ local function wrap(inventory)
   if turtle then
     inventory = inventory or wrapTurtleInventoryAsPlethoraInv()
   end
-  argChecker(1, inventory, {"table"})
-  tableChecker("arg[1]", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})
+  argChecker(1, inventory, {"table", "string"})
+  if type(inventory) == "string" then
+    local peripheralName = inventory
+    if not peripheral.isPresent(peripheralName) then
+      error("Could not wrap peripheral with name "..peripheralName, 1)
+    end
+    inventory = peripheral.wrap(peripheralName)
+    inventory._peripheralName = peripheralName
+    pcall(tableChecker, "peripheral.wrap(arg[1])", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}}))
+  else
+    tableChecker("arg[1]", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})
+  end
 
   inventory.eachSlot = function()
     local currentSlot = 0
@@ -151,11 +161,15 @@ local function wrap(inventory)
 
   inventory.compactItemStacks = function()
     if turtle and inventory._isThisTurtleInv then
-      -- TODO: investigate how turtles move items onto full or incompatable stacks #homeOnly
-      -- TODO: implement turtle move
+      for sourceSlot in inventory.eachSlotWithItem() do
+        turtle.select(sourceSlot)
+        for destinationSlot = 1, sourceSlot do
+          turtle.transferTo(destinationSlot)
+        end
+      end
     else
       tableChecker("self", inventory, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
-      for slot in pairs(inventory.list())
+      for slot in pairs(inventory.list()) do
         chest.pushItems(chest._peripheralName, slot)
       end
     end
@@ -259,7 +273,19 @@ local function wrap(inventory)
   end
 
   inventory.compactItemStacksParrallel = function(item) -- TODO: implement and test
-    -- might be able to use sequential as template, but it is incompleat so will have to copy later
+      if turtle and inventory._isThisTurtleInv then
+        for sourceSlot in inventory.eachSlotWithItem() do
+          turtle.select(sourceSlot)
+          for destinationSlot = 1, sourceSlot do
+            turtle.transferTo(destinationSlot)
+          end
+        end
+      else
+        tableChecker("self", inventory, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
+        for slot in pairs(inventory.list()) do
+          chest.pushItems(chest._peripheralName, slot)
+        end
+      end
 
   end
 
