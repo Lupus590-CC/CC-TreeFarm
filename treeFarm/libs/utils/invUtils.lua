@@ -195,7 +195,7 @@ local function wrap(inventory)
     return iterator
   end
 
-  inventory.eachSlotSkippingEmptyParrallel = function(callback) -- could be optimised on plethora with a call to inventory.list -- TODO: implement
+  inventory.eachSlotSkippingEmptyParrallel = function(callback)-- TODO: implement
     local eachSlotIterator = inventory.eachSlot()
     local function iterator()
       repeat

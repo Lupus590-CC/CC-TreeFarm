@@ -12,27 +12,32 @@ local function new(prototype) -- o:f()
 end
 
 local function uplift(object) -- converts o:f() to o.f()
+
+  local function wrapFunction(object, function)
+    return function(...)
+      -- TODO: catch errors which are blamed on this function's caller and blame our caller
+      return v(uplifitedObject, ...)
+    end
+  end
+
+
   local prototype = getmetatable(object).__index
   local uplifitedObject = {}
   for k, v in pairs(prototype) do
     if type(v) == "function" then
-      uplifitedObject[k] = function(...)
-        return v(uplifitedObject, ...) -- TODO: catch errors which are blamed on this function's caller and blame our caller
-      end
+      uplifitedObject[k] = wrapFunction(uplifitedObject, v)
     else
       uplifitedObject[k] = v
     end
   end
   for k, v in pairs(object) do
     if type(v) == "function" then
-      uplifitedObject[k] = function(...)
-        return v(uplifitedObject, ...) -- TODO: catch errors which are blamed on this function's caller and blame our caller
-      end
+      uplifitedObject[k] = wrapFunction(uplifitedObject, v)
     else
       uplifitedObject[k] = v
     end
   end
-  return uplifitedObject
+  return setmetatable(uplifitedObject, nil) -- if prototype gets a new method thne uplifitedObject would break trying it use it with the o.f() notation
 end
 
 local function upliftNew(prototype) -- o.f()
