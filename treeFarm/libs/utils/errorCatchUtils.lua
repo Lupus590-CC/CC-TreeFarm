@@ -130,11 +130,14 @@ local function itemIdChecker(argPosition, itemIdArg)
   tableCheckerFunc("arg["..argPosition.."]", itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
 end
 
-local _ENV = _ENV or getfenv()
-_ENV.argChecker = argChecker
-_ENV.tableChecker = tableChecker
-_ENV.numberRangeChecker = numberRangeChecker
-_ENV.itemIdChecker = itemIdChecker
+local makeAMess = false
+if makeAMess then
+  local _ENV = _ENV or getfenv()
+  _ENV.argChecker = argChecker
+  _ENV.tableChecker = tableChecker
+  _ENV.numberRangeChecker = numberRangeChecker
+  _ENV.itemIdChecker = itemIdChecker
+end
 
 
 local errorCatchUtils = {

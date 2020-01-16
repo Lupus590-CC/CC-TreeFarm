@@ -1,13 +1,21 @@
 --wraps inventories and adds uility methods for them
 
+local itemUtils = require("treeFarm.libs.utils.itemUtils")
+
+local turtleInventoryAsPlethoraInv
+
 local function wrapTurtleInventoryAsPlethoraInv()
   if not turtle then
     error("not a turtle")
   end
 
+  if turtleInventoryAsPlethoraInv then
+    return turtleInventoryAsPlethoraInv
+  end
+
   turtleInventoryAsPlethoraInv = {}
   turtleInventoryAsPlethoraInv.size = function()
-    return 16 -- TODO: avoid hard coded value
+    return 16
   end
   turtleInventoryAsPlethoraInv.getItem = function(slot)
     argChecker(1, slot, {"number"})
@@ -15,8 +23,6 @@ local function wrapTurtleInventoryAsPlethoraInv()
     return turtle.getItemDetail(slot)
   end
   turtleInventoryAsPlethoraInv.list = function()
-    -- TODO: if it's empty does plethora return an empty table or nil? #homeOnly
-    -- documentation says that it only returns a table
     local list = {}
     for i = 1, turtleInventoryAsPlethoraInv.size() do
       list[i] = turtleInventoryAsPlethoraInv.getItem(i)
@@ -179,63 +185,85 @@ local function wrap(inventory)
   -- if the inv is a turtle one then we fall back to using the sequential methods
 
 
-  inventory.eachSlotParrallel = function(callback) -- TODO: implement
-    local currentSlot = 0
-    local invSize = inventory.size()
-    local function iterator()
-      currentSlot = currentSlot+1
-      if currentSlot > invSize then
-        return
+  inventory.eachSlotParrallel = function(callback)
+    -- TODO: validate callback
+    -- turtles can't safely parrallel
+    if inventory._isThisTurtleInv then
+      for slot, item in inventory.eachSlot() do
+        callback(slot, item)
       end
-      if inventory.allowChangeOfSelectedSlot and inventory._isThisTurtleInv then
-        turtle.select(i)
-      end
-      return currentSlot, inventory.getItemMeta and inventory.getItemMeta(currentSlot) or inventory.getItem(currentSlot) -- if we can then we give the itemMeta (it contains all of the getItem stuff anyways) otherwise we give the normal item details
+      return
     end
-    return iterator
+
+    local tasks = {}
+    local itemMetaOrGetitemFunc = inventory.getItemMeta or inventory.getItemInfo
+    for i = 1, inventory.size() do
+      tasks[i] = function()
+        local slot = i
+        callback(slot, itemMetaOrGetitemFunc(slot))
+      end
+    end
+
+    parrallel.waitForAll(table.unpack(tasks, 1, inventory.size()))
   end
 
-  inventory.eachSlotSkippingEmptyParrallel = function(callback)-- TODO: implement
-    local eachSlotIterator = inventory.eachSlot()
-    local function iterator()
-      repeat
-        local slot, item = eachSlotIterator()
-        if slot == nil then
-          return
-        end
-      until item
-      return slot, item
+  inventory.eachSlotSkippingEmptyParrallel = function(callback)
+    -- TODO: validate callback
+    if inventory._isThisTurtleInv then
+      for slot, item in inventory.eachSlotSkippingEmpty() do
+        callback(slot, item)
+      end
+      return
     end
-    return iterator
+
+    inventory.eachSlotParrallel(function(slot, item)
+      if item then
+        callback(slot, item)
+      end
+    end)
   end
 
-  inventory.eachSlotWithItemParrallel = function(targetItem, callback) -- TODO: implement
-    argChecker(1, targetItem, {"table", "nil"})
-    if not targetItem then
-      return inventory.eachSlotSkippingEmpty()
+  inventory.eachSlotWithItemParrallel = function(targetItem, callback)
+      itemUtils.itemIdChecker(1, targetItem)
+      
+    -- TODO: validate callback
+    if inventory._isThisTurtleInv then
+      for slot, item in inventory.eachSlotWithItem() do
+        callback(slot, item)
+      end
+      return
     end
-    itemIdChecker(1, targetItem)
-    local eachSlotSkippingEmptyIterator = inventory.eachSlotSkippingEmpty()
-    local function iterator()
-      repeat
-        local slot, item = eachSlotSkippingEmptyIterator()
-        if slot == nil then
-          return
-        end
-      until itemEqualityComparer(item, targetItem)
-      return slot, item
-    end
-    return iterator
+
+    inventory.eachSlotParrallel(function(slot, item)
+      if itemUtils.itemEqualityComparer(item, targetItem) then
+        callback(slot, item)
+      end
+    end)
   end
 
   inventory.findItemByIdParrallel = function(item) -- TODO: implement
-    itemArgChecker(1, item)
+    itemUtils.itemIdChecker(1, item)
+    if inventory._isThisTurtleInv then
+      return inventory.findItemById(item)
+    end
+
+
     local iterator = inventory.eachSlotWithItem(item)
     local slot, item = iterator()
     return slot, item
   end
 
   inventory.eachEmptySlotParrallel = function(callback) -- TODO: implement
+    -- TODO: validate callback
+    if inventory._isThisTurtleInv then
+      for slot, item in inventory.eachEmptySlot() do
+        callback(slot, item)
+      end
+      return
+    end
+
+
+
     local eachSlotIterator = inventory.eachSlot()
     local function iterator()
       repeat
@@ -249,14 +277,8 @@ local function wrap(inventory)
     return iterator
   end
 
-  inventory.findEmptySlotParrallel = function() -- TODO: implement
-    local iterator = inventory.eachEmptySlot()
-    local slot = iterator()
-    return slot
-  end
-
   inventory.getTotalItemCountParrallel = function(item)  -- TODO: implement
-    itemArgChecker(1, item)
+    itemUtils.itemIdChecker(1, item)
     local total = 0
     for _, item in inventory.eachSlotWithItem(item)
       total = total +item.count
@@ -272,7 +294,8 @@ local function wrap(inventory)
     return total
   end
 
-  inventory.compactItemStacksParrallel = function(item) -- TODO: implement and test
+  inventory.compactItemStacksParrallel = function(item) -- TODO: implement and test #homeOnly
+    itemUtils.itemIdChecker(1, item)
       if turtle and inventory._isThisTurtleInv then
         for sourceSlot in inventory.eachSlotWithItem() do
           turtle.select(sourceSlot)

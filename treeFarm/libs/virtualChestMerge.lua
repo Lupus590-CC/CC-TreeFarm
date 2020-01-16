@@ -134,6 +134,9 @@ end
 -- wrap all
 local function wrap(...)
   local backingPeripheralsList = {}
+  if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
+    arg = arg[1]
+  end
   for k, v in ipairs(arg) do
     argChecker(k, v, {"string"})
     if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
