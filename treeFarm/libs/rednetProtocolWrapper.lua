@@ -1,5 +1,6 @@
+-- TODO does this work?
 
-
+-- TODO: use argValidationUtils?
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
   if type(position) ~= "number" then

@@ -32,7 +32,7 @@ local function concatProtocols(...)
   end
 
   for k, v in pairs(protocols)
-    argChecker(k, v, {"string"})
+    argValidationUtils.argChecker(k, v, {"string"})
     protocol[k] = trimProtocolSeperator(v)
   end
 
@@ -46,8 +46,8 @@ local function concatProtocols(...)
 end
 
 local function ping(targetId, timeout)
-  argChecker(1, targetId, {"number"})
-  argChecker(2, timeout, {"number", "nil"})
+  argValidationUtils.argChecker(1, targetId, {"number"})
+  argValidationUtils.argChecker(2, timeout, {"number", "nil"})
   timeout = timeout or 2 -- seconds
 
   local randomPayload = string.format("%08x", math.random(1, 2147483647)

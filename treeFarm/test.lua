@@ -8,7 +8,7 @@ do
   -- local launcher = require("treeFarm.launcher")
   -- local remote = require("treeFarm.remote")
 
-  -- local errorCatchUtils = require("treeFarm.libs.errorCatchUtils")
+  -- local argValidationUtils = require("treeFarm.libs.utils.argValidationUtils")
   -- local checkpoint = require("treeFarm.libs.checkpoint")
   -- local config = require("treeFarm.libs.config")
   -- local daemonManager = require("treeFarm.libs.daemonManager")

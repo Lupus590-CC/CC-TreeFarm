@@ -1,5 +1,8 @@
-require("treeFarm.libs.errorCatchUtils")
+local argValidationUtils = require("treeFarm.libs.utils.argValidationUtils")
 
+-- TODO: allow user to specify app to launch with an argument, if they do then save it to the config
+-- TODO: ask to edit startup file
+-- TODO: read config to find out what we should launch
 
 local checkpoint = require("treeFarm.libs.checkpoint")
 
@@ -19,7 +22,7 @@ end
 
 if pocket then
   require("treeFarm.remote").run()
-elseif turtle then -- If furnace manager is a normal computer than this will change
+elseif turtle then -- TODO: If furnace manager is a normal computer than this will change
 
 -- TODO: lama override
 -- TODO: set start up file

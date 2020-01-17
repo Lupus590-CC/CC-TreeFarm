@@ -21,6 +21,8 @@
 
 -- heavily inspired by Lyqyd's own config API https://github.com/lyqyd/cc-configuration
 
+
+-- TODO: validate arguments use argValidationUtils?
 local function load(filename)
   local function unsafeload()
     local file = fs.open(filename, "r")
@@ -29,7 +31,7 @@ local function load(filename)
     return data
   end
 
-  if not fs.exists(filename) or fs.isDir(filename) then
+  if (not fs.exists(filename)) or fs.isDir(filename) then
     return false, "not a file"
   end
 

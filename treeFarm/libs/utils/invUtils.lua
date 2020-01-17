@@ -1,6 +1,7 @@
 --wraps inventories and adds uility methods for them
 
 local itemUtils = require("treeFarm.libs.utils.itemUtils")
+local argValidationUtils = require("treeFarm.libs.utils.argValidationUtils")
 
 local turtleInventoryAsPlethoraInv
 
@@ -18,8 +19,8 @@ local function wrapTurtleInventoryAsPlethoraInv()
     return 16
   end
   turtleInventoryAsPlethoraInv.getItem = function(slot)
-    argChecker(1, slot, {"number"})
-    numberRangeChecker(1, slot, 1, turtleInventoryAsPlethoraInv.size())
+    argValidationUtils.argChecker(1, slot, {"number"})
+    argValidationUtils.numberRangeChecker(1, slot, 1, turtleInventoryAsPlethoraInv.size())
     return turtle.getItemDetail(slot)
   end
   turtleInventoryAsPlethoraInv.list = function()
@@ -47,7 +48,7 @@ local function wrap(inventory)
   if turtle then
     inventory = inventory or wrapTurtleInventoryAsPlethoraInv()
   end
-  argChecker(1, inventory, {"table", "string"})
+  argValidationUtils.argChecker(1, inventory, {"table", "string"})
   if type(inventory) == "string" then
     local peripheralName = inventory
     if not peripheral.isPresent(peripheralName) then
@@ -55,9 +56,9 @@ local function wrap(inventory)
     end
     inventory = peripheral.wrap(peripheralName)
     inventory._peripheralName = peripheralName
-    pcall(tableChecker, "peripheral.wrap(arg[1])", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}}))
+    pcall(argValidationUtils.tableChecker, "peripheral.wrap(arg[1])", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}}))
   else
-    tableChecker("arg[1]", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})
+    argValidationUtils.tableChecker("arg[1]", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})
   end
 
   inventory.eachSlot = function()
@@ -91,11 +92,11 @@ local function wrap(inventory)
   end
 
   inventory.eachSlotWithItem = function(targetItem)
-    argChecker(1, targetItem, {"table", "nil"})
+    argValidationUtils.argChecker(1, targetItem, {"table", "nil"})
     if not targetItem then
       return inventory.eachSlotSkippingEmpty()
     end
-    itemIdChecker(1, targetItem)
+    argValidationUtils.itemIdChecker(1, targetItem)
     local eachSlotSkippingEmptyIterator = inventory.eachSlotSkippingEmpty()
     local function iterator()
       repeat
@@ -120,7 +121,7 @@ local function wrap(inventory)
     if turtle and inventory._isThisTurtleInv then
       slot = slot or turtle.getSelectedSlot()
     end
-    argChecker(1, slot, {"number"})
+    argValidationUtils.argChecker(1, slot, {"number"})
     local item = inventory.getItem(slot)
     if not item then
       return true
@@ -174,7 +175,7 @@ local function wrap(inventory)
         end
       end
     else
-      tableChecker("self", inventory, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
+      argValidationUtils.tableChecker("self", inventory, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
       for slot in pairs(inventory.list()) do
         chest.pushItems(chest._peripheralName, slot)
       end
@@ -186,7 +187,7 @@ local function wrap(inventory)
 
 
   inventory.eachSlotParrallel = function(callback)
-    -- TODO: validate callback
+    argValidationUtils.argChecker(1, callback, {"function"})
     -- turtles can't safely parrallel
     if inventory._isThisTurtleInv then
       for slot, item in inventory.eachSlot() do
@@ -208,7 +209,7 @@ local function wrap(inventory)
   end
 
   inventory.eachSlotSkippingEmptyParrallel = function(callback)
-    -- TODO: validate callback
+    argValidationUtils.argChecker(1, callback, {"function"})
     if inventory._isThisTurtleInv then
       for slot, item in inventory.eachSlotSkippingEmpty() do
         callback(slot, item)
@@ -224,9 +225,9 @@ local function wrap(inventory)
   end
 
   inventory.eachSlotWithItemParrallel = function(targetItem, callback)
-      itemUtils.itemIdChecker(1, targetItem)
-      
-    -- TODO: validate callback
+    argValidationUtils.itemIdChecker(1, targetItem)
+    argValidationUtils.argChecker(2, callback, {"function"})
+
     if inventory._isThisTurtleInv then
       for slot, item in inventory.eachSlotWithItem() do
         callback(slot, item)
@@ -242,7 +243,7 @@ local function wrap(inventory)
   end
 
   inventory.findItemByIdParrallel = function(item) -- TODO: implement
-    itemUtils.itemIdChecker(1, item)
+    argValidationUtils.itemIdChecker(1, item)
     if inventory._isThisTurtleInv then
       return inventory.findItemById(item)
     end
@@ -254,7 +255,7 @@ local function wrap(inventory)
   end
 
   inventory.eachEmptySlotParrallel = function(callback) -- TODO: implement
-    -- TODO: validate callback
+    argValidationUtils.argChecker(1, callback, {"function"})
     if inventory._isThisTurtleInv then
       for slot, item in inventory.eachEmptySlot() do
         callback(slot, item)
@@ -278,7 +279,7 @@ local function wrap(inventory)
   end
 
   inventory.getTotalItemCountParrallel = function(item)  -- TODO: implement
-    itemUtils.itemIdChecker(1, item)
+    argValidationUtils.itemIdChecker(1, item)
     local total = 0
     for _, item in inventory.eachSlotWithItem(item)
       total = total +item.count
@@ -295,7 +296,7 @@ local function wrap(inventory)
   end
 
   inventory.compactItemStacksParrallel = function(item) -- TODO: implement and test #homeOnly
-    itemUtils.itemIdChecker(1, item)
+    argValidationUtils.itemIdChecker(1, item)
       if turtle and inventory._isThisTurtleInv then
         for sourceSlot in inventory.eachSlotWithItem() do
           turtle.select(sourceSlot)
@@ -304,7 +305,7 @@ local function wrap(inventory)
           end
         end
       else
-        tableChecker("self", inventory, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
+        argValidationUtils.tableChecker("self", inventory, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
         for slot in pairs(inventory.list()) do
           chest.pushItems(chest._peripheralName, slot)
         end

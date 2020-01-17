@@ -11,8 +11,6 @@
 -- Note, you have to wrap every inventory that will interact with the merged one so that the single inventories can push to the merged inventory peripheral name string.
 -- I'm working on allowing virtuals peripherals to interact with real ones directly
 --
--- VirtualChestMerge's License:
---
 --  The MIT License (MIT)
 --
 --  Copyright (c) 2019 Lupus590
@@ -49,7 +47,9 @@
 
 -- TODO: can some of the peripheral calls be done in parallel? someone on discord noticed a speed increase and some commands seemed slow in testing
 -- add a flag on the vitual peripheral to parallelise stuff which can be turned off later?
+-- see invUtils
 
+-- TODO: use argValidationUtils?
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
   if type(position) ~= "number" then
@@ -199,7 +199,7 @@ local function wrap(...)
 
 
     local virtualToPeripheral = virtualPeripheralList[virtualToName] or (function()
-      -- make a fake virtualPeripheral so that we can unwrap it latter, because the item manipulation assumes that the remote peripheral is virtual
+      -- make a fake virtualPeripheral so that we can unwrap it later, because the item manipulation assumes that the remote peripheral is virtual
       if !peripheral.isPresent(virtualToName) then
         return nil
       end

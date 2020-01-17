@@ -2,7 +2,7 @@ local rednetUtils = require("treeFarm.libs.utils.rednetUtils")
 local invUtils = require("treeFarm.libs.utils.invUtils")
 local itemUtils = require("treeFarm.libs.utils.itemUtils")
 local nav = require("treeFarm.libs.utils.nav")
-local errorCatchUtils = require("treeFarm.libs.utils.errorCatchUtils")
+local argValidationUtils = require("treeFarm.libs.utils.argValidationUtils")
 
 
 
@@ -29,7 +29,7 @@ local utils = {
   itemUtils = itemUtils,
   nav = nav,
   fuelCheck = fuelCheck,
-  errorCatchUtils = errorCatchUtils,
+  argValidationUtils = argValidationUtils,
 }
 
 return utils

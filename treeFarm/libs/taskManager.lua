@@ -1,3 +1,12 @@
+--[[
+-- @Name: tasknManager
+-- @Author: Lupus590
+-- @License: MIT
+-- @URL: -- TODO: url
+--
+-- If you are interested in the above format: http://www.computercraft.info/forums2/index.php?/topic/18630-rfc-standard-for-program-metadata-for-graphical-shells-use/
+--
+--  The MIT License (MIT)
 --
 -- Copyright 2019 Lupus590
 --
@@ -18,6 +27,7 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 -- IN THE SOFTWARE.
 --
+--]]
 
 local running = false
 local oldError = error
@@ -26,6 +36,7 @@ local function error(mess, level)
   return oldError(mess, (level or 1) +1)
 end
 
+-- TODO: use argValidationUtils?
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
   if type(position) ~= "number" then

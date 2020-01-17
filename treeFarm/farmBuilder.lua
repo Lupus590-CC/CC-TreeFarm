@@ -1,5 +1,5 @@
 -- build the tree farm
-require("treeFarm.libs.errorCatchUtils")
+local argValidationUtils = require("treeFarm.libs.utils.argValidationUtils")
 local utils = require("treeFarm.libs.utils")
 local invUtils = utils.invUtils
 local itemUtils = invUtils.itemUtils
@@ -13,7 +13,7 @@ local task = require("treeFarm.libs.taskManager")
 
 -- by default full slots are not deemed valid for selection
 local function selectForDigging(itemId)
- itemIdChecker(1, itemId)
+ argValidationUtils.itemIdChecker(1, itemId)
 
  item = reverseItemLookup(item)
  if item.digsInto then
@@ -28,7 +28,7 @@ end
 -- TODO: change how refueling works entirely to not use wood and only use saplings when given permission from the furnace manager
 local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #homeOnly
  -- TODO: add an argument to skip saplings?
- argChecker(1, targetFuelValue, {"number", "nil"})
+ argValidationUtils.argChecker(1, targetFuelValue, {"number", "nil"})
  targetFuelValue = targetFuelValue or math.huge
 
  local bestFuelSlot

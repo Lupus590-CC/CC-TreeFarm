@@ -1,6 +1,4 @@
 
--- TODO: move file out of itemUtils?
-
 local itemIds = { -- TODO: remove non-charcoal fuels?
 -- TODO: save to file and allow override?
   dirt = { name = "minecraft:dirt", damage = 0, maxCount = 64 },
@@ -46,12 +44,12 @@ for k, v in pairs(itemIds) do
   reverseItemLookup[v.name..":"..tostring(v.damage)] = itemIds[k]
 end
 setmetatable(reverseItemLookup, {
-  __call = function(_self, itemId)
+  __call = function(_self, itemId) -- NOTE: what does this do?
     if itemId == nil then
       itemId = _self
       _self = reverseItemLookup
     end
-    itemIdChecker(1, itemId)
+    argValidationUtils.itemIdChecker(1, itemId)
     return reverseItemLookup[itemId.name..":"..tostring(itemId.damage)]
   end
 })

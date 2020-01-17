@@ -1,6 +1,6 @@
 -- relative coordinates
 
--- TODO: remove nav?
+-- TODO: remove nav? rename to turtleUtils?
 
 local walkwayHight = {0, 0, 0}
 local rootCorner = {1, 1, 1}

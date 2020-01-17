@@ -1,14 +1,23 @@
+--[[
+-- @Name: patience
+-- @Author: Lupus590
+-- @License: MIT
+-- @URL: -- TODO: url
+--
+-- If you are interested in the above format: http://www.computercraft.info/forums2/index.php?/topic/18630-rfc-standard-for-program-metadata-for-graphical-shells-use/
+--
+--  The MIT License (MIT)
 --
 -- Copyright 2019 Lupus590
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to
---  deal in the Software without restriction, including without limitation the
---  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
---  sell copies of the Software, and to permit persons to whom the Software is
---  furnished to do so, subject to the following conditions: The above
---  copyright notice and this permission notice shall be included in all copies
---  or substantial portions of the Software.
+-- deal in the Software without restriction, including without limitation the
+-- rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+-- sell copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions: The above copyright
+-- notice and this permission notice shall be included in all copies or
+-- substantial portions of the Software.
 --
 -- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 -- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,7 +27,9 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 -- IN THE SOFTWARE.
 --
+--]]
 
+-- TODO: use argValidationUtils?
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
   if type(position) ~= "number" then
@@ -78,7 +89,7 @@ local function startTimer(secondsToWait)
   end
 
   -- add to list
-  local timerId = string.format("%08x", math.random(1, 2147483647))
+  local timerId = string.format("%08x", math.random(1, 2147483647)) -- TODO: make a miscUtils for this?
   timers[timerId] = secondsToWait
 
   return timerId
@@ -102,7 +113,7 @@ local function enterLoop(patienceFileName, updateInterval)
   argChecker(1, patienceFileName, {"string", "nil"})
   patienceFileName = patienceFileName or ".patience"
   argChecker(2, updateInterval, {"number", "nil"})
-  updateInterval = updateInterval or 5 -- TODO: is there a way to get this more accurate without hammering the HDD?
+  updateInterval = updateInterval or 5 -- TODO: is there a way to get this more accurate without hammering the HDD? #discord
 
   if running then
     return false, "already running"
@@ -124,19 +135,19 @@ local function enterLoop(patienceFileName, updateInterval)
   end
   while doLoop do
     for timerId, timeRemaining in pairs(timers) do
-      -- queue events if expired
       if timeRemaining <= 0 then
+        -- queue events if expired
         os.queueEvent("patienceTimer", timerId)
         timers[timerId] = nil
+      else
+        -- decrement the timeRemaining
+        timers[timerId] = timeRemaining - updateInterval
       end
-    end
-    -- decrement the timeRemaining
-    for k, timeRemaining in pairs(timers) do
-      timers[k] = timeRemaining - updateInterval
     end
     local ok, err = config.save(patienceFileName, timers)
     if not ok then
-      error("patience couldn't save file, got error: "..err)
+      error("patience couldn't save file with name: "..patienceFileName
+      .."\ngot error: "..err)
     end
     if doLoop then -- quick exit
       sleep(updateInterval)

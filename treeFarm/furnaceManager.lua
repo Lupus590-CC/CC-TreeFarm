@@ -1,4 +1,4 @@
-require("treeFarm.libs.errorCatchUtils")
+local argValidationUtils = require("treeFarm.libs.utils.argValidationUtils")
 local utils = require("treeFarm.libs.utils")
 local invUtils = utils.invUtils -- TODO: use invUtils
 local itemUtils = utils.itemUtils
@@ -23,7 +23,7 @@ local furnaceOutputSlotNumber = 3
 local linkedTurtleId = "manualTesting" -- TODO: change to nil and implement turtle pairing and communicating #turtle
 
 local function fuelValueForFurnace(turtleFuelValue)
-  argChecker(1, turtleFuelValue, {"number"})
+  argValidationUtils.argChecker(1, turtleFuelValue, {"number"})
   return turtleFuelValue/10
 end
 

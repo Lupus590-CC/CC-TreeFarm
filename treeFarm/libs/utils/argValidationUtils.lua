@@ -1,5 +1,3 @@
--- TODO: some libs copy this function, can this be prevented?
-  -- make this a standalone lib and have them depend on this?
 
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
@@ -130,17 +128,10 @@ local function itemIdChecker(argPosition, itemIdArg)
   tableCheckerFunc("arg["..argPosition.."]", itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
 end
 
-local makeAMess = false
-if makeAMess then
-  local _ENV = _ENV or getfenv()
-  _ENV.argChecker = argChecker
-  _ENV.tableChecker = tableChecker
-  _ENV.numberRangeChecker = numberRangeChecker
-  _ENV.itemIdChecker = itemIdChecker
-end
 
 
-local errorCatchUtils = {
+
+local argValidationUtils = {
   argChecker = argChecker,
   tableChecker = tableChecker,
   numberRangeChecker = numberRangeChecker,
@@ -148,4 +139,26 @@ local errorCatchUtils = {
 }
 
 
-return errorCatchUtils
+local makeSmallMess = false
+local makeMess = false
+local makeBigmess = false
+if makeSmallMess then
+  local _ENV = _ENV or getfenv()
+  _ENV.argValidationUtils = argValidationUtils
+end
+if makeMess then
+  local _ENV = _ENV or getfenv()
+  _ENV.argChecker = argChecker
+  _ENV.tableChecker = tableChecker
+  _ENV.numberRangeChecker = numberRangeChecker
+  _ENV.itemIdChecker = itemIdChecker
+end
+if makeBigmess then
+  _G.argChecker = argChecker
+  _G.tableChecker = tableChecker
+  _G.numberRangeChecker = numberRangeChecker
+  _G.itemIdChecker = itemIdChecker
+end
+
+
+return argValidationUtils

@@ -29,7 +29,7 @@
 -- how to track reference frames?
 -- how to access reference frames?
 -- push/pop interface for creating and removing reference frames
--- don't forget to use argChecker
+-- don't forget to use argValidationUtils
 
 -- REQUIRE_COMPAT
 if _G.LAMA then
