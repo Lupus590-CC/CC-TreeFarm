@@ -50,3 +50,8 @@ end
 -- TODO: tostring on a function
 -- tables can be called so function.tostring can be a method of that table
 -- lua decompiler for string.dump?
+-- table with __tostring and __call metamethods
+local f = "return function() print(\"hello world\") end"
+local t = setmetatable({}, {__call = loadstring(f)(), __tostring = function() return f end})
+-- different means of serializing objects?
+-- objects have a serialize method and prototypes have deserialize and the serialized object?

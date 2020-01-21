@@ -7,7 +7,7 @@
  -- multiple server names? remote has one and the furnace has one?
  -- turtle and furnace manager pair like bluetooth
 
-local modem = -- TODO: locate wireless modem
+local modem = peripheral.find("modem", function(_, modem) return modem.isWireless() end)
 rednet.open(modem)
 
 local protocolSeperator = "."

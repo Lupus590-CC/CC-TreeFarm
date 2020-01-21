@@ -25,6 +25,16 @@ local function argChecker(position, value, validTypesList, level)
   for k, v in ipairs(validTypesList) do
     if type(value) == v then
       return
+    --[[
+  elseif v == "callable" then -- TODO: is this a good idea? #discord
+      if type(value) == "function" then
+        return
+      elseif type(value) == "table" then
+        local meta = getmetatable(value)
+        if type(meta) == "table" and type(meta.__call) == "function" then
+          return
+        end
+      end--]]
     end
   end
 

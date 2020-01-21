@@ -16,9 +16,9 @@ local furnaces = {}
 local wirelessModem
 local monitor
 
-local furnaceInputSlotNumber = 1
-local furnaceFuelSlotNumber = 2
-local furnaceOutputSlotNumber = 3
+local furnaceInputSlot = 1
+local furnaceFuelSlot = 2
+local furnaceOutputSlot = 3
 
 local linkedTurtleId = "manualTesting" -- TODO: change to nil and implement turtle pairing and communicating #turtle
 
@@ -315,14 +315,14 @@ local function chestAndFurnaceManagmentLoop()
 
   -- empty out the output of the furnaces, only remove 8 at a time so that if the output is full then it won't waste fuel
   for _, furnace in pairs(furnaces) do
-    local item = furnace.getItemMeta(furnaceOutputSlotNumber)
+    local item = furnace.getItemMeta(furnaceOutputSlot)
     local currentCount = item and item.count or 0
     local moveLimit = 0
     while currentCount > moveLimit + 8 do
       moveLimit = moveLimit + 8
     end
     if moveLimit > 0 then
-      furnace.pushItems(chests.charcoal._peripheralName, furnaceOutputSlotNumber, moveLimit)
+      furnace.pushItems(chests.charcoal._peripheralName, furnaceOutputSlot, moveLimit)
     end
   end
 
@@ -355,10 +355,10 @@ local function chestAndFurnaceManagmentLoop()
 
     end
     local limit = 2
-    local moved = furnace.pullItems(chest.charcoal._peripheralName, 1, limit, furnaceInputSlotNumber)
+    local moved = furnace.pullItems(chest.charcoal._peripheralName, 1, limit, furnaceInputSlot)
     if moved < limit then
       for
-        furnace.pullItems(chest.output._peripheralName, 1, limit, furnaceInputSlotNumber)
+        furnace.pullItems(chest.output._peripheralName, 1, limit, furnaceInputSlot)
       end
     end
   end
@@ -366,14 +366,14 @@ local function chestAndFurnaceManagmentLoop()
   -- TODO: reload the furnaces, 8 at a time to use fuel efficiently
   -- TODO: add a furnace log intermediary chest and update the screenshots #homeOnly
   --[[for _, furnace in pairs(furnaces) do
-    local item = furnace.getItemMeta(furnaceOutputSlotNumber)
+    local item = furnace.getItemMeta(furnaceOutputSlot)
     local currentCount = item and item.count or 0
     local moveLimit = 0
     while currentCount > moveLimit + 8 do
       moveLimit = moveLimit + 8
     end
     if moveLimit > 0 then
-      furnace.pushItems(chests.charcoal._peripheralName, furnaceOutputSlotNumber, moveLimit)
+      furnace.pushItems(chests.charcoal._peripheralName, furnaceOutputSlot, moveLimit)
     end
   end]]
 

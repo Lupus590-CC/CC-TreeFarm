@@ -49,6 +49,8 @@
 -- add a flag on the vitual peripheral to parallelise stuff which can be turned off later?
 -- see invUtils
 
+-- TODO: figure out how best for using with invUtils
+
 -- TODO: use argValidationUtils?
 local function argChecker(position, value, validTypesList, level)
   -- check our own args first, sadly we can't use ourself for this
@@ -111,8 +113,10 @@ end
 
 local virtualPeripheralList = {}
 
+-- TODO: export this or put into wrap
 local function translateSlot(virtualPeripheral, virtualSlot) -- returns peripheralWithVirtualSlot, physicalSlotNumber
   argChecker(1, virtualPeripheral, {"table"})
+  -- TODO: check that virtualPeripheral is infact a virtual peripheral
   argChecker(2, virtualSlot, {"number"})
 
   if virtualSlot > virtualPeripheral.size() or virtualSlot < 1 then
@@ -150,7 +154,7 @@ local function wrap(...)
 
   local thisVirtualPeripheral = {}
 
-  function thisVirtualPeripheral.size()
+  function thisVirtualPeripheral.size() -- NOTE: can parallel
     local total = 0
     for k, v in ipairs(backingPeripheralsList) do
       total = total + backingPeripheralsList[k].size()
@@ -176,7 +180,7 @@ local function wrap(...)
     return backer.getItemMeta(trueSlot)
   end
 
-  function thisVirtualPeripheral.list()
+  function thisVirtualPeripheral.list() -- NOTE: can parallel
     local list = {}
     local listSize = 0
     for k, v in ipairs(backingPeripheralsList) do
@@ -348,16 +352,6 @@ local function wrap(...)
 
 
   thisVirtualPeripheral._backingPeripheralList = backingPeripheralsList -- lua needs read only tables which play nice
-  thisVirtualPeripheral._translateSlot = function(slot)
-    local ok, peripheralOrErr
-    ok, peripheral, slot = pcall(translateSlot, thisVirtualPeripheral, slot)
-    if not ok then
-      err = string.sub(peripheralOrErr, 8)
-      error(err, 2)
-    end
-    local peripheral = peripheralOrErr
-    return peripheral, slot
-  end
 
   thisVirtualPeripheral._peripheralName = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
 
@@ -370,6 +364,7 @@ end
 
 
 local virtualChestMerge = {
+  translateSlot = translateSlot,
   wrap = wrap,
 }
 

@@ -1,4 +1,3 @@
--- TODO does this work?
 
 -- TODO: use argValidationUtils?
 local function argChecker(position, value, validTypesList, level)
@@ -87,17 +86,29 @@ local function wrap(protocol)
   end
 end
 
-local function run() -- only required for events, the wrapped methods still work stand alone
-  while true do
+local runEventTranslator
+local function startEventTranslator() -- only required for events, the wrapped methods still work stand alone
+  runEventTranslator = true
+  while runEventTranslator do
     local event = table.pack(os.pullevent("rednet_message"))
     os.queueEvent(toEventName(event[4]), event[2], event[3])
   end
 end
 
+local function stopEventTranslator()
+  runEventTranslator = false
+end
+
+local isEventTranslatorRunning()
+  return runEventTranslator
+end
+
 local rednetProtocolWrapper = {
   toEventName = toEventName,
   wrap = wrap,
-  run = run,
+  startEventTranslator = startEventTranslator,
+  stopEventTranslator = stopEventTranslator,
+  isEventTranslatorRunning = isEventTranslatorRunning,
   open = rednet.open,
   close = rednet.close,
   isOpen = rednet.isOpen,

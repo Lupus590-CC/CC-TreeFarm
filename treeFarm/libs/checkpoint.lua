@@ -281,10 +281,7 @@ function checkpoint.run(defaultLabel, fileName, stackTracing) -- returns whateve
   if fs.exists(checkpointFile) then
     fs.delete(checkpointFile)
   end
-
-  -- NOTE: should we be doing this? I think we were doing this because traceback mode packs the table
-  return type(returnValues) == "table" and table.unpack(returnValues, 1, returnValues.n) or returnValues -- if it's a table, return the unpacked table, else return whatever it is
-
+  return table.unpack(returnValues, 1, returnValues.n)
 end
 
 return checkpoint

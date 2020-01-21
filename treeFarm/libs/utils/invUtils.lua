@@ -31,7 +31,6 @@ local function wrapTurtleInventoryAsPlethoraInv()
     return list
   end
 
-  -- TODO: attempt to complete implementation
   -- drop -- notImplementable? -- where does the chest drop too?
   -- getItemMeta -- notImplementable
   -- pullItmes -- notImplementable?
@@ -149,11 +148,11 @@ local function wrap(inventory)
     return slot
   end
 
-  inventory.getTotalItemCount = function(item)
-    itemArgChecker(1, item)
+  inventory.getTotalItemCount = function(itemToCount)
+    itemArgChecker(1, itemToCount)
     local total = 0
-    for _, item in inventory.eachSlotWithItem(item)
-      total = total +item.count
+    for _, item in inventory.eachSlotWithItem(itemToCount)
+      total = total + item.count
     end
     return total
   end
@@ -182,7 +181,6 @@ local function wrap(inventory)
     end
   end
 
-  -- TODO: add parallel forEach methods?
   -- if the inv is a turtle one then we fall back to using the sequential methods
 
 
@@ -198,7 +196,7 @@ local function wrap(inventory)
 
     local tasks = {}
     local itemMetaOrGetitemFunc = inventory.getItemMeta or inventory.getItemInfo
-    for i = 1, inventory.size() do
+    for i = 1, inventory.size() do -- TODO: check performance on large inventories #homeOnly
       tasks[i] = function()
         local slot = i
         callback(slot, itemMetaOrGetitemFunc(slot))
@@ -225,11 +223,15 @@ local function wrap(inventory)
   end
 
   inventory.eachSlotWithItemParrallel = function(targetItem, callback)
-    argValidationUtils.itemIdChecker(1, targetItem)
+    argValidationUtils.argChecker(1, targetItem, {"table", "nil"})
     argValidationUtils.argChecker(2, callback, {"function"})
+    if not targetItem then
+      return inventory.eachSlotSkippingEmptyParrallel(callback)
+    end
+    argValidationUtils.itemIdChecker(1, targetItem)
 
     if inventory._isThisTurtleInv then
-      for slot, item in inventory.eachSlotWithItem() do
+      for slot, item in inventory.eachSlotWithItem(targetItem) do
         callback(slot, item)
       end
       return
@@ -242,19 +244,21 @@ local function wrap(inventory)
     end)
   end
 
-  inventory.findItemByIdParrallel = function(item) -- TODO: implement
+  inventory.findItemByIdParrallel = function(item) -- TODO: test, may not be faster but it might depend on which slot the item is in #homeOnly
     argValidationUtils.itemIdChecker(1, item)
     if inventory._isThisTurtleInv then
-      return inventory.findItemById(item)
+      return inventory.(item)
     end
 
-
-    local iterator = inventory.eachSlotWithItem(item)
-    local slot, item = iterator()
-    return slot, item
+    local slotfound, itemFound
+    inventory.eachSlotWithItemParrallel(item, function(slot, item) -- could be faster with parallel.waitForAny
+      slotfound = slot
+      itemFound = itemFound
+    end)
+    return slotfound, itemFound
   end
 
-  inventory.eachEmptySlotParrallel = function(callback) -- TODO: implement
+  inventory.eachEmptySlotParrallel = function(callback)
     argValidationUtils.argChecker(1, callback, {"function"})
     if inventory._isThisTurtleInv then
       for slot, item in inventory.eachEmptySlot() do
@@ -263,54 +267,43 @@ local function wrap(inventory)
       return
     end
 
-
-
-    local eachSlotIterator = inventory.eachSlot()
-    local function iterator()
-      repeat
-        local slot, item = eachSlotIterator()
-        if slot == nil then
-          return
-        end
-      until not item
-      return slot
-    end
-    return iterator
+    inventory.eachSlotParrallel(function(slot, item)
+      if not item then
+        callback(slot)
+      end
+    end)
   end
 
-  inventory.getTotalItemCountParrallel = function(item)  -- TODO: implement
-    argValidationUtils.itemIdChecker(1, item)
+  inventory.getTotalItemCountParrallel = function(itemToCount) -- TODO: test, may not be faster #homeOnly
+    argValidationUtils.itemIdChecker(1, itemToCount)
     local total = 0
-    for _, item in inventory.eachSlotWithItem(item)
-      total = total +item.count
+    inventory.eachSlotWithItemParrallel(itemToCount, function(_, item)
+      total = total + item.count
     end
     return total
   end
 
-  inventory.getFreeSpaceCountParrallel = function()  -- TODO: implement
+  inventory.getFreeSpaceCountParrallel = function() -- TODO: test, may not be faster #homeOnly
     local total = 0
-    for _ in inventory.eachEmptySlot()
+    inventory.eachEmptySlotParrallel(itemToCount, function()
       total = total + 1
     end
     return total
   end
 
-  inventory.compactItemStacksParrallel = function(item) -- TODO: implement and test #homeOnly
-    argValidationUtils.itemIdChecker(1, item)
-      if turtle and inventory._isThisTurtleInv then
-        for sourceSlot in inventory.eachSlotWithItem() do
-          turtle.select(sourceSlot)
-          for destinationSlot = 1, sourceSlot do
-            turtle.transferTo(destinationSlot)
-          end
-        end
-      else
-        argValidationUtils.tableChecker("self", inventory, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
-        for slot in pairs(inventory.list()) do
-          chest.pushItems(chest._peripheralName, slot)
-        end
+  inventory.compactItemStacksParrallel = function() -- TODO: test, may not be faster and may not even work #homeOnly
+    if inventory._isThisTurtleInv then
+      inventory.compactItemStacks()
+    else
+      argValidationUtils.tableChecker("self", inventory, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
+      local tasks = {}
+      local taskCount = 0
+      for slot in pairs(inventory.list()) do
+         taskCount = taskCount + 1
+         tasks[taskCount] = function() chest.pushItems(chest._peripheralName, slot) end
       end
-
+      parrallel.waitForAll(table.unpack(tasks, 1, taskCount))
+    end
   end
 
   return inventory

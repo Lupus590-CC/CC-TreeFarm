@@ -44,7 +44,7 @@ for k, v in pairs(itemIds) do
   reverseItemLookup[v.name..":"..tostring(v.damage)] = itemIds[k]
 end
 setmetatable(reverseItemLookup, {
-  __call = function(_self, itemId) -- NOTE: what does this do?
+  __call = function(_self, itemId) -- converts real items to their table version above
     if itemId == nil then
       itemId = _self
       _self = reverseItemLookup
@@ -54,4 +54,4 @@ setmetatable(reverseItemLookup, {
   end
 })
 
-return itemIds
+return {itemIds = itemIds, reverseItemLookup = reverseItemLookup}
