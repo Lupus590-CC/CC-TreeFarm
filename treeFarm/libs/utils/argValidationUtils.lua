@@ -25,7 +25,7 @@ local function argChecker(position, value, validTypesList, level)
   for k, v in ipairs(validTypesList) do
     if type(value) == v then
       return
-    --[[
+    --[[ -- TODO: allow users to pass in functions instead? Do this for each of the checkers?
   elseif v == "callable" then -- TODO: is this a good idea? #discord
       if type(value) == "function" then
         return
@@ -56,7 +56,7 @@ local function tableChecker(positionInfo, tableToCheck, templateTable, rejectExt
   argChecker(4, rejectExtention, {"boolean", "nil"})
   argChecker(5, level, {"number", "nil"})
 
-  level = level and level + 1 or 2
+  level = level and level + 1 or 3
 
   local hasElements = false
   for k, v in pairs(templateTable) do
@@ -150,20 +150,20 @@ local argValidationUtils = {
 
 
 local makeSmallMess = false
-local makeMess = false
 local makeBigmess = false
+local makeHugemess = false
 if makeSmallMess then
   local _ENV = _ENV or getfenv()
   _ENV.argValidationUtils = argValidationUtils
 end
-if makeMess then
+if makeBigmess then
   local _ENV = _ENV or getfenv()
   _ENV.argChecker = argChecker
   _ENV.tableChecker = tableChecker
   _ENV.numberRangeChecker = numberRangeChecker
   _ENV.itemIdChecker = itemIdChecker
 end
-if makeBigmess then
+if makeHugemess then
   _G.argChecker = argChecker
   _G.tableChecker = tableChecker
   _G.numberRangeChecker = numberRangeChecker

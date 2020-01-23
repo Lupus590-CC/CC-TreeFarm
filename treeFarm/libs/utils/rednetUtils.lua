@@ -10,9 +10,9 @@
 local modem = peripheral.find("modem", function(_, modem) return modem.isWireless() end)
 rednet.open(modem)
 
-local protocolSeperator = "."
-local rootProtocol = "Lupus590"..protocolSeperator.."treeFarm"
-local pingProtocol = rootProtocol..protocolSeperator.."ping"
+local protocolSeperator = "." -- TODO: uppercase this
+local rootProtocol = "Lupus590"..protocolSeperator.."treeFarm" -- TODO: uppercase this
+local pingProtocol = rootProtocol..protocolSeperator.."ping" -- TODO: uppercase this
 
 local function concatProtocols(...)
   local protocols = table.pack(...)

@@ -16,9 +16,9 @@ local furnaces = {}
 local wirelessModem
 local monitor
 
-local furnaceInputSlot = 1
-local furnaceFuelSlot = 2
-local furnaceOutputSlot = 3
+local furnaceInputSlot = 1 -- TODO: uppercase this
+local furnaceFuelSlot = 2 -- TODO: uppercase this
+local furnaceOutputSlot = 3 -- TODO: uppercase this
 
 local linkedTurtleId = "manualTesting" -- TODO: change to nil and implement turtle pairing and communicating #turtle
 

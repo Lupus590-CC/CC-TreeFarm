@@ -37,7 +37,7 @@ local function wrapTurtleInventoryAsPlethoraInv()
   -- pushItems -- notImplementable?
   -- suck -- notImplementable? -- where does the chest suck from?
 
-  turtleInventoryAsPlethoraInv._isThisTurtleInv = true
+  turtleInventoryAsPlethoraInv._isThisTurtleInv = true -- TODO: uppercase this
   turtleInventoryAsPlethoraInv.allowChangeOfSelectedSlot = true
 
   return turtleInventoryAsPlethoraInv
@@ -54,7 +54,7 @@ local function wrap(inventory)
       error("Could not wrap peripheral with name "..peripheralName, 1)
     end
     inventory = peripheral.wrap(peripheralName)
-    inventory._peripheralName = peripheralName
+    inventory._peripheralName = peripheralName -- TODO: uppercase this
     pcall(argValidationUtils.tableChecker, "peripheral.wrap(arg[1])", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}}))
   else
     argValidationUtils.tableChecker("arg[1]", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})

@@ -42,7 +42,7 @@ end
 
 local function toEventName(protocol)
   argChecker(1, protocol, {"string"})
-  return "rednet_protocol_message_"..protocol
+  return "rednet_protocol_message_"..protocol -- TODO: I don't like this prefix rednet one is "rednet_message"
 end
 
 local function wrap(protocol)

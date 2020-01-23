@@ -47,7 +47,6 @@ setmetatable(reverseItemLookup, {
   __call = function(_self, itemId) -- converts real items to their table version above
     if itemId == nil then
       itemId = _self
-      _self = reverseItemLookup
     end
     argValidationUtils.itemIdChecker(1, itemId)
     return reverseItemLookup[itemId.name..":"..tostring(itemId.damage)]

@@ -100,7 +100,7 @@ local function tableChecker(positionInfo, tableToCheck, templateTable, rejectExt
   argChecker(4, rejectExtention, {"boolean", "nil"})
   argChecker(5, level, {"number", "nil"})
 
-  level = level and level + 1 or 2
+  level = level and level + 1 or 3
 
   local hasElements = false
   for k, v in pairs(templateTable) do
@@ -176,6 +176,14 @@ end
 
 local virtualPeripheralList = {}
 
+local function hasBackers(virtualPeripheral) -- TODO: use
+  argChecker(1, virtualPeripheral, {"table"})
+  tableChecker("arg[1]", virtualPeripheral, {_backingPeripheralList = {"table"}})
+  tableChecker("arg[1]._backingPeripheralList", virtualPeripheral._backingPeripheralList, {n = {"number"}})
+
+  return virtualPeripheral._backingPeripheralList.n > 0
+end
+
 local function translateSlot(virtualPeripheral, virtualSlot) -- returns peripheralWithVirtualSlot, physicalSlotNumber
   argChecker(1, virtualPeripheral, {"table"})
   argChecker(2, virtualSlot, {"number"})
@@ -215,11 +223,13 @@ local function wrap(...)
         error("arg["..k.."] not a valid peripheral side/name, got"..v, 2)
       end
       backingPeripheralsList[k] = peripheral.wrap(v) or virtualPeripheralList[v]
-      backingPeripheralsList[k]._peripheralName = v
+      backingPeripheralsList[k]._peripheralName = v -- TODO: uppercase this
     end
   end
   function backingPeripheralsList.remove(backerPeripheralToRemove)
     -- TODO: what should the other functions do if the virtual peripheral has no backers?
+    -- insert a nullObject? a fake inventory with no storage space? this will break some arg validation
+    -- just error when user attempts to remove the last backer?
   end
   if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments -- TODO: what if the args have holes? currently the backer list gets holes which means that the virtual peripheral ends up smaller
     arg = arg[1]
@@ -230,7 +240,7 @@ local function wrap(...)
       error("arg["..k.."] not a valid peripheral side/name, got"..v, 2)
     end
     backingPeripheralsList[k] = peripheral.wrap(v) or virtualPeripheralList[v]
-    backingPeripheralsList[k]._peripheralName = v
+    backingPeripheralsList[k]._peripheralName = v -- TODO: uppercase this
     if not arg.n and k > backingPeripheralsList.n then
       backingPeripheralsList.n = k
     end
@@ -296,8 +306,8 @@ local function wrap(...)
       end
       local realPeripheralName = virtualToName
       local p = peripheral.wrap(realPeripheralName)
-      p._backingPeripheralList = {p} -- circular loop, will this break things?
-      p._peripheralName = realPeripheralName
+      p._backingPeripheralList = {p, n = 1} -- circular loop, will this break things?
+      p._peripheralName = realPeripheralName -- TODO: uppercase this
       return p
     end)() -- TODO: test this then copy to pullItems #homeOnly
     -- should allow virtual to interact with real peripherals 'directly'
@@ -440,11 +450,11 @@ local function wrap(...)
   -- TODO: if I add a peripheral to this table then does the virtual peripheral get bigger or does it break? #homeOnly
   -- TODO: what if I remove one (while keeping it as a list without holes)? #homeOnly
   -- TODO: add a method for adding and removing backers?
-  thisVirtualPeripheral._backingPeripheralList = backingPeripheralsList -- lua needs read only tables which play nice
+  thisVirtualPeripheral._backingPeripheralList = backingPeripheralsList -- lua needs read only tables which play nice -- TODO: uppercase this? we do modify it's contents so it's not deep read only
 
-  thisVirtualPeripheral._peripheralName = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
+  thisVirtualPeripheral._peripheralName = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647)) -- TODO: uppercase this
 
-  thisVirtualPeripheral._isVirtual = true
+  thisVirtualPeripheral._isVirtual = true -- TODO: uppercase this
 
   virtualPeripheralList[thisVirtualPeripheral._peripheralName] = thisVirtualPeripheral
 
@@ -453,6 +463,7 @@ end
 
 
 local virtualChestMerge = {
+  hasBackers = hasBackers,
   translateSlot = translateSlot,
   wrap = wrap,
 }
