@@ -364,6 +364,7 @@ local function chestAndFurnaceManagmentLoop()
   end
 
   -- TODO: reload the furnaces, 8 at a time to use fuel efficiently
+    -- there is a method on the furnace to read the remaining burn time, use that instead?
   -- TODO: add a furnace log intermediary chest and update the screenshots #homeOnly
   --[[for _, furnace in pairs(furnaces) do
     local item = furnace.getItemMeta(furnaceOutputSlot)

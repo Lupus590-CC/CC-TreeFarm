@@ -38,6 +38,7 @@
 
 -- TODO: override peipheral api?
 -- TODO: add fluid support #bonus
+-- tanks ususally can take only one item, should all tanks under the virtual peripheral be forced to this? what if one backer is modified seperatly to have different contents?
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.common.capabilities.ICapabilityProvider
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.fluids.capability.IFluidHandler
 -- https://squiddev-cc.github.io/plethora/methods.html#targeted-methods-net.minecraftforge.items.IItemHandler
@@ -92,6 +93,68 @@ local function argChecker(position, value, validTypesList, level)
   .." got "..type(value), level)
 end
 
+local function tableChecker(positionInfo, tableToCheck, templateTable, rejectExtention, level)
+  argChecker(1, positionInfo, {"string"})
+  argChecker(2, tableToCheck, {"table"})
+  argChecker(3, templateTable, {"table"})
+  argChecker(4, rejectExtention, {"boolean", "nil"})
+  argChecker(5, level, {"number", "nil"})
+
+  level = level and level + 1 or 2
+
+  local hasElements = false
+  for k, v in pairs(templateTable) do
+    hasElements = true
+    if type(v) ~= "table" then
+      error("arg[3]["..tostring(k).."] expected table got "..type(v),2)
+    end
+    for k2, v2 in pairs(v) do
+      if type(v2) ~= "string" then
+         error("arg[3]["..tostring(k).."]["..tostring(k2).."] expected string  got "..type(v2),2)
+      end
+    end
+  end
+  if not hasElements then
+    error("arg[3] table must contain at least one element",2)
+  end
+
+
+  local function elementIsValid(element, validTypesList)
+    for k, v in ipairs(validTypesList) do
+      if type(element) == v then
+        return true
+      end
+    end
+    return false
+  end
+
+  -- check the client's stuff
+  for key, value in pairs(tableToCheck) do
+    if (rejectExtention) and (not templateTable[key]) then
+      error(positionInfo.." table has invalid key "..tostring(key), level)
+    end
+
+    local validTypesList = templateTable[key]
+    if validTypesList and not elementIsValid(value, validTypesList) then
+      local expectedTypes
+      if #validTypesList == 1 then
+          expectedTypes = validTypesList[1]
+      else
+          expectedTypes = table.concat(validTypesList, ", ", 1, #validTypesList  - 1) .. " or " .. validTypesList[#validTypesList]
+      end
+
+      error(positionInfo.."["..tostring(key).."] expected "..expectedTypes
+      .." got "..type(value), level)
+    end
+  end
+
+  for k, v in pairs(templateTable) do
+    if not tableToCheck[k] then
+      error(positionInfo.." table is missing key"..tostring(k),  level)
+    end
+  end
+end
+
 local function numberRangeChecker(argPosition, value, lowerBound, upperBound, level)
   argChecker(1, argPosition, {"number"})
   argChecker(2, value, {"number"})
@@ -113,11 +176,14 @@ end
 
 local virtualPeripheralList = {}
 
--- TODO: export this or put into wrap
 local function translateSlot(virtualPeripheral, virtualSlot) -- returns peripheralWithVirtualSlot, physicalSlotNumber
   argChecker(1, virtualPeripheral, {"table"})
-  -- TODO: check that virtualPeripheral is infact a virtual peripheral
   argChecker(2, virtualSlot, {"number"})
+
+  tableChecker("arg[1]", virtualPeripheral, {_backingPeripheralList = {"table"}, size = {"function"}})
+  for k, v in ipairs(virtualPeripheral._backingPeripheralList)
+    tableChecker("arg[1]["..k.."]", v, {size = {"function"}})
+  end
 
   if virtualSlot > virtualPeripheral.size() or virtualSlot < 1 then
     error("arg[1] number out of range, must be between 1 and "..virtualPeripheral.size(), 2)
@@ -132,23 +198,44 @@ local function translateSlot(virtualPeripheral, virtualSlot) -- returns peripher
     end
     scannedSize = scannedSize + currentBackerSize
   end
-  error("virtualChestMerge:translateSlot got to that line that we shouldn't have been able to get to")
+  error("arg[1] Walked off end of backers, virtual peripheral must be malformed",2)
 end
 
 -- wrap all
 local function wrap(...)
   local backingPeripheralsList = {}
-  if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
+  function backingPeripheralsList.add(...) -- TODO: prevent recursive backers
+    if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
+      arg = arg[1]
+    end
+    backingPeripheralsList
+    for k, v in ipairs(arg) do
+      argChecker(k, v, {"string"})
+      if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
+        error("arg["..k.."] not a valid peripheral side/name, got"..v, 2)
+      end
+      backingPeripheralsList[k] = peripheral.wrap(v) or virtualPeripheralList[v]
+      backingPeripheralsList[k]._peripheralName = v
+    end
+  end
+  function backingPeripheralsList.remove(backerPeripheralToRemove)
+    -- TODO: what should the other functions do if the virtual peripheral has no backers?
+  end
+  if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments -- TODO: what if the args have holes? currently the backer list gets holes which means that the virtual peripheral ends up smaller
     arg = arg[1]
   end
   for k, v in ipairs(arg) do
     argChecker(k, v, {"string"})
     if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
-      error("arg["..k.."] not a valid peripheral side/name, got"..v)
+      error("arg["..k.."] not a valid peripheral side/name, got"..v, 2)
     end
     backingPeripheralsList[k] = peripheral.wrap(v) or virtualPeripheralList[v]
     backingPeripheralsList[k]._peripheralName = v
+    if not arg.n and k > backingPeripheralsList.n then
+      backingPeripheralsList.n = k
+    end
   end
+  backingPeripheralsList.n = backingPeripheralsList.n or arg.n
 
   -- create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
 
@@ -212,9 +299,9 @@ local function wrap(...)
       p._backingPeripheralList = {p} -- circular loop, will this break things?
       p._peripheralName = realPeripheralName
       return p
-    end)() -- TODO: test this #homeOnly
+    end)() -- TODO: test this then copy to pullItems #homeOnly
     -- should allow virtual to interact with real peripherals 'directly'
-    -- then copy to pullItems
+
 
     if not virtualToPeripheral then
       error("arg[1] no virtual peripheral with name "..virtualToName,2)
@@ -284,7 +371,7 @@ local function wrap(...)
     argChecker(3, limit, {"number", "nil"})
     argChecker(4, virtualToSlot, {"number", "nil"})
 
-    local virtualFromPeripheral = virtualPeripheralList[virtualFromName]
+    local virtualFromPeripheral = virtualPeripheralList[virtualFromName] -- TODO: paste from pushItems after testing #homeOnly
 
     if not virtualFromPeripheral then
       error("arg[1] no virtual peripheral with name "..virtualFromName,2)
@@ -350,7 +437,9 @@ local function wrap(...)
   end
 
 
-
+  -- TODO: if I add a peripheral to this table then does the virtual peripheral get bigger or does it break? #homeOnly
+  -- TODO: what if I remove one (while keeping it as a list without holes)? #homeOnly
+  -- TODO: add a method for adding and removing backers?
   thisVirtualPeripheral._backingPeripheralList = backingPeripheralsList -- lua needs read only tables which play nice
 
   thisVirtualPeripheral._peripheralName = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
