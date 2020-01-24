@@ -10,22 +10,22 @@
 local modem = peripheral.find("modem", function(_, modem) return modem.isWireless() end)
 rednet.open(modem)
 
-local protocolSeperator = "." -- TODO: uppercase this
-local rootProtocol = "Lupus590"..protocolSeperator.."treeFarm" -- TODO: uppercase this
-local pingProtocol = rootProtocol..protocolSeperator.."ping" -- TODO: uppercase this
+local PROTOCOL_SEPERATOR = "."
+local ROOT_PROTOCOL = "Lupus590"..PROTOCOL_SEPERATOR.."treeFarm"
+local PING_PROTOCOL = ROOT_PROTOCOL..PROTOCOL_SEPERATOR.."ping"
 
 local function concatProtocols(...)
   local protocols = table.pack(...)
 
   local function trimProtocolSeperator(protocolToTrim)
     -- first character
-    if string.sub(protocolToTrim,1,1) == protocolSeperator then
-      protocolToTrim = string.gsub(protocolToTrim, protocolSeperator, "", 1)
+    if string.sub(protocolToTrim,1,1) == PROTOCOL_SEPERATOR then
+      protocolToTrim = string.gsub(protocolToTrim, PROTOCOL_SEPERATOR, "", 1)
     end
 
     -- last character
     local length = string.length(protocolToTrim)
-    if string.sub(protocolToTrim,length) == protocolSeperator then
+    if string.sub(protocolToTrim,length) == PROTOCOL_SEPERATOR then
       protocolToTrim = string.sub(protocolToTrim, 1, length-1)
     end
     return protocolToTrim
@@ -39,10 +39,10 @@ local function concatProtocols(...)
   -- if we only have one protocol then concat it with the root protocol
   if #protocols == 1 then
     protocol[2] = protocol[1]
-    protocol[1] = rootProtocol
+    protocol[1] = ROOT_PROTOCOL
   end
 
-  return table.concat(protocols, protocolSeperator)
+  return table.concat(protocols, PROTOCOL_SEPERATOR)
 end
 
 local function ping(targetId, timeout)
@@ -52,13 +52,13 @@ local function ping(targetId, timeout)
 
   local randomPayload = string.format("%08x", math.random(1, 2147483647)
   local expectedResponce = "pong:"..randomPayload
-  rednet.send(targetId, "ping:"..randomPayload, pingProtocol)
+  rednet.send(targetId, "ping:"..randomPayload, PING_PROTOCOL)
 
   local timerId = os.startTimer(timeout)
   while true do
     local event = table.pack(os.pullEvent())
 
-    if event[1] == "rednet_message" and event[4] == pingProtocol
+    if event[1] == "rednet_message" and event[4] == PING_PROTOCOL
     and event[2] == targetId and event[3] == expectedResponce then
       os.cancelTimer(timerID)
       return true -- remote responded correctly
@@ -73,8 +73,8 @@ local function run()
   while true do
     local sender, message, protocol = rednet.receive()
 
-    if protocol == pingProtocol and string.sub(message, 1, 5) == "ping:" then
-      rednet.send(sender, "pong:"..string.sub(message, 6), pingProtocol)
+    if protocol == PING_PROTOCOL and string.sub(message, 1, 5) == "ping:" then
+      rednet.send(sender, "pong:"..string.sub(message, 6), PING_PROTOCOL)
     end
   end
 end

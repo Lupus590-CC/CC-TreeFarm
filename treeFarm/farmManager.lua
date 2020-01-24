@@ -2,7 +2,7 @@
 local argValidationUtils = require("treeFarm.libs.utils.argValidationUtils")
 
 local utils = require("treeFarm.libs.utils")
-local invUtils = utils.invUtils
+local invUtils = utils.invUtils -- TODO: this APi has changed alot and useage here is out of date
 local itemUtils = invUtils.itemUtils
 local itemIds = itemUtils.itemIds
 local checkpoint = require("treeFarm.libs.checkpoint")

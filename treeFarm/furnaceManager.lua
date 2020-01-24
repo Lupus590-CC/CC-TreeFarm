@@ -1,6 +1,6 @@
 local argValidationUtils = require("treeFarm.libs.utils.argValidationUtils")
 local utils = require("treeFarm.libs.utils")
-local invUtils = utils.invUtils -- TODO: use invUtils
+local invUtils = utils.invUtils -- TODO: use invUtils (existing may be out of date)
 local itemUtils = utils.itemUtils
 local itemIds = require("treeFarm.libs.itemIds")
 local daemonManager = require("treeFarm.libs.daemonManager")
@@ -16,9 +16,9 @@ local furnaces = {}
 local wirelessModem
 local monitor
 
-local furnaceInputSlot = 1 -- TODO: uppercase this
-local furnaceFuelSlot = 2 -- TODO: uppercase this
-local furnaceOutputSlot = 3 -- TODO: uppercase this
+local FURNACE_INPUT_SLOT = 1
+local FURNACE_FUEL_SLOT = 2
+local FURNACE_OUTPUT_SLOT = 3
 
 local linkedTurtleId = "manualTesting" -- TODO: change to nil and implement turtle pairing and communicating #turtle
 
@@ -243,7 +243,7 @@ local function chestAndFurnaceManagmentLoop()
   -- remove junk from the input chest
   for slot, item in pairs(chest.input.list()) do
     if not (itemUtils.itemEqualityComparer(item, itemIds.sapling) or itemUtils.itemEqualityComparer(item, itemIds.charcoal) or itemUtils.itemEqualityComparer(item, itemIds.log)) then
-      local moved = chest.input.pushItems(chest.output._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.output.PERIPHERAL_NAME, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -256,7 +256,7 @@ local function chestAndFurnaceManagmentLoop()
   -- restock the charcoal chest from the input chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItems(chest.charcoal._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.charcoal.PERIPHERAL_NAME, slot)
       if moved < item.count then
         break -- chest full
       end
@@ -266,7 +266,7 @@ local function chestAndFurnaceManagmentLoop()
   -- move any remaining charcoal to the output chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItems(chest.output._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.output.PERIPHERAL_NAME, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -276,7 +276,7 @@ local function chestAndFurnaceManagmentLoop()
   -- restock the sapling chest from the input chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
-      local moved = chest.input.pushItems(chest.sapling._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.sapling.PERIPHERAL_NAME, slot)
       if moved < item.count then
         break -- chest full
       end
@@ -286,7 +286,7 @@ local function chestAndFurnaceManagmentLoop()
   -- move any remaining saplings to the output chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
-      local moved = chest.input.pushItems(chest.output._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.output.PERIPHERAL_NAME, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -296,7 +296,7 @@ local function chestAndFurnaceManagmentLoop()
   -- restock the log chest from the input chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.log) then
-      local moved = chest.input.pushItems(chest.log._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.log.PERIPHERAL_NAME, slot)
       if moved < item.count then
         break -- chest full
       end
@@ -306,7 +306,7 @@ local function chestAndFurnaceManagmentLoop()
   -- move any remaining logs to the output chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.log) then
-      local moved = chest.input.pushItems(chest.output._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.output.PERIPHERAL_NAME, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -315,14 +315,14 @@ local function chestAndFurnaceManagmentLoop()
 
   -- empty out the output of the furnaces, only remove 8 at a time so that if the output is full then it won't waste fuel
   for _, furnace in pairs(furnaces) do
-    local item = furnace.getItemMeta(furnaceOutputSlot)
+    local item = furnace.getItemMeta(FURNACE_OUTPUT_SLOT)
     local currentCount = item and item.count or 0
     local moveLimit = 0
     while currentCount > moveLimit + 8 do
       moveLimit = moveLimit + 8
     end
     if moveLimit > 0 then
-      furnace.pushItems(chests.charcoal._peripheralName, furnaceOutputSlot, moveLimit)
+      furnace.pushItems(chests.charcoal.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT, moveLimit)
     end
   end
 
@@ -330,7 +330,7 @@ local function chestAndFurnaceManagmentLoop()
   -- restock the charcoal chest from the input chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItems(chest.charcoal._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.charcoal.PERIPHERAL_NAME, slot)
       if moved < item.count then
         break -- chest full
       end
@@ -340,7 +340,7 @@ local function chestAndFurnaceManagmentLoop()
   -- move any remaining charcoal to the output chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItems(chest.output._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.output.PERIPHERAL_NAME, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -355,10 +355,10 @@ local function chestAndFurnaceManagmentLoop()
 
     end
     local limit = 2
-    local moved = furnace.pullItems(chest.charcoal._peripheralName, 1, limit, furnaceInputSlot)
+    local moved = furnace.pullItems(chest.charcoal.PERIPHERAL_NAME, 1, limit, FURNACE_INPUT_SLOT)
     if moved < limit then
       for
-        furnace.pullItems(chest.output._peripheralName, 1, limit, furnaceInputSlot)
+        furnace.pullItems(chest.output.PERIPHERAL_NAME, 1, limit, FURNACE_INPUT_SLOT)
       end
     end
   end
@@ -367,21 +367,21 @@ local function chestAndFurnaceManagmentLoop()
     -- there is a method on the furnace to read the remaining burn time, use that instead?
   -- TODO: add a furnace log intermediary chest and update the screenshots #homeOnly
   --[[for _, furnace in pairs(furnaces) do
-    local item = furnace.getItemMeta(furnaceOutputSlot)
+    local item = furnace.getItemMeta(FURNACE_OUTPUT_SLOT)
     local currentCount = item and item.count or 0
     local moveLimit = 0
     while currentCount > moveLimit + 8 do
       moveLimit = moveLimit + 8
     end
     if moveLimit > 0 then
-      furnace.pushItems(chests.charcoal._peripheralName, furnaceOutputSlot, moveLimit)
+      furnace.pushItems(chests.charcoal.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT, moveLimit)
     end
   end]]
 
   -- restock the charcoal chest from the output chest
   for slot, item in pairs(chest.output.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItems(chest.charcoal._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.charcoal.PERIPHERAL_NAME, slot)
       if moved < item.count then
         break -- chest full
       end
@@ -391,7 +391,7 @@ local function chestAndFurnaceManagmentLoop()
   -- restock the sapling chest from the output chest
   for slot, item in pairs(chest.output.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
-      local moved = chest.input.pushItems(chest.sapling._peripheralName, slot)
+      local moved = chest.input.pushItems(chest.sapling.PERIPHERAL_NAME, slot)
       if moved < item.count then
         break -- chest full
       end

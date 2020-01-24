@@ -1,7 +1,7 @@
 -- build the tree farm
 local argValidationUtils = require("treeFarm.libs.utils.argValidationUtils")
 local utils = require("treeFarm.libs.utils")
-local invUtils = utils.invUtils
+local invUtils = utils.invUtils -- TODO: existing may be out of date
 local itemUtils = invUtils.itemUtils
 local itemIds = itemUtils.itemIds
 local lama = require("treeFarm.libs.lama")

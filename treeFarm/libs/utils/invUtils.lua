@@ -37,7 +37,7 @@ local function wrapTurtleInventoryAsPlethoraInv()
   -- pushItems -- notImplementable?
   -- suck -- notImplementable? -- where does the chest suck from?
 
-  turtleInventoryAsPlethoraInv._isThisTurtleInv = true -- TODO: uppercase this
+  turtleInventoryAsPlethoraInv.IS_THIS_TURTLE_INV = true
   turtleInventoryAsPlethoraInv.allowChangeOfSelectedSlot = true
 
   return turtleInventoryAsPlethoraInv
@@ -54,7 +54,7 @@ local function wrap(inventory)
       error("Could not wrap peripheral with name "..peripheralName, 1)
     end
     inventory = peripheral.wrap(peripheralName)
-    inventory._peripheralName = peripheralName -- TODO: uppercase this
+    inventory.PERIPHERAL_NAME = peripheralName
     pcall(argValidationUtils.tableChecker, "peripheral.wrap(arg[1])", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}}))
   else
     argValidationUtils.tableChecker("arg[1]", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})
@@ -68,7 +68,7 @@ local function wrap(inventory)
       if currentSlot > invSize then
         return
       end
-      if inventory.allowChangeOfSelectedSlot and inventory._isThisTurtleInv then
+      if inventory.allowChangeOfSelectedSlot and inventory.IS_THIS_TURTLE_INV then
         turtle.select(i)
       end
       return currentSlot, inventory.getItemMeta and inventory.getItemMeta(currentSlot) or inventory.getItem(currentSlot) -- if we can then we give the itemMeta (it contains all of the getItem stuff anyways) otherwise we give the normal item details
@@ -117,7 +117,7 @@ local function wrap(inventory)
   end
 
   inventory.slotIsEmpty = function(slot)
-    if turtle and inventory._isThisTurtleInv then
+    if turtle and inventory.IS_THIS_TURTLE_INV then
       slot = slot or turtle.getSelectedSlot()
     end
     argValidationUtils.argChecker(1, slot, {"number"})
@@ -166,7 +166,7 @@ local function wrap(inventory)
   end
 
   inventory.compactItemStacks = function()
-    if turtle and inventory._isThisTurtleInv then
+    if turtle and inventory.IS_THIS_TURTLE_INV then
       for sourceSlot in inventory.eachSlotWithItem() do
         turtle.select(sourceSlot)
         for destinationSlot = 1, sourceSlot do
@@ -174,9 +174,9 @@ local function wrap(inventory)
         end
       end
     else
-      argValidationUtils.tableChecker("self", inventory, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
+      argValidationUtils.tableChecker("self", inventory, {list = {"function"}, PERIPHERAL_NAME = {"string"}, pushItems = {"function"}})
       for slot in pairs(inventory.list()) do
-        chest.pushItems(chest._peripheralName, slot)
+        chest.pushItems(chest.PERIPHERAL_NAME, slot)
       end
     end
   end
@@ -187,7 +187,7 @@ local function wrap(inventory)
   inventory.eachSlotParrallel = function(callback)
     argValidationUtils.argChecker(1, callback, {"function"})
     -- turtles can't safely parrallel
-    if inventory._isThisTurtleInv then
+    if inventory.IS_THIS_TURTLE_INV then
       for slot, item in inventory.eachSlot() do
         callback(slot, item)
       end
@@ -208,7 +208,7 @@ local function wrap(inventory)
 
   inventory.eachSlotSkippingEmptyParrallel = function(callback)
     argValidationUtils.argChecker(1, callback, {"function"})
-    if inventory._isThisTurtleInv then
+    if inventory.IS_THIS_TURTLE_INV then
       for slot, item in inventory.eachSlotSkippingEmpty() do
         callback(slot, item)
       end
@@ -230,7 +230,7 @@ local function wrap(inventory)
     end
     argValidationUtils.itemIdChecker(1, targetItem)
 
-    if inventory._isThisTurtleInv then
+    if inventory.IS_THIS_TURTLE_INV then
       for slot, item in inventory.eachSlotWithItem(targetItem) do
         callback(slot, item)
       end
@@ -246,7 +246,7 @@ local function wrap(inventory)
 
   inventory.findItemByIdParrallel = function(item) -- TODO: test, may not be faster but it might depend on which slot the item is in #homeOnly
     argValidationUtils.itemIdChecker(1, item)
-    if inventory._isThisTurtleInv then
+    if inventory.IS_THIS_TURTLE_INV then
       return inventory.(item)
     end
 
@@ -260,7 +260,7 @@ local function wrap(inventory)
 
   inventory.eachEmptySlotParrallel = function(callback)
     argValidationUtils.argChecker(1, callback, {"function"})
-    if inventory._isThisTurtleInv then
+    if inventory.IS_THIS_TURTLE_INV then
       for slot, item in inventory.eachEmptySlot() do
         callback(slot, item)
       end
@@ -292,15 +292,15 @@ local function wrap(inventory)
   end
 
   inventory.compactItemStacksParrallel = function() -- TODO: test, may not be faster and may not even work #homeOnly
-    if inventory._isThisTurtleInv then
+    if inventory.IS_THIS_TURTLE_INV then
       inventory.compactItemStacks()
     else
-      argValidationUtils.tableChecker("self", inventory, {list = {"function"}, _peripheralName = {"string"}, pushItems = {"function"}})
+      argValidationUtils.tableChecker("self", inventory, {list = {"function"}, PERIPHERAL_NAME = {"string"}, pushItems = {"function"}})
       local tasks = {}
       local taskCount = 0
       for slot in pairs(inventory.list()) do
          taskCount = taskCount + 1
-         tasks[taskCount] = function() chest.pushItems(chest._peripheralName, slot) end
+         tasks[taskCount] = function() chest.pushItems(chest.PERIPHERAL_NAME, slot) end
       end
       parrallel.waitForAll(table.unpack(tasks, 1, taskCount))
     end

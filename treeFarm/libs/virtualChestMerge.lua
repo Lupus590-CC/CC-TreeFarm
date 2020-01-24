@@ -176,87 +176,108 @@ end
 
 local virtualPeripheralList = {}
 
-local function hasBackers(virtualPeripheral) -- TODO: use
-  argChecker(1, virtualPeripheral, {"table"})
-  tableChecker("arg[1]", virtualPeripheral, {_backingPeripheralList = {"table"}})
-  tableChecker("arg[1]._backingPeripheralList", virtualPeripheral._backingPeripheralList, {n = {"number"}})
+local function newBackerVerificationAndTableConsolidation(...)
+  if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
+    arg = arg[1]
+  end
+  local verifiedNewBackers = {}
+  local n = 0
+  for k, v in pairs(arg) do
+    argChecker(k, v, {"string"}, 3)
+    if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
+      error("arg["..k.."] not a valid peripheral side/name, got"..v, 3)
+    end
 
-  return virtualPeripheral._backingPeripheralList.n > 0
+    n = n +1
+    verifiedNewBackers[n] = v
+  end
+  verifiedNewBackers.n = n
+  return verifiedNewBackers
 end
 
-local function translateSlot(virtualPeripheral, virtualSlot) -- returns peripheralWithVirtualSlot, physicalSlotNumber
-  argChecker(1, virtualPeripheral, {"table"})
-  argChecker(2, virtualSlot, {"number"})
-
-  tableChecker("arg[1]", virtualPeripheral, {_backingPeripheralList = {"table"}, size = {"function"}})
-  for k, v in ipairs(virtualPeripheral._backingPeripheralList)
-    tableChecker("arg[1]["..k.."]", v, {size = {"function"}})
+local function addbackers(existingBackersList, toAddList)
+  local n = existingBackersList.n
+  for k, v in ipairs(toAddList) do
+    existingBackersList[n+k] = peripheral.wrap(v) or virtualPeripheralList[v]
   end
-
-  if virtualSlot > virtualPeripheral.size() or virtualSlot < 1 then
-    error("arg[1] number out of range, must be between 1 and "..virtualPeripheral.size(), 2)
-  end
-
-  local scannedSize = 0
-  for k, v in ipairs(virtualPeripheral._backingPeripheralList) do
-    local currentBackerSize = virtualPeripheral._backingPeripheralList[k].size()
-    if virtualSlot <= scannedSize + currentBackerSize then
-      -- this is our backer peripheral
-      return virtualPeripheral._backingPeripheralList[k], virtualSlot-scannedSize -- peripheralWithVirtualSlot, physicalSlotNumber
-    end
-    scannedSize = scannedSize + currentBackerSize
-  end
-  error("arg[1] Walked off end of backers, virtual peripheral must be malformed",2)
+  existingBackersList.n = n + toAddList.n
 end
 
 -- wrap all
 local function wrap(...)
-  local backingPeripheralsList = {}
-  function backingPeripheralsList.add(...) -- TODO: prevent recursive backers
+  -- create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
+  local thisVirtualPeripheral = {_backingPeripheralsList = {n = 0}}
+
+  function thisVirtualPeripheral._backingPeripheralsList.add(...) -- TODO: prevent recursive backers
+    addbackers(thisVirtualPeripheral._backingPeripheralsList, newBackerVerificationAndTableConsolidation(...))
+  end
+  function thisVirtualPeripheral._backingPeripheralsList.remove(...)
     if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
       arg = arg[1]
     end
-    backingPeripheralsList
-    for k, v in ipairs(arg) do
-      argChecker(k, v, {"string"})
+    local toRemove = {}
+    for k, v in pairs(arg) do
+      argChecker(k, v, {"string"}, 3)
       if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
-        error("arg["..k.."] not a valid peripheral side/name, got"..v, 2)
+        error("arg["..k.."] not a valid peripheral side/name, got"..v, 3)
       end
-      backingPeripheralsList[k] = peripheral.wrap(v) or virtualPeripheralList[v]
-      backingPeripheralsList[k]._peripheralName = v -- TODO: uppercase this
-    end
-  end
-  function backingPeripheralsList.remove(backerPeripheralToRemove)
-    -- TODO: what should the other functions do if the virtual peripheral has no backers?
-    -- insert a nullObject? a fake inventory with no storage space? this will break some arg validation
-    -- just error when user attempts to remove the last backer?
-  end
-  if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments -- TODO: what if the args have holes? currently the backer list gets holes which means that the virtual peripheral ends up smaller
-    arg = arg[1]
-  end
-  for k, v in ipairs(arg) do
-    argChecker(k, v, {"string"})
-    if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
-      error("arg["..k.."] not a valid peripheral side/name, got"..v, 2)
-    end
-    backingPeripheralsList[k] = peripheral.wrap(v) or virtualPeripheralList[v]
-    backingPeripheralsList[k]._peripheralName = v -- TODO: uppercase this
-    if not arg.n and k > backingPeripheralsList.n then
-      backingPeripheralsList.n = k
-    end
-  end
-  backingPeripheralsList.n = backingPeripheralsList.n or arg.n
 
-  -- create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
+      toRemove[v] = true
+    end
 
-  local thisVirtualPeripheral = {}
+    local newList = {}
+    local currentList = thisVirtualPeripheral._backingPeripheralsList
+    newList.add = currentList.add
+    newList.remove = currentList.remove
+
+
+    local n = 0
+    for _, v in ipairs(currentList) do
+      if not toRemove[v] then
+        n = n + 1
+        newList[n] = v
+      end
+    end
+    newList.n = n
+
+    thisVirtualPeripheral._backingPeripheralsList = newList
+  end
+
+  addbackers(thisVirtualPeripheral._backingPeripheralsList, newBackerVerificationAndTableConsolidation(...))
+
+  local function thisVirtualPeripheral.hasBackers() -- TODO: convert to "instance method"
+    return thisVirtualPeripheral._backingPeripheralList.n > 0
+  end
 
   function thisVirtualPeripheral.size() -- NOTE: can parallel
     local total = 0
-    for k, v in ipairs(backingPeripheralsList) do
-      total = total + backingPeripheralsList[k].size()
+    for k, v in ipairs(thisVirtualPeripheral._backingPeripheralsList) do
+      total = total + thisVirtualPeripheral._backingPeripheralsList[k].size()
     end
     return total
+  end
+
+  local function thisVirtualPeripheral.translateSlot(virtualSlot) -- returns peripheralWithVirtualSlot, physicalSlotNumber
+    argChecker(1, virtualSlot, {"number"})
+
+    if not thisVirtualPeripheral.hasBackers() then
+      error("no backing peripherals", 2)
+    end
+
+    if virtualSlot > thisVirtualPeripheral.size() or virtualSlot < 1 then
+      error("arg[1] number out of range, must be between 1 and "..thisVirtualPeripheral.size(), 2)
+    end
+
+    local scannedSize = 0
+    for k, v in ipairs(thisVirtualPeripheral._backingPeripheralList) do
+      local currentBackerSize = thisVirtualPeripheral._backingPeripheralList[k].size()
+      if virtualSlot <= scannedSize + currentBackerSize then
+        -- this is our backer peripheral
+        return thisVirtualPeripheral._backingPeripheralList[k], virtualSlot-scannedSize -- peripheralWithVirtualSlot, physicalSlotNumber
+      end
+      scannedSize = scannedSize + currentBackerSize
+    end
+    error("Walked off end of backers, virtual peripheral must be malformed",2)
   end
 
   function thisVirtualPeripheral.getItem(slot)
@@ -280,9 +301,9 @@ local function wrap(...)
   function thisVirtualPeripheral.list() -- NOTE: can parallel
     local list = {}
     local listSize = 0
-    for k, v in ipairs(backingPeripheralsList) do
-      local currentBackerSize = backingPeripheralsList[k].size()
-      local additions = backingPeripheralsList[k].list()
+    for k, v in ipairs(thisVirtualPeripheral._backingPeripheralsList) do
+      local currentBackerSize = thisVirtualPeripheral._backingPeripheralsList[k].size()
+      local additions = thisVirtualPeripheral._backingPeripheralsList[k].list()
       for i=1, currentBackerSize do
         list[listSize+i] = additions[i]
       end
@@ -307,7 +328,7 @@ local function wrap(...)
       local realPeripheralName = virtualToName
       local p = peripheral.wrap(realPeripheralName)
       p._backingPeripheralList = {p, n = 1} -- circular loop, will this break things?
-      p._peripheralName = realPeripheralName -- TODO: uppercase this
+      p.PERIPHERAL_NAME = realPeripheralName
       return p
     end)() -- TODO: test this then copy to pullItems #homeOnly
     -- should allow virtual to interact with real peripherals 'directly'
@@ -333,7 +354,7 @@ local function wrap(...)
     local realFromSlot = virtualFromSlot
     repeat
       realFromPeripheral, realFromSlot= translateSlot(realFromPeripheral, realFromSlot)
-    until not realFromPeripheral._isVirtual
+    until not realFromPeripheral.IS_VIRTUAL
 
     if not limit then
       local item = realFromPeripheral.getItemMeta(realFromSlot)
@@ -352,19 +373,19 @@ local function wrap(...)
       local realToSlot = virtualToSlot
       repeat
         realToPeripheral, realToSlot= translateSlot(realToPeripheral, realToSlot)
-      until not realToPeripheral._isVirtual
+      until not realToPeripheral.IS_VIRTUAL
 
-      return realFromPeripheral.pushItems(realToPeripheral._peripheralName, realFromSlot, limit, realToSlot)
+      return realFromPeripheral.pushItems(realToPeripheral.PERIPHERAL_NAME, realFromSlot, limit, realToSlot)
     end
 
     local targets = virtualToPeripheral._backingPeripheralList
     local totalMoved = 0
     for i = 1, #targets do
       local moved = 0
-      if targets[i]._isVirtual then
-        moved = thisVirtualPeripheral.pushItems(targets[i]._peripheralName, virtualFromSlot, limit)
+      if targets[i].IS_VIRTUAL then
+        moved = thisVirtualPeripheral.pushItems(targets[i].PERIPHERAL_NAME, virtualFromSlot, limit)
       else
-        moved = realFromPeripheral.pushItems(targets[i]._peripheralName, realFromSlot, limit)
+        moved = realFromPeripheral.pushItems(targets[i].PERIPHERAL_NAME, realFromSlot, limit)
       end
       totalMoved = totalMoved + moved
       limit = limit - moved
@@ -404,7 +425,7 @@ local function wrap(...)
     local realFromSlot = virtualFromSlot
     repeat
       realFromPeripheral, realFromSlot= translateSlot(realFromPeripheral, realFromSlot)
-    until not realFromPeripheral._isVirtual
+    until not realFromPeripheral.IS_VIRTUAL
 
     if not limit then
       local item = realFromPeripheral.getItemMeta(realFromSlot)
@@ -423,19 +444,19 @@ local function wrap(...)
       local realToSlot = virtualToSlot
       repeat
         realToPeripheral, realToSlot= translateSlot(realToPeripheral, realToSlot)
-      until not realToPeripheral._isVirtual
+      until not realToPeripheral.IS_VIRTUAL
 
-      return realToPeripheral.pullItems(realFromPeripheral._peripheralName, realFromSlot, limit, realToSlot)
+      return realToPeripheral.pullItems(realFromPeripheral.PERIPHERAL_NAME, realFromSlot, limit, realToSlot)
     end
 
     local targets = thisVirtualPeripheral._backingPeripheralList
     local totalMoved = 0
     for i = 1, #targets do
       local moved = 0
-      if targets[i]._isVirtual then
-        moved = thisVirtualPeripheral.pullItems(targets[i]._peripheralName, virtualFromSlot, limit)
+      if targets[i].IS_VIRTUAL then
+        moved = thisVirtualPeripheral.pullItems(targets[i].PERIPHERAL_NAME, virtualFromSlot, limit)
       else
-        moved = targets[i].pullItems(realFromPeripheral._peripheralName, realFromSlot, limit)
+        moved = targets[i].pullItems(realFromPeripheral.PERIPHERAL_NAME, realFromSlot, limit)
       end
       totalMoved = totalMoved + moved
       limit = limit - moved
@@ -446,25 +467,17 @@ local function wrap(...)
     return totalMoved
   end
 
+  thisVirtualPeripheral.PERIPHERAL_NAME = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
 
-  -- TODO: if I add a peripheral to this table then does the virtual peripheral get bigger or does it break? #homeOnly
-  -- TODO: what if I remove one (while keeping it as a list without holes)? #homeOnly
-  -- TODO: add a method for adding and removing backers?
-  thisVirtualPeripheral._backingPeripheralList = backingPeripheralsList -- lua needs read only tables which play nice -- TODO: uppercase this? we do modify it's contents so it's not deep read only
+  thisVirtualPeripheral.IS_VIRTUAL = true
 
-  thisVirtualPeripheral._peripheralName = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647)) -- TODO: uppercase this
-
-  thisVirtualPeripheral._isVirtual = true -- TODO: uppercase this
-
-  virtualPeripheralList[thisVirtualPeripheral._peripheralName] = thisVirtualPeripheral
+  virtualPeripheralList[thisVirtualPeripheral.PERIPHERAL_NAME] = thisVirtualPeripheral
 
   return thisVirtualPeripheral
 end
 
 
 local virtualChestMerge = {
-  hasBackers = hasBackers,
-  translateSlot = translateSlot,
   wrap = wrap,
 }
 
