@@ -44,6 +44,8 @@ local function upliftNew(prototype) -- o.f()
   return uplift(new(prototype))
 end
 
+-- TODO: code generating objects?
+-- TODO: speed test against closures
 
 
 
