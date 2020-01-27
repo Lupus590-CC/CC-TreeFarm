@@ -176,31 +176,34 @@ end
 
 local virtualPeripheralList = {}
 
-local function newBackerVerificationAndTableConsolidation(...)
+local function addbackers(existingBackersList, ...)
   if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
     arg = arg[1]
   end
-  local verifiedNewBackers = {}
+  local validNewPeripherals = {}
   local n = 0
   for k, v in pairs(arg) do
     argChecker(k, v, {"string"}, 3)
     if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
       error("arg["..k.."] not a valid peripheral side/name, got"..v, 3)
     end
-
     n = n +1
-    verifiedNewBackers[n] = v
+    validNewPeripherals[n] = v
   end
-  verifiedNewBackers.n = n
-  return verifiedNewBackers
-end
+  validNewPeripherals.n = n
+  local toAddList = validNewPeripherals
 
-local function addbackers(existingBackersList, toAddList)
+
+  -- TODO: prevent duplicates
+  -- TODO: prevent recursion
+
   local n = existingBackersList.n
+  local added = toAddList
   for k, v in ipairs(toAddList) do
     existingBackersList[n+k] = peripheral.wrap(v) or virtualPeripheralList[v]
   end
   existingBackersList.n = n + toAddList.n
+  return added
 end
 
 -- wrap all
@@ -208,8 +211,8 @@ local function wrap(...)
   -- create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
   local thisVirtualPeripheral = {_backingPeripheralsList = {n = 0}}
 
-  function thisVirtualPeripheral._backingPeripheralsList.add(...) -- TODO: prevent recursive backers
-    addbackers(thisVirtualPeripheral._backingPeripheralsList, newBackerVerificationAndTableConsolidation(...))
+  function thisVirtualPeripheral._backingPeripheralsList.add(...) -- TODO: prevent recursive backers (and duplicates?)
+    addbackers(thisVirtualPeripheral._backingPeripheralsList, ...)
   end
   function thisVirtualPeripheral._backingPeripheralsList.remove(...)
     if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
@@ -232,8 +235,11 @@ local function wrap(...)
 
 
     local n = 0
+    local removed = {}
     for _, v in ipairs(currentList) do
-      if not toRemove[v] then
+      if toRemove[v] then
+        removed[v] = true
+      else
         n = n + 1
         newList[n] = v
       end
@@ -241,9 +247,10 @@ local function wrap(...)
     newList.n = n
 
     thisVirtualPeripheral._backingPeripheralsList = newList
+    return removed
   end
 
-  addbackers(thisVirtualPeripheral._backingPeripheralsList, newBackerVerificationAndTableConsolidation(...))
+  addbackers(thisVirtualPeripheral._backingPeripheralsList,...)
 
   local function thisVirtualPeripheral.hasBackers() -- TODO: convert to "instance method"
     return thisVirtualPeripheral._backingPeripheralList.n > 0

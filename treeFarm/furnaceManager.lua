@@ -30,10 +30,10 @@ end
 
 local function init()
   -- check config for peripheral map
-  local chestMap = {}
-  local ok, data =  config.load(chestMapFile)
+  local chestMap
+  local ok, data = config.load(chestMapFile)
   if ok then
-    timers = data
+    chestMap = data
   else
     if data == "not a file" then
       chestMap = {}
@@ -49,12 +49,6 @@ local function init()
   monitor = peripheral.find("monitor")
   wirelessModem = peripheral.find("modem", function(_, m) return m.isWireless() end)
   furnaces = table.pack(peripheral.find("minecraft:furnace"))
-  local peripherals = peripheral.getNames()
-  for k, peripheralName in pairs(peripherals) do
-    if string.find(peripheralName, "furnace") then
-        furnaces[k] = virtualChestMerge.wrap(peripheralName)
-    end
-  end
 
 
 
@@ -85,7 +79,7 @@ local function init()
   end
 
   -- if nothing is mapped yet then start mapping
-  if not (chestMap.input and chestMap.output and chestMap.charcoal and chestMap.sapling) then
+  if not (chestMap.input and chestMap.output and chestMap.charcoal and chestMap.sapling) then -- always reset if one fails?
 
     monitor.clear()
     monitor.write("Please don't open the chests or drop items into the water stream, chest mapping in progress")
@@ -93,6 +87,7 @@ local function init()
 
     -- filter names for chests and get their inital state
     local chestStates = {}
+    local peripherals = peripheral.getNames()
     for _, peripheralName in pairs(peripherals) do
       if string.find(peripheralName, "chest") then
           chestStates[peripheralName] = peripheral.call(peripheralName, "list")
@@ -236,6 +231,40 @@ local outputChestFull()
   monitor.write("PAUSED: Output inventory is full")
   os.pullEvent("monitor_touch")
   -- need an event which tells us that the output has space again
+end
+
+local function outputChestExtender()
+  while true do
+    local event, side = os.pullEvent()
+    if event == "peripheral" or event == "peripheral_detach" then
+      local chestMap
+      local ok, data = config.load(chestMapFile)
+      if ok then
+        chestMap = data
+      else
+        if data == "not a file" then
+          chestMap = {}
+        else
+          error("couldn't load file with name: "..chestMapFile
+          .."\ngot error: "..data)
+        end
+      end
+
+      if event == "peripheral" then
+        chests.output._backingPeripheralsList.add(side)
+        table.insert(chestMap.output, chestName)
+      else -- detach
+        if chests.output._backingPeripheralsList.remove(side)[side] then
+
+        else
+          -- one of the other peripherals which don't support hotswapping no longer exist
+          error("A required peripheral was detached "..side)
+        end
+      end
+
+      config.save(chestMapFile, chestMap)
+    end
+  end
 end
 
 -- NOTE: SquidDev says that it should be safe to split up and parallelise this function

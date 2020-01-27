@@ -181,6 +181,7 @@ local function wrap(inventory)
     end
   end
 
+-- parrallel methods
   -- if the inv is a turtle one then we fall back to using the sequential methods
 
 
