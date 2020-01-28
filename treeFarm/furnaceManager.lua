@@ -254,9 +254,8 @@ local function outputChestExtender()
         chests.output._backingPeripheralsList.add(side)
         table.insert(chestMap.output, chestName)
       else -- detach
-        if chests.output._backingPeripheralsList.remove(side)[side] then
-
-        else
+        local removed = chests.output._backingPeripheralsList.remove(side)
+        if not (removed and removed[side]) then
           -- one of the other peripherals which don't support hotswapping no longer exist
           error("A required peripheral was detached "..side)
         end

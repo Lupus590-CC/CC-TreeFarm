@@ -176,34 +176,55 @@ end
 
 local virtualPeripheralList = {}
 
-local function addbackers(existingBackersList, ...)
+local function wouldCauseRecursion(virtualPeripheralName, newBackerName)
+  local newBacker = virtualPeripheralList[newBackerName]
+  if newBacker then
+    for _, v in ipairs(newBacker._backingPeripheralList) do
+      if v.PERIPHERAL_NAME == virtualPeripheralName then
+        return true -- we found what will become recursion
+      end
+      if wouldCauseRecursion(virtualPeripheralName, v.PERIPHERAL_NAME) then
+        return true -- we found what will become recursion
+      end
+    end
+    return false -- no issues
+  else
+    return false -- new backer is a real peripheral
+  end
+end
+
+local function addbackers(virtualPeripheral, ...)
   if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
     arg = arg[1]
   end
-  local validNewPeripherals = {}
+  local toAddList = {}
   local n = 0
   for k, v in pairs(arg) do
     argChecker(k, v, {"string"}, 3)
     if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
       error("arg["..k.."] not a valid peripheral side/name, got"..v, 3)
     end
-    n = n +1
-    validNewPeripherals[n] = v
+
+    if not virtualPeripheral._backingPeripheralList.backerIndex[v] then
+      if wouldCauseRecursion(virtualPeripheral.PERIPHERAL_NAME, v) then
+        error("arg["..k.."] would cause the virtual peripheral to be it's own backer", 3)
+      end
+
+      n = n +1
+      toAddList[n] = v
+      toAddList[v] = n
+    end
+    -- else ignore the duplicate
   end
-  validNewPeripherals.n = n
-  local toAddList = validNewPeripherals
+  toAddList.n = n
 
-
-  -- TODO: prevent duplicates
-  -- TODO: prevent recursion
-
-  local n = existingBackersList.n
-  local added = toAddList
+  local n = virtualPeripheral._backingPeripheralList.n
   for k, v in ipairs(toAddList) do
-    existingBackersList[n+k] = peripheral.wrap(v) or virtualPeripheralList[v]
+    virtualPeripheral._backingPeripheralList[n+k] = peripheral.wrap(v) or virtualPeripheralList[v]
+    virtualPeripheral._backingPeripheralList.backerIndex[v] = n+k
   end
-  existingBackersList.n = n + toAddList.n
-  return added
+  virtualPeripheral._backingPeripheralList.n = n + toAddList.n
+  return toAddList
 end
 
 -- wrap all
@@ -211,8 +232,8 @@ local function wrap(...)
   -- create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
   local thisVirtualPeripheral = {_backingPeripheralsList = {n = 0}}
 
-  function thisVirtualPeripheral._backingPeripheralsList.add(...) -- TODO: prevent recursive backers (and duplicates?)
-    addbackers(thisVirtualPeripheral._backingPeripheralsList, ...)
+  function thisVirtualPeripheral._backingPeripheralsList.add(...)
+    addbackers(thisVirtualPeripheral, ...)
   end
   function thisVirtualPeripheral._backingPeripheralsList.remove(...)
     if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
@@ -228,7 +249,7 @@ local function wrap(...)
       toRemove[v] = true
     end
 
-    local newList = {}
+    local newList = {backerIndex = {}}
     local currentList = thisVirtualPeripheral._backingPeripheralsList
     newList.add = currentList.add
     newList.remove = currentList.remove
@@ -242,6 +263,7 @@ local function wrap(...)
       else
         n = n + 1
         newList[n] = v
+        newList.backerIndex[v] = n
       end
     end
     newList.n = n
@@ -250,7 +272,7 @@ local function wrap(...)
     return removed
   end
 
-  addbackers(thisVirtualPeripheral._backingPeripheralsList,...)
+  addbackers(thisVirtualPeripheral,...)
 
   local function thisVirtualPeripheral.hasBackers() -- TODO: convert to "instance method"
     return thisVirtualPeripheral._backingPeripheralList.n > 0
