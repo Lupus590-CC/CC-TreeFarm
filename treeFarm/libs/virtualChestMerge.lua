@@ -272,9 +272,14 @@ local function wrap(...)
     return removed
   end
 
-  addbackers(thisVirtualPeripheral,...)
+  thisVirtualPeripheral.addBackingPeripheral = thisVirtualPeripheral._backingPeripheralsList.add
+  thisVirtualPeripheral.removeBackingPeripheral = thisVirtualPeripheral._backingPeripheralsList.remove
 
-  local function thisVirtualPeripheral.hasBackers() -- TODO: convert to "instance method"
+  if arg then -- allow creation with no backers
+    addbackers(thisVirtualPeripheral, ...)
+  end
+
+  local function thisVirtualPeripheral.hasBackers()
     return thisVirtualPeripheral._backingPeripheralList.n > 0
   end
 
