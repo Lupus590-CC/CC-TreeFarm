@@ -266,11 +266,25 @@ local function outputChestExtender()
   end
 end
 
--- NOTE: SquidDev says that it should be safe to split up and parallelise this function
-local function chestAndFurnaceManagmentLoop()
+local function emptyInputChest()
+  for slot, item in pairs(chest.input.list()) do
+    local destination
+    if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
+      destination = chests.saplings
+    elseif itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
+      destination = chests.charcoal
+    elseif itemUtils.itemEqualityComparer(item, itemIds.log) then
+      destination = chests.log
+    else
+      destination = chests.output
+    end
+    destination.pullItems() -- temp wrap and push instead?
+  end
+
+
   -- remove junk from the input chest
   for slot, item in pairs(chest.input.list()) do
-    if not (itemUtils.itemEqualityComparer(item, itemIds.sapling) or itemUtils.itemEqualityComparer(item, itemIds.charcoal) or itemUtils.itemEqualityComparer(item, itemIds.log)) then
+    if not (itemUtils.itemEqualityComparer(item, itemIds.sapling) then or itemUtils.itemEqualityComparer(item, itemIds.charcoal) or itemUtils.itemEqualityComparer(item, itemIds.log)) then
       local moved = chest.input.pushItems(chest.output.PERIPHERAL_NAME, slot)
       if moved < item.count then
         outputChestFull()
@@ -280,7 +294,6 @@ local function chestAndFurnaceManagmentLoop()
 
   -- if any of the other chests end up full then let it 'overflow' into the output chest
 
-  -- TODO: lots of repeated code here
   -- restock the charcoal chest from the input chest
   for slot, item in pairs(chest.input.list()) do
     if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
@@ -340,8 +353,11 @@ local function chestAndFurnaceManagmentLoop()
       end
     end
   end
+end
 
+local function emptyFurnaces()
   -- empty out the output of the furnaces, only remove 8 at a time so that if the output is full then it won't waste fuel
+  --TODO: make sure that the result is a multiple of 8 instead of taking 8 at a time
   for _, furnace in pairs(furnaces) do
     local item = furnace.getItemMeta(FURNACE_OUTPUT_SLOT)
     local currentCount = item and item.count or 0
@@ -353,78 +369,39 @@ local function chestAndFurnaceManagmentLoop()
       furnace.pushItems(chests.charcoal.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT, moveLimit)
     end
   end
+end
 
+local function loadFurnaces()
+    -- control furnace with fuel, only add fuel if there are 8 items and output spaces
+    -- TODO: refuel the furnaces
+    -- if we frequently empty the charcoal chest then start pulling from output
+    for _, furnace in pairs(furnaces) do
+      for i = 1, chest.charcoal.size() do
 
-  -- restock the charcoal chest from the input chest
-  for slot, item in pairs(chest.input.list()) do
-    if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItems(chest.charcoal.PERIPHERAL_NAME, slot)
-      if moved < item.count then
-        break -- chest full
+      end
+      local limit = 2
+      local moved = furnace.pullItems(chest.charcoal.PERIPHERAL_NAME, 1, limit, FURNACE_INPUT_SLOT)
+      if moved < limit then
+        for
+          furnace.pullItems(chest.output.PERIPHERAL_NAME, 1, limit, FURNACE_INPUT_SLOT)
+        end
       end
     end
-  end
 
-  -- move any remaining charcoal to the output chest
-  for slot, item in pairs(chest.input.list()) do
-    if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItems(chest.output.PERIPHERAL_NAME, slot)
-      if moved < item.count then
-        outputChestFull()
+    -- TODO: reload the furnaces, 8 at a time to use fuel efficiently
+      -- there is a method on the furnace to read the remaining burn time, use that instead?
+    -- TODO: add a furnace log intermediary chest and update the screenshots #homeOnly
+    --[[for _, furnace in pairs(furnaces) do
+      local item = furnace.getItemMeta(FURNACE_OUTPUT_SLOT)
+      local currentCount = item and item.count or 0
+      local moveLimit = 0
+      while currentCount > moveLimit + 8 do
+        moveLimit = moveLimit + 8
       end
-    end
-  end
-
-
-  -- TODO: refuel the furnaces
-  -- if we frequently empty the charcoal chest then start pulling from output
-  for _, furnace in pairs(furnaces) do
-    for i = 1, chest.charcoal.size() do
-
-    end
-    local limit = 2
-    local moved = furnace.pullItems(chest.charcoal.PERIPHERAL_NAME, 1, limit, FURNACE_INPUT_SLOT)
-    if moved < limit then
-      for
-        furnace.pullItems(chest.output.PERIPHERAL_NAME, 1, limit, FURNACE_INPUT_SLOT)
+      if moveLimit > 0 then
+        furnace.pushItems(chests.charcoal.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT, moveLimit)
       end
-    end
-  end
-
-  -- TODO: reload the furnaces, 8 at a time to use fuel efficiently
-    -- there is a method on the furnace to read the remaining burn time, use that instead?
-  -- TODO: add a furnace log intermediary chest and update the screenshots #homeOnly
-  --[[for _, furnace in pairs(furnaces) do
-    local item = furnace.getItemMeta(FURNACE_OUTPUT_SLOT)
-    local currentCount = item and item.count or 0
-    local moveLimit = 0
-    while currentCount > moveLimit + 8 do
-      moveLimit = moveLimit + 8
-    end
-    if moveLimit > 0 then
-      furnace.pushItems(chests.charcoal.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT, moveLimit)
-    end
-  end]]
-
-  -- restock the charcoal chest from the output chest
-  for slot, item in pairs(chest.output.list()) do
-    if itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
-      local moved = chest.input.pushItems(chest.charcoal.PERIPHERAL_NAME, slot)
-      if moved < item.count then
-        break -- chest full
-      end
-    end
-  end
-
-  -- restock the sapling chest from the output chest
-  for slot, item in pairs(chest.output.list()) do
-    if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
-      local moved = chest.input.pushItems(chest.sapling.PERIPHERAL_NAME, slot)
-      if moved < item.count then
-        break -- chest full
-      end
-    end
-  end
+    end]]
 end
 
 -- TODO: farm manager watchdog for if the farm manager forwards an error to us
