@@ -1,5 +1,7 @@
 TODO: organise this file #high
 
+One furnace fed by hoppers to work around the furnace disconnect issue?
+
 NOTE: pickaxe doesn't show up when equipped and scanner has a different name
 
 usesful reference: https://squiddev-cc.github.io/plethora/methods.html
