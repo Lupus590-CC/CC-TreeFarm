@@ -11,10 +11,11 @@ local virtualChestMerge = require("treeFarm.libs.virtualChestMerge")
 
 -- maps peripheral names
 local chestMapFile = ".chestMap"
-local chests = {} -- input, output, charcoal, sapling, log
+local chests = {} -- input, output, charcoal, saplings, logs
 local furnaces = {}
 local wirelessModem
 local monitor
+local furnaceLowEfficiencyMode -- true if burning logs to make charcoal -- TODO: message the turtle about this. What should the turtle do?
 
 local FURNACE_INPUT_SLOT = 1
 local FURNACE_FUEL_SLOT = 2
@@ -83,7 +84,7 @@ local function init()
   end
 
   -- if nothing is mapped yet then start mapping
-  if not (chestMap.input and chestMap.output and chestMap.charcoal and chestMap.sapling) then -- always reset if one fails?
+  if not (chestMap.input and chestMap.output and chestMap.charcoal and chestMap.saplings and chestMap.logs) then -- always reset if one fails?
 
     monitor.clear()
     monitor.write("Please don't open the chests or drop items into the water stream, chest mapping in progress")
@@ -112,7 +113,7 @@ local function init()
     -- wait a few seconds for the items to get the chest
     sleep(5)
 
-    -- the chest which has different items in the input chest
+    -- the chest which has different items in is the input chest
     for chestName, oldState in pairs(chestStates) do
       local newState = peripheral.call(chestName, "list")
       for slot, item in pairs(oldState) do
@@ -176,7 +177,7 @@ local function init()
           break
         end
       end
-      if chestMap.sapling then -- early exit
+      if chestMap.saplings then -- early exit
         break
       end
     end
@@ -191,12 +192,12 @@ local function init()
       local newState = peripheral.call(chestName, "list")
       for slot, item in pairs(oldState) do -- TODO: should be for each slot?
         if itemUtils.itemEqualityComparerWithQuantity(newState[slot], item) then
-          chestMap.log = chestName
+          chestMap.logs = chestName
           chestStates[chestName] = nil
           break
         end
       end
-      if chestMap.log then -- early exit
+      if chestMap.logs then -- early exit
         break
       end
     end
@@ -221,9 +222,9 @@ local function init()
   -- wrap the chests
   for chestRole, peripheralName in pairs(chestMap) do
     if type(peripheralName) == "table" then -- output "chest" is a list of chests not a single chest
-      chests[chestRole] = virtualChestMerge.wrap(table.unpack(peripheralName))
+      chests[chestRole] = invUtils.inject(virtualChestMerge.wrap(table.unpack(peripheralName)))
     else
-      chests[chestRole] = virtualChestMerge.wrap(peripheralName)
+      chests[chestRole] = invUtils.inject(virtualChestMerge.wrap(peripheralName))
     end
   end
 end
@@ -271,21 +272,21 @@ local function outputChestExtender()
 end
 
 local function emptyInputChest()
-  local wrappedInputChest = virtualChestMerge.wrap(chest.input.PERIPHERAL_NAME)
-  for slot, item in pairs(chest.input.list()) do
+  local wrappedInputChest = virtualChestMerge.wrap(chests.input.PERIPHERAL_NAME)
+  for slot, item in pairs(chests.input.list()) do
     local destination
     if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
       destination = chests.saplings
     elseif itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
       destination = chests.charcoal
     elseif itemUtils.itemEqualityComparer(item, itemIds.log) then
-      destination = chests.log
+      destination = chests.logs
     else -- junk
       destination = chests.output
     end
     local moved = wrappedInputChest.pushItems(destination.PERIPHERAL_NAME, slot)
     if moved < item.count then -- if it's junk then we push to output twice but it should be fine
-      moved = moved + wrappedInputChest.pushItems(chest.output.PERIPHERAL_NAME, slot)
+      moved = moved + wrappedInputChest.pushItems(chests.output.PERIPHERAL_NAME, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -295,9 +296,9 @@ end
 
 local function emptyFurnaces()
   for _, furnace in pairs(furnaces) do
-    local moved = furnace.pushItems(chest.charcoal.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT)
+    local moved = furnace.pushItems(chests.charcoal.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT)
     if moved < item.count then
-      moved = moved + furnace.pushItems(chest.output.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT)
+      moved = moved + furnace.pushItems(chests.output.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT)
       if moved < item.count then
         outputChestFull()
       end
@@ -306,25 +307,39 @@ local function emptyFurnaces()
 end
 
 local function loadFurnaces()
-  -- TODO: how to do load splitting?
-  -- make sure that each has 16 then round robin the extra in 8's
   for _, furnace in pairs(furnaces) do
-    for i = 1, chest.charcoal.size() do
-
-    end
-    local limit = 2
-    local moved = furnace.pullItems(chest.charcoal.PERIPHERAL_NAME, 1, limit, FURNACE_INPUT_SLOT)
-    if moved < limit then
-      for
-        furnace.pullItems(chest.output.PERIPHERAL_NAME, 1, limit, FURNACE_INPUT_SLOT)
+    -- make sure that each has a multiple of 8
+    local inputItemStack = furnace.getItemMeta(FURNACE_INPUT_SLOT)
+    local inputItemCount = inputItemStack and inputItemCount.count or 0
+    local charcoalItemBurnCount = fuelValueForFurnace(itemIds.charcoal)
+    local limit = inputItemCount % charcoalItemBurnCount
+    limit = limit == 0 and charcoalItemBurnCount or limit -- if at 8 add another 8 else add enough to make it 8
+    if inputItemCount < inputItemStack.maxCount and chests.logs.getTotalItemCount(itemIds.log) > limit then
+      for slot in chests.logs.eachSlotWithItem(itemIds.log) do
+        limit = limit - furnace.pullItems(chests.logs.PERIPHERAL_NAME, slot, limit, FURNACE_INPUT_SLOT)
+        if limit == 0 then
+          break
+        end
       end
     end
   end
 end
 
 local function fuelFurnaces()
-  -- if we empty the charcoal chest should we start pulling from output?
-  for _, furnace in pairs(furnaces) do
+  local emergencyState = setmetatable({}, {
+    __call = function(t)
+      for _, v in pairs(t) do
+        if not v then
+          furnaceLowEfficiencyMode = false
+          return false
+        end
+      end
+      furnaceLowEfficiencyMode = true
+      return true
+    end
+  })
+
+  for furnaceId, furnace in pairs(furnaces) do
     -- control furnace with fuel, only add fuel if there are 8 items and output spaces
     local inputItemStack = furnace.getItemMeta(FURNACE_INPUT_SLOT)
     local fuelItemStack = furnace.getItemMeta(FURNACE_FUEL_SLOT)
@@ -334,12 +349,34 @@ local function fuelFurnaces()
     local fuelItemCount = fuelItemStack and fuelItemStack.count or 0
     local outputItemSpace = outputItemStack and outputItemStack.maxCount - outputItemStack.count or 64
 
-    -- make sure that there is atleast 16 items and spaces and one fuel, the odd 8 is a buffer for efficient fuel use
+    local safeSmeltCount = math.min(inputItemCount, outputItemSpace)
+    local requiredFuelCount = math.floor(safeSmeltCount / fuelValueForFurnace(itemIds.charcoal))
 
-    -- TODO: implement fuelFurnaces
+    local limit = requiredFuelCount
+    if limit > 0 then
+      for slot in chests.charcoal.eachSlotWithItem(itemIds.charcoal) do
+        limit = limit - furnace.pullItems(chests.charcoal.PERIPHERAL_NAME, slot, limit, FURNACE_FUEL_SLOT)
+        if limit == 0 then
+          break
+        end
+      end
+    end
+    emergencyState[furnaceId] = (limit == requiredFuelCount and outputItemSpace == 64) -- we didn't get any fuel and our output (which would have more fuel) is empty
+  end
+
+
+
+  if emergencyState() then
+    -- TODO: emergency mode: furnace[1] checks its fuel status and uses one log if it's out and not burning pending logs
+    local furnace = furnaces[1]
+    local inputItemStack = furnace.getItemMeta(FURNACE_INPUT_SLOT)
+    local inputItemCount = inputItemStack and inputItemCount.count or 0
+    -- what if out of logs?
 
   end
 end
+
+-- TODO: support dynamic furnace adding/removing?
 
 -- TODO: farm manager watchdog for if the farm manager forwards an error to us
 local function farmerWatchdog()

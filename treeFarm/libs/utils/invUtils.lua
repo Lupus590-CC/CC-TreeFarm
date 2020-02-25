@@ -43,7 +43,7 @@ local function wrapTurtleInventoryAsPlethoraInv()
   return turtleInventoryAsPlethoraInv
 end
 
-local function wrap(inventory)
+local function inject(inventory)
   if turtle then
     inventory = inventory or wrapTurtleInventoryAsPlethoraInv()
   end
@@ -311,8 +311,8 @@ local function wrap(inventory)
 end
 
 local invUtils = {
-  wrapTurtleInventoryAsPlethoraInv = wrapTurtleInventoryAsPlethoraInv
-  wrap = wrap
-
+  wrapTurtleInventoryAsPlethoraInv = wrapTurtleInventoryAsPlethoraInv,
+  inject = inject,
+  wrap = inject,
 }
 return invUtils
