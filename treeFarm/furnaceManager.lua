@@ -15,7 +15,7 @@ local chests = {} -- input, output, charcoal, saplings, logs
 local furnaces = {}
 local wirelessModem
 local monitor
-local furnaceLowEfficiencyMode -- true if burning logs to make charcoal -- TODO: message the turtle about this. What should the turtle do?
+local furnaceLowEfficiencyMode -- true if burning logs to make charcoal -- TODO: message the turtle about this. What should the turtle do? #turtle
 
 local FURNACE_INPUT_SLOT = 1
 local FURNACE_FUEL_SLOT = 2
@@ -231,48 +231,68 @@ end
 
 local outputChestFull()
   -- TODO: pause everything
-  -- stop the turtle and let the user know that the program has stopped because the output is full
+  -- TODO: stop the turtle and let the user know that the program has stopped because the output is full #turtle
   monitor.clear()
   monitor.write("PAUSED: Output inventory is full")
   os.pullEvent("monitor_touch")
   -- need an event which tells us that the output has space again
 end
 
-local function outputChestExtender()
+local function dynamicPeripheralManager()
   while true do
     local event, side = os.pullEvent()
     if event == "peripheral" or event == "peripheral_detach" then
-      local chestMap
-      local ok, data = config.load(chestMapFile)
-      if ok then
-        chestMap = data
-      else
-        if data == "not a file" then
-          chestMap = {}
+      if string.find(peripheralName, "chest") then
+        local chestMap
+        local ok, data = config.load(chestMapFile)
+        if ok then
+          chestMap = data
         else
-          error("couldn't load file with name: "..chestMapFile
-          .."\ngot error: "..data)
+          if data == "not a file" then
+            chestMap = {}
+          else
+            error("couldn't load file with name: "..chestMapFile
+            .."\ngot error: "..data)
+          end
         end
-      end
 
-      if event == "peripheral" then
-        chests.output.addBackingPeripheral(side)
-        table.insert(chestMap.output, chestName)
-      else -- detach
-        local removed = chests.output.removeBackingPeripheral(side)
-        if not (removed and removed[side]) then
-          -- one of the other peripherals which don't support hotswapping no longer exist
-          error("A required peripheral was detached "..side)
+        if event == "peripheral" then
+          chests.output.addBackingPeripheral(side)
+          table.insert(chestMap.output, chestName)
+        else -- detach
+          local removed = chests.output.removeBackingPeripheral(side)
+          if not (removed and removed[side]) then
+            -- one of the other peripherals which don't support hotswapping no longer exist
+            error("A required chest was detached "..side)
+          end
         end
-      end
 
-      config.save(chestMapFile, chestMap)
+        config.save(chestMapFile, chestMap)
+      elseif string.find(side, "furnace") then
+        if event == "peripheral" then
+          furnaces.n = furnaces.n + 1
+          furnaces[furnaces.n] = virtualChestMerge(side)
+        else -- detach
+          for id , furnace in ipairs(furnaces) do
+            -- find the hole
+            if furnace.PERIPHERAL_NAME == side then
+              -- move the last one to fill the hole
+              furnaces[id] = furnaces[furnaces.n]
+              furnaces[furnaces.n] = nil
+              furnaces.n = furnaces.n - 1
+              break
+            end
+          end
+        end
+
+      else
+        error("A required peripheral was detached "..side)
+      end
     end
   end
 end
 
 local function emptyInputChest()
-  local wrappedInputChest = virtualChestMerge.wrap(chests.input.PERIPHERAL_NAME)
   for slot, item in pairs(chests.input.list()) do
     local destination
     if itemUtils.itemEqualityComparer(item, itemIds.sapling) then
@@ -280,13 +300,14 @@ local function emptyInputChest()
     elseif itemUtils.itemEqualityComparer(item, itemIds.charcoal) then
       destination = chests.charcoal
     elseif itemUtils.itemEqualityComparer(item, itemIds.log) then
+      -- we coould split the logs coming it but we instead allow it to overflow.
       destination = chests.logs
     else -- junk
       destination = chests.output
     end
-    local moved = wrappedInputChest.pushItems(destination.PERIPHERAL_NAME, slot)
+    local moved = chests.input.pushItems(destination.PERIPHERAL_NAME, slot)
     if moved < item.count then -- if it's junk then we push to output twice but it should be fine
-      moved = moved + wrappedInputChest.pushItems(chests.output.PERIPHERAL_NAME, slot)
+      moved = moved + chests.input.pushItems(chests.output.PERIPHERAL_NAME, slot)
       if moved < item.count then
         outputChestFull()
       end
@@ -295,7 +316,7 @@ local function emptyInputChest()
 end
 
 local function emptyFurnaces()
-  for _, furnace in pairs(furnaces) do
+  for _, furnace in ipairs(furnaces) do
     local moved = furnace.pushItems(chests.charcoal.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT)
     if moved < item.count then
       moved = moved + furnace.pushItems(chests.output.PERIPHERAL_NAME, FURNACE_OUTPUT_SLOT)
@@ -307,7 +328,7 @@ local function emptyFurnaces()
 end
 
 local function loadFurnaces()
-  for _, furnace in pairs(furnaces) do
+  for _, furnace in ipairs(furnaces) do
     -- make sure that each has a multiple of 8
     local inputItemStack = furnace.getItemMeta(FURNACE_INPUT_SLOT)
     local inputItemCount = inputItemStack and inputItemCount.count or 0
@@ -339,13 +360,13 @@ local function fuelFurnaces()
     end
   })
 
-  for furnaceId, furnace in pairs(furnaces) do
+  for furnaceId, furnace in ipairs(furnaces) do
     -- control furnace with fuel, only add fuel if there are 8 items and output spaces
     local inputItemStack = furnace.getItemMeta(FURNACE_INPUT_SLOT)
     local fuelItemStack = furnace.getItemMeta(FURNACE_FUEL_SLOT)
     local outputItemStack = furnace.getItemMeta(FURNACE_OUTPUT_SLOT)
 
-    local inputItemCount = inputItemStack and inputItemCount.count or 0
+    local inputItemCount = inputItemStack and inputItemStack.count or 0
     local fuelItemCount = fuelItemStack and fuelItemStack.count or 0
     local outputItemSpace = outputItemStack and outputItemStack.maxCount - outputItemStack.count or 64
 
@@ -361,22 +382,36 @@ local function fuelFurnaces()
         end
       end
     end
-    emergencyState[furnaceId] = (limit == requiredFuelCount and outputItemSpace == 64) -- we didn't get any fuel and our output (which would have more fuel) is empty
+    emergencyState[furnaceId] = (limit == requiredFuelCount and outputItemSpace == 64 and furnace.getRemainingBurnTime() == 0) -- we didn't get any fuel and our output (which would have more fuel) is empty and we are not burning fuel
   end
 
 
 
   if emergencyState() then
-    -- TODO: emergency mode: furnace[1] checks its fuel status and uses one log if it's out and not burning pending logs
+    -- try to efficiently burn logs to make more fuel
     local furnace = furnaces[1]
     local inputItemStack = furnace.getItemMeta(FURNACE_INPUT_SLOT)
-    local inputItemCount = inputItemStack and inputItemCount.count or 0
-    -- what if out of logs?
+    local inputItemCount = inputItemStack and inputItemStack.count or 0
 
+    -- if current input is less than 8 then pull from log chest to make it 8
+    -- if still lower than 8 then pull from other furnaces
+    if inputItemCount < 8 then
+      inputItemCount = inputItemCount + furnace.pullItems(chests.logs.PERIPHERAL_NAME, slot, 8 - inputItemCount, FURNACE_INPUT_SLOT)
+      if inputItemCount < 8 then
+        for _, f in ipairs(furnaces) do
+          inputItemCount = inputItemCount + furnace.pullItems(f.PERIPHERAL_NAME, FURNACE_INPUT_SLOT, 8 - inputItemCount, FURNACE_INPUT_SLOT)
+          if inputItemCount >= 8 then
+            break
+          end
+        end
+      end
+    end
+
+    if inputItemCount <= 2 then -- if less than 2 then we may as well wait incase the user drops of more charcoal before more logs arrive from the turtle
+      furnace.pullItems(furnace.PERIPHERAL_NAME, FURNACE_INPUT_SLOT, 1, FURNACE_FUEL_SLOT) -- take one log from our input to use as fuel
+    end
   end
 end
-
--- TODO: support dynamic furnace adding/removing?
 
 -- TODO: farm manager watchdog for if the farm manager forwards an error to us
 local function farmerWatchdog()
