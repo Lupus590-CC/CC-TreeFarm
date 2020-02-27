@@ -28,6 +28,13 @@ local function fuelValueForFurnace(turtleFuelValue)
   return turtleFuelValue/10
 end
 
+local function statusUpdater(state, message)
+  argValidationUtils.argChecker(1, state, {"string"})
+  argValidationUtils.argChecker(2, message, {"string","nil"})
+  monitor.clear()
+  monitor.write(state)
+  term.print(state..": "..message)
+end
 
 local function init()
   -- check config for peripheral map
@@ -229,7 +236,7 @@ local function init()
   end
 end
 
-local outputChestFull()
+local function outputChestFull()
   -- TODO: pause everything
   -- TODO: stop the turtle and let the user know that the program has stopped because the output is full #turtle
   monitor.clear()
@@ -275,7 +282,7 @@ local function dynamicPeripheralManager()
         else -- detach
           for id , furnace in ipairs(furnaces) do
             -- find the hole
-            if furnace.PERIPHERAL_NAME == side then
+            if furnace._backingPeripheralsList[1].PERIPHERAL_NAME == side then
               -- move the last one to fill the hole
               furnaces[id] = furnaces[furnaces.n]
               furnaces[furnaces.n] = nil
