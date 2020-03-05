@@ -13,6 +13,7 @@ rednet.open(modem)
 local PROTOCOL_SEPERATOR = "."
 local ROOT_PROTOCOL = "Lupus590"..PROTOCOL_SEPERATOR.."treeFarm"
 local PING_PROTOCOL = ROOT_PROTOCOL..PROTOCOL_SEPERATOR.."ping"
+local STATUS_PROTOCOL = ROOT_PROTOCOL..PROTOCOL_SEPERATOR.."status"
 
 local function concatProtocols(...)
   local protocols = table.pack(...)
@@ -64,7 +65,7 @@ local function ping(targetId, timeout)
       return true -- remote responded correctly
 
     elseif event[1] == "timer" and event[2] == timerID then
-      return false -- no responce
+      return false -- no response
     end
   end
 end
@@ -80,6 +81,8 @@ local function run()
 end
 
 local rednetUtils = {
+  ROOT_PROTOCOL = ROOT_PROTOCOL,
+  STATUS_PROTOCOL = STATUS_PROTOCOL,
   concatProtocols = concatProtocols,
   ping = ping,
   run = run,

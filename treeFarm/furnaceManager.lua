@@ -28,16 +28,33 @@ local function fuelValueForFurnace(turtleFuelValue)
   return turtleFuelValue/10
 end
 
-local lastState -- TODO: allow the pocket remote program to read this state
-
+local lastState
+local logFile
+local LOG_FILE_PATH = fs.combine(fs.getDir(shell.getRunningProgram()), "treefarm.log")
 local function statusUpdater(state, message)
   argValidationUtils.argChecker(1, state, {"string"})
   argValidationUtils.argChecker(2, message, {"string","nil"})
+  -- TODO: set background colour to red/green/yellow based on error/ok/warn
   monitor.clear()
   monitor.write(state)
-  lastState = message and state..": "..message or state
+  local timeStamp = os.date("%d.%m.%Y %H:%M")
+  lastState = message and timeStamp.." "..state..": "..message or timeStamp.." "..state
   term.print(lastState)
-  -- TODO: log the state to a file?
+  if not logFile then
+    logFile = fs.open(LOG_FILE_PATH, "a")
+  end
+  logFile.writeLine(lastState)
+  logFile.flush()
+end
+
+local function remoteStateResponder()
+  while true do
+    -- TODO: rednet protocol wrapper
+    local sender, message = rednet.receive(rednetUtils.STATUS_PROTOCOL, nil)
+    if message == "status request" then
+      rednet.send(sender, lastState, rednetUtils.STATUS_PROTOCOL)
+    end
+  end
 end
 
 local function init()
