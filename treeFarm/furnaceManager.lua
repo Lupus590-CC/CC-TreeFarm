@@ -28,12 +28,16 @@ local function fuelValueForFurnace(turtleFuelValue)
   return turtleFuelValue/10
 end
 
+local lastState -- TODO: allow the pocket remote program to read this state
+
 local function statusUpdater(state, message)
   argValidationUtils.argChecker(1, state, {"string"})
   argValidationUtils.argChecker(2, message, {"string","nil"})
   monitor.clear()
   monitor.write(state)
-  term.print(state..": "..message)
+  lastState = message and state..": "..message or state
+  term.print(lastState)
+  -- TODO: log the state to a file?
 end
 
 local function init()
@@ -68,16 +72,14 @@ local function init()
   -- if we have a turtle then test the connection to make sure it still exists
   if linkedTurtleId then
     --TODO: ping the turtle, if no responce then unpair the turtle #turtle
-    monitor.clear()
-    monitor.write("Player is standing in for the turtle for init testing, click the monitor to continue")
-    os.pullEvent("monitor_touch")
+    statusUpdater("test", "Player is standing in for the turtle for init testing, click the monitor to continue")
+    os.pullEvent("monitor_touch") -- TODO: remove #turtle
   end
 
 
   if not linkedTurtleId then
 
-    monitor.clear()
-    monitor.write("Waiting to pair with turtle, pairing code: "..os.getComputerID().."\nplease access turtle and pair")
+    statusUpdater("ok", "Waiting to pair with turtle, pairing code: "..os.getComputerID().."\nplease access turtle and pair")
 
     -- TODO: how to do pairing #turtle
     -- rednet host stuff? unhost once paired (will unhosting disrupt the turtle?)
@@ -92,9 +94,9 @@ local function init()
 
   -- if nothing is mapped yet then start mapping
   if not (chestMap.input and chestMap.output and chestMap.charcoal and chestMap.saplings and chestMap.logs) then -- always reset if one fails?
+    -- TODO: detect state corruption?
 
-    monitor.clear()
-    monitor.write("Please don't open the chests or drop items into the water stream, chest mapping in progress")
+    statusUpdater("WARNING", "Chest Mapping in progress, do not modify the contents of the chests.")
 
 
     -- filter names for chests and get their inital state
@@ -113,9 +115,8 @@ local function init()
     -- TODO: what if the turtle doesn't have enough items to drop? #turtle
       -- have the turtle message as if an error accured
 
-    monitor.clear()
-    monitor.write("waiting for drop signal")
-    os.pullEvent("monitor_touch")
+    statusUpdater("ok", "waiting for drop signal")
+    os.pullEvent("monitor_touch") -- TODO: remove #turtle
 
     -- wait a few seconds for the items to get the chest
     sleep(5)
@@ -150,9 +151,8 @@ local function init()
 
 
     -- TODO: message the turtle to remove an item from the charcoal chest #turtle
-    monitor.clear()
-    monitor.write("waiting for turtle to remove item from charcoal chest")
-    os.pullEvent("monitor_touch")
+    statusUpdater("ok", "waiting for turtle to remove item from charcoal chest")
+    os.pullEvent("monitor_touch") -- TODO: remove #turtle
 
     -- the chest now missing an item is the charcoal chest
     for chestName, oldState in pairs(chestStates) do
@@ -170,9 +170,8 @@ local function init()
     end
 
     -- TODO: message the turtle to remove an item from the sapling chest #turtle
-    monitor.clear()
-    monitor.write("waiting for turtle to remove item from sapling chest")
-    os.pullEvent("monitor_touch")
+    statusUpdater("ok", "waiting for turtle to remove item from sapling chest")
+    os.pullEvent("monitor_touch") -- TODO: remove #turtle
 
     -- the chest now missing an item is the sapling chest
     for chestName, oldState in pairs(chestStates) do
@@ -190,14 +189,13 @@ local function init()
     end
 
     -- TODO: message the turtle to remove an item from the log chest #turtle
-    monitor.clear()
-    monitor.write("waiting for turtle to remove item from log chest")
-    os.pullEvent("monitor_touch")
+    statusUpdater("ok", "waiting for turtle to remove item from log chest")
+    os.pullEvent("monitor_touch") -- TODO: remove #turtle
 
     -- the chest now missing an item is the log chest
     for chestName, oldState in pairs(chestStates) do
       local newState = peripheral.call(chestName, "list")
-      for slot, item in pairs(oldState) do -- TODO: should be for each slot?
+      for slot, item in pairs(oldState) do
         if itemUtils.itemEqualityComparerWithQuantity(newState[slot], item) then
           chestMap.logs = chestName
           chestStates[chestName] = nil
@@ -218,8 +216,7 @@ local function init()
     end
 
     -- update monitor to say that chest mapping is complete
-    monitor.clear()
-    monitor.write("Chest mapping complete")
+    statusUpdater("ok", "Chest mapping complete")
 
     -- save maps (only need to save chests, the others can be rediscovered on next load)
     config.save(chestMapFile, chestMap)
@@ -239,9 +236,8 @@ end
 local function outputChestFull()
   -- TODO: pause everything
   -- TODO: stop the turtle and let the user know that the program has stopped because the output is full #turtle
-  monitor.clear()
-  monitor.write("PAUSED: Output inventory is full")
-  os.pullEvent("monitor_touch")
+  statusUpdater("PAUSED", "Output inventory is full")
+  os.pullEvent("monitor_touch") -- TODO: remove #turtle
   -- need an event which tells us that the output has space again
 end
 
