@@ -49,7 +49,7 @@ end
 
 local function remoteStateResponder()
   while true do
-    -- TODO: rednet protocol wrapper
+    -- TODO: rednet protocol wrapper?
     local sender, message = rednet.receive(rednetUtils.STATUS_PROTOCOL, nil)
     if message == "status request" then
       rednet.send(sender, lastState, rednetUtils.STATUS_PROTOCOL)
