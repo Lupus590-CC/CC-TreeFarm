@@ -8,9 +8,15 @@ local touchpoint = require("treeFarm.libs.touchpoint")
   -- always do this?
 
 -- TODO: implement
+-- status screen
+-- remote control
+-- turtle position debug
+
 
 local function run()
-
+  if not term.isColour() then
+    error("Requires coloured terminal", 0)
+  end
 end
 
 
