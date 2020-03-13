@@ -31,20 +31,39 @@ end
 local lastState
 local logFile
 local LOG_FILE_PATH = fs.combine(fs.getDir(shell.getRunningProgram()), "treefarm.log")
-local function statusUpdater(state, message)
+local statusUpdaterState = {["error"] = true, ["ok"] = true, ["warning"] = true, ["warn"] = true,}
+local function statusUpdater(state, message, turtleUpdate)
   argValidationUtils.argChecker(1, state, {"string"})
-  argValidationUtils.argChecker(2, message, {"string","nil"})
-  -- TODO: set background colour to red/green/yellow based on error/ok/warn
+  state = string.lower(state)
+  if not statusUpdaterState[state] then
+    error("invalid status updator state",2)
+  end
+  message = message ~= nil and tostring(message)
+  argValidationUtils.argChecker(3, turtleUpdate, {"boolean","nil"})
+  -- TODO: set background colour to red/green/yellow based on error/ok/(warn/warning)
   monitor.clear()
   monitor.write(state)
   local timeStamp = os.date("%d.%m.%Y %H:%M")
-  lastState = message and timeStamp.." "..state..": "..message or timeStamp.." "..state
+  if turtleUpdate then
+    lastState = message and timeStamp.." turtle "..state..": "..message or timeStamp.." turtle "..state
+  else
+    lastState = message and timeStamp.." "..state..": "..message or timeStamp.." "..state
+  end
   term.print(lastState)
   if not logFile then
     logFile = fs.open(LOG_FILE_PATH, "a")
   end
   logFile.writeLine(lastState)
   logFile.flush()
+end
+
+-- TODO: override error to use statusUpdater
+local oldError = error
+local function error(message, level)
+  argValidationUtils.argChecker(2, level, {"number", "nil"})
+  message = message ~= nil and tostring(message)
+  statusUpdater(statusUpdaterState.error, message)
+  oldError(message, level)
 end
 
 local function remoteStateResponder()
@@ -436,7 +455,7 @@ end
 -- TODO: farm manager watchdog for if the farm manager forwards an error to us
 local function farmerWatchdog()
   -- listen for specific rednet messages
-  -- mark the screen if one such message is recived
+  statusUpdater(turtleState, "Turtle: "..turtleMessage)
 end
 
 local function run()

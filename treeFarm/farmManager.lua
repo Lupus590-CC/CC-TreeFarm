@@ -15,6 +15,20 @@ local turtleInv = invUtils.wrapTurtleInv()
 
 -- TODO: inventory checks
 
+local statusUpdaterState = {["error"] = true, ["ok"] = true, ["warning"] = true, ["warn"] = true,}
+local function statusUpdater(state, message)
+  argValidationUtils.argChecker(1, state, {"string"})
+  state = string.lower(state)
+  if not statusUpdaterState[state] then
+    error("invalid status updator state",2)
+  end
+  message = message ~= nil and tostring(message)
+
+  -- TODO: send a message to the furnace manager
+
+end
+
+-- TODO: turtleUtils
 -- by default full slots are not deemed valid for selection
 local function selectForDigging(itemId)
  argValidationUtils.itemIdChecker(1, itemId)
@@ -28,6 +42,7 @@ local function selectForDigging(itemId)
  return turtleInv.selectItemById(itemId) or turtleInv.selectEmptySlot()
 end
 
+-- TODO: turtleUtils
 -- items which give more fuel than targetFuelValue are not eligible
 -- TODO: change how refueling works entirely to not use wood and only use saplings when given permission from the furnace manager
 local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #homeOnly
@@ -56,6 +71,7 @@ local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #ho
  return false
 end
 
+-- TODO: turtleUtils
 -- implicitly preserves the wireless modem
 local function equipItemWithId(itemId)
  -- will peripheral.getType(side:string):string tell me that there is a pickaxe on that side? nope
@@ -75,13 +91,14 @@ local function equipItemWithId(itemId)
 end
 turtleInv.equipItemWithId = equipItemWithId
 
+
 -- drops everything into the water stream
-local function dumpInv()
+local function dumpInv(dropFunc)
   turtleInv.compactItemStacks()
+  dropFunc = dropFunc or turtle.dropDown
 
   -- dump junk
   local keepItems = {
-    itemId.charcoal,
     itemId.coal,
     itemId.wirelessModem,
     itemId.diamondPickaxe,
@@ -89,8 +106,9 @@ local function dumpInv()
     itemId.coalCokeBlock,
     itemId.lavaBucket,
     itemId.coalBlock,
-    itemId.sapling,
     itemId.blockScanner,
+    itemId.sapling,
+    itemId.charcoal,
   }
   local function keepThis(item)
     for _, v in pairs(keepItems) do
@@ -100,19 +118,26 @@ local function dumpInv()
     end
     return false
   end
-  for _, item in turtleInv.eachSlotSkippingEmpty() do
-    if not keepThis(item) then
-       turtle.dropDown()
-    end
-  end
 
-  -- dump excess saplings
+  -- dump excess saplings and charcoal
+  -- also dump junk
   local skippedFirstSaplingSlot = false -- first slot has the most saplings
-  for _ in turtleInv.eachSlotWithItem(itemIds.sapling) do
-    if skippedFirstSaplingSlot then
-      turtle.dropDown()
-    else
-      skippedFirstSaplingSlot = true
+  local skippedFirstCharcoalSlot = false -- first slot has the most charcoal
+  for _, item in turtleInv.eachSlotSkippingEmpty() do
+    if itemEqualityComparer(item, itemIds.sapling) then
+      if skippedFirstSaplingSlot then
+        dropFunc()
+      else
+        skippedFirstSaplingSlot = true
+      end
+    elseif itemEqualityComparer(item, itemIds.chacoal) then
+      if skippedFirstCharcoalSlot then
+        dropFunc()
+      else
+        skippedFirstCharcoalSlot = true
+      end
+    elseif not keepThis(item) then
+       dropFunc()
     end
   end
 end
@@ -185,13 +210,34 @@ checkpoint.add("scanForWork", scanForWork)
 
 local function restock()
   -- TODO: implement
+  -- TODO: go to?
 
+  -- rotate so that we face out
+  while turtle.detect() do
+    turtle.turnRight()
+  end
 
   -- dump inventory?
-  dumpInv()
+  dumpInv(turtle.drop)
 
+  local function isSaplingChest(chest)
+    return itemEqualityComparer(pairs(c.list())(), itemIds.sapling) -- TODO: fix ugly code
+  end
 
+  local function isCharcoalChest(chest)
+    return itemEqualityComparer(pairs(c.list())(), itemIds.charcoal) -- TODO: fix ugly code
+  end
+
+  -- TODO: does the turtle suck across slots in the chest? e.g. the chest has 1 item in the first slot but more of that item in the second, if the turtle trys to suck 2 of the item does it get 2? #homeOnly
   -- grab saplings
+  local c = peripheral.wrap("up")
+  if not isSaplingChest(c) then
+    c = peripheral.wrap("down") -- try the other chest
+  end
+  if isSaplingChest(c) then -- if this fails then the sapling chest is empty
+    if not turtleInv.findItemById(itemIds.sapling) then
+      statusUpdater("WARNING", "out of saplings")
+  end
 
   -- grab fuel and refuel aggressivly
   while (not fullyRefueled) and chestHasFuel do

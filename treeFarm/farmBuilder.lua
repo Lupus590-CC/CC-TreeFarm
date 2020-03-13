@@ -11,6 +11,7 @@ local task = require("treeFarm.libs.taskManager")
 
 -- TODO: make this a semi-intelligent 3d printer?
 
+-- TODO: turtleUtils
 -- by default full slots are not deemed valid for selection
 local function selectForDigging(itemId)
  argValidationUtils.itemIdChecker(1, itemId)
@@ -24,6 +25,7 @@ local function selectForDigging(itemId)
  return selectItemById(selectItemById) or selectEmptySlot()
 end
 
+-- TODO: turtleUtils
 -- items which give more fuel than targetFuelValue are not eligible
 -- TODO: change how refueling works entirely to not use wood and only use saplings when given permission from the furnace manager
 local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #homeOnly
@@ -53,6 +55,7 @@ local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #ho
  return false
 end
 
+-- TODO: turtleUtils
 -- implicitly preserves the wireless modem
 local function equipItemWithId(itemId)
  -- will peripheral.getType(side:string):string tell me that there is a pickaxe on that side? nope
