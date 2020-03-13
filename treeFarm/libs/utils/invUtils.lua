@@ -44,7 +44,7 @@ local function wrapTurtleInventoryAsPlethoraInv()
 end
 
 local function inject(inventory)
-  if turtle then
+  if turtle and then
     inventory = inventory or wrapTurtleInventoryAsPlethoraInv()
   end
   argValidationUtils.argChecker(1, inventory, {"table", "string"})
@@ -310,9 +310,17 @@ local function inject(inventory)
   return inventory
 end
 
+local function wrapTurtleInv()
+  if not turtle then
+    error("Not a turtle", 2)
+  end
+  return inject(wrapTurtleInventoryAsPlethoraInv())
+end
+
 local invUtils = {
   wrapTurtleInventoryAsPlethoraInv = wrapTurtleInventoryAsPlethoraInv,
   inject = inject,
   wrap = inject,
+  wrapTurtleInv = wrapTurtleInv,
 }
 return invUtils

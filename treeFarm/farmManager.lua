@@ -7,6 +7,8 @@ local itemUtils = invUtils.itemUtils
 local itemIds = itemUtils.itemIds
 local checkpoint = require("treeFarm.libs.checkpoint")
 
+local turtleInv = invUtils.wrapTurtleInv()
+
 -- 1,1,1 is the restock chest
 -- 3,0,3 first tree
 -- 13,0,13 last tree
@@ -17,35 +19,34 @@ local checkpoint = require("treeFarm.libs.checkpoint")
 local function selectForDigging(itemId)
  argValidationUtils.itemIdChecker(1, itemId)
 
- item = reverseItemLookup(item)
- if item.digsInto then
-   item = item.digsInto
+ itemId = reverseItemLookup(itemId)
+ if itemId.digsInto then
+   itemId = itemId.digsInto
    -- stone turns into cobble when we dig it
  end
 
- return selectItemById(selectItemById) or selectEmptySlot()
+ return turtleInv.selectItemById(itemId) or turtleInv.selectEmptySlot()
 end
 
 -- items which give more fuel than targetFuelValue are not eligible
 -- TODO: change how refueling works entirely to not use wood and only use saplings when given permission from the furnace manager
 local function selectBestFuel(targetFuelValue) -- TODO: test targetFuelValue #homeOnly
- -- TODO: add an argument to skip saplings?
  argValidationUtils.argChecker(1, targetFuelValue, {"number", "nil"})
  targetFuelValue = targetFuelValue or math.huge
 
  local bestFuelSlot
  local bestFuelValue = 0
- forEachSlotSkippingEmpty(function(selectedSlot)
-   local currentItem = turtle.getItemDetail()
-   if type(currentItem) == "table"
-   and reverseItemLookup(currentItem).fuelValue
-   and reverseItemLookup(currentItem).fuelValue > bestFuelValue
-   and reverseItemLookup(currentItem).fuelValue <= targetFuelValue
+ for slot, item in turtleInv.eachSlotSkippingEmpty() do
+
+   if type(item) == "table"
+   and reverseItemLookup(item).fuelValue
+   and reverseItemLookup(item).fuelValue > bestFuelValue
+   and reverseItemLookup(item).fuelValue <= targetFuelValue
    then
-     bestFuelSlot = selectedSlot
-     bestFuelValue = reverseItemLookup(currentItem).fuelValue
+     bestFuelSlot = slot
+     bestFuelValue = reverseItemLookup(item).fuelValue
    end
- end)
+ end
 
  if bestFuelSlot then
    turtle.select(bestFuelSlot)
@@ -62,7 +63,7 @@ local function equipItemWithId(itemId)
  if alreadyEquiped then
    return true, "already equipped"
  end
- if selectItemById(itemId) then
+ if turtleInv.selectItemById(itemId) then
    -- TODO: find non-modem side and equip to that side
    if equipped then
      return true, "equipped"
@@ -72,27 +73,16 @@ local function equipItemWithId(itemId)
  end
  return false, "couldn't find that"
 end
+turtleInv.equipItemWithId = equipItemWithId
 
+-- drops everything into the water stream
 local function dumpInv()
-  invUtils.forEachSlotWithItem(itemIds.log, function() turtle.dropDown() end)
-  -- merge sapling stacks
-  invUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.transferTo(1) end) -- TODO: test this where the first slot is not saplings or is saplings and full #homeOnly
-  -- and dump excess saplings
-  turtle.select(1)
-  local skippedFirst = false
-  local function skipFirst()
-    if skippedFirst then
-      return true
-    end
-    skippedFirst = true
-    return false
-  end
-  invUtils.forEachSlotWithItem(itemIds.sapling, function() turtle.dropDown() end, skipFirst)
+  turtleInv.compactItemStacks()
 
+  -- dump junk
   local keepItems = {
     itemId.charcoal,
     itemId.coal,
-    itemId.log,
     itemId.wirelessModem,
     itemId.diamondPickaxe,
     itemId.coalCoke,
@@ -101,67 +91,80 @@ local function dumpInv()
     itemId.coalBlock,
     itemId.sapling,
     itemId.blockScanner,
-
   }
-
-
-  -- TODO: dump excess of stack
-  -- dump junk
-  local function keepThis()
-    local _, currentItem = turtle.getItemDetail()
-    for k, v in pairs(keepItems) do
-      if itemUtils.itemEqualityComparer(currentItem, v) then
+  local function keepThis(item)
+    for _, v in pairs(keepItems) do
+      if itemUtils.itemEqualityComparer(item, v) then
         return true
       end
     end
     return false
   end
-
-  invUtils.forEachSlotSkippingEmpty(function(_)
-    if not keepThis() then
+  for _, item in turtleInv.eachSlotSkippingEmpty() do
+    if not keepThis(item) then
        turtle.dropDown()
     end
-  end)
+  end
+
+  -- dump excess saplings
+  local skippedFirstSaplingSlot = false -- first slot has the most saplings
+  for _ in turtleInv.eachSlotWithItem(itemIds.sapling) do
+    if skippedFirstSaplingSlot then
+      turtle.dropDown()
+    else
+      skippedFirstSaplingSlot = true
+    end
+  end
 end
 
 
 local function chopTree() -- TODO: fuel checks - use implied fuel checks?
-  -- TODO: equip pickaxe (could have block scanner equiped)
-  local hasBlock, blockId = turtle.inspect()
-  while hasBlock and blockId.name == itemIds.log.name then
-    hasBlock, blockId = turtle.inspectUp()
-    if hasBlock and blockId.name == itemIds.leaves.name then
-      if not invUtils.selectItemByIdOrEmptySlot(itemId.log) then
-        dumpInv()
-      end
-      turtle.digUp()
-    end
-    turtle.up()
-    hasBlock, blockId = turtle.inspect()
+  turtleInv.compactItemStacks()
+  if not equipItemWithId(itemIds.diamondPickaxe) then
+    error("can't find pickaxe")
   end
 
-  hasBlock, blockId = turtle.inspect()
-  while (not hasblock) or blockId.name == itemIds.leaves.name do
-    hasBlock, blockId = turtle.inspect()
-    if hasBlock and blockId.name == itemIds.log.name then
-      if not invUtils.selectItemByIdOrEmptySlot(itemId.log) then
-        dumpInv()
+  local hasBlock, blockId = turtle.inspect()
+  if hasBlock and blockId.name == itemIds.log.name then
+    if not turtleInv.selectEmptySlot() then
+      dumpInv()
+      if not turtleInv.selectEmptySlot() then
+        error("inventory full after trying to empty it")
       end
-      turtle.dig()
+    end
+    turtle.dig()
+    turtle.forward()
+  end
+
+  -- go up and dig the next log
+  hasBlock, blockId = turtle.inspectUp()
+  if not hasBlock then -- incase we stopped after digging but before climbing
+    turtle.up()
+    hasBlock, blockId = turtle.inspectUp()
+  end
+  while hasBlock and blockId.name == itemIds.log.name do
+    turtle.digUp()
+    turtle.up()
+    hasBlock, blockId = turtle.inspectUp()
+  end
+
+  -- go back down
+  hasBlock, blockId = turtle.inspectDown()
+  while (not hasBlock) or (blockId.name ~= itemIds.dirt.name and blockId.name ~= itemIds.sapling.name) do -- TODO: reduce nots, it's comfusing
+    if hasBlock then
+      turtle.digDown()
     end
     turtle.down()
-    hasBlock, blockId = turtle.inspect()
+    hasBlock, blockId = turtle.inspectDown()
   end
 
   if blockId.name == itemIds.dirt.name then
     turtle.up()
   end
-
-  -- we scan for missing saplings later so we can afford to not have any it's just less effient
-  if invUtils.selectItemById(itemIds.sapling) then
-    turtle.place()
+  -- we scan for missing saplings later so we can afford to not have any it's just less efficent
+  if turtleInv.selectItemById(itemIds.sapling) then
+    turtle.place() -- placing a sapling on a sapling should fail cleanly
   end
-
   checkpoint.reach("scanForWork")
 end
 checkpoint.add("chopTree", chopTree)
@@ -183,14 +186,10 @@ checkpoint.add("scanForWork", scanForWork)
 local function restock()
   -- TODO: implement
 
-  -- go towards chest but stop one block away over the water
 
-  -- dump inventory - not dumping first incase we need to use the wood as fuel
+  -- dump inventory?
   dumpInv()
 
-  -- go over chest and wrap it with plethora
-  turtle.forwards() -- TODO: fuel check
-  local chest = peripheral.wrap("down")
 
   -- grab saplings
 
