@@ -253,6 +253,7 @@ end
 local function run()
   -- TODO: pcall things and for any uncaught errors, message the furnace manager
   -- run checkpoint
+  -- TODO: nsh
 end
 
 local farmManager = {
