@@ -76,7 +76,7 @@ local function inject(inventory)
     return iterator
   end
 
-  inventory.eachSlotSkippingEmpty = function() -- could be optimised on plethora with a call to inventory.list
+  inventory.eachSlotSkippingEmpty = function() -- TODO: could be optimised on plethora with a call to inventory.list
     local eachSlotIterator = inventory.eachSlot()
     local function iterator()
       repeat
@@ -248,7 +248,7 @@ local function inject(inventory)
   inventory.findItemByIdParrallel = function(item) -- TODO: test, may not be faster but it might depend on which slot the item is in #homeOnly
     argValidationUtils.itemIdChecker(1, item)
     if inventory.IS_THIS_TURTLE_INV then
-      return inventory.(item)
+      return inventory.findItemById(item)
     end
 
     local slotfound, itemFound
