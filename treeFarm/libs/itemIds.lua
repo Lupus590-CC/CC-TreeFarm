@@ -42,7 +42,7 @@ itemIds.leaves.digsInto = itemIds.sapling
 
 -- allows finding item info from the itemIds table using the details
   -- provided by turtle.getItemDetail
-local reverseItemLookup = {}
+local itemIds.reverseItemLookup = {}
 for k, v in pairs(itemIds) do
   reverseItemLookup[v.name..":"..tostring(v.damage)] = itemIds[k]
 end
@@ -56,4 +56,4 @@ setmetatable(reverseItemLookup, {
   end
 })
 
-return {itemIds = itemIds, reverseItemLookup = reverseItemLookup}
+return itemIds
