@@ -106,7 +106,7 @@ local function tableChecker(positionInfo, tableToCheck, templateTable, rejectExt
 
   for k, v in pairs(templateTable) do
     if not tableToCheck[k] then
-      error(positionInfo.." table is missing key"..tostring(k),  level)
+      error(positionInfo.." table is missing key: "..tostring(k),  level)
     end
   end
 end
@@ -135,7 +135,7 @@ local function itemIdChecker(argPosition, itemIdArg)
 
   argChecker(argPosition, itemIdArg, {"table"}, 3)
   --argChecker(position, value, validTypesList, level)
-  tableCheckerFunc("arg["..argPosition.."]", itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
+  tableChecker("arg["..argPosition.."]", itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
 end
 
 
