@@ -44,7 +44,7 @@ local function wrapTurtleInventoryAsPlethoraInv()
 end
 
 local function inject(inventory)
-  if turtle and then
+  if turtle then
     inventory = inventory or wrapTurtleInventoryAsPlethoraInv()
   end
   argValidationUtils.argChecker(1, inventory, {"table", "string"})
@@ -55,7 +55,7 @@ local function inject(inventory)
     end
     inventory = peripheral.wrap(peripheralName)
     inventory.PERIPHERAL_NAME = peripheralName
-    pcall(argValidationUtils.tableChecker, "peripheral.wrap(arg[1])", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}}))
+    argValidationUtils.tableChecker("peripheral.wrap(arg[1])", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})
   else
     argValidationUtils.tableChecker("arg[1]", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})
   end
@@ -151,7 +151,7 @@ local function inject(inventory)
   inventory.getTotalItemCount = function(itemToCount)
     itemArgChecker(1, itemToCount)
     local total = 0
-    for _, item in inventory.eachSlotWithItem(itemToCount)
+    for _, item in inventory.eachSlotWithItem(itemToCount) do
       total = total + item.count
     end
     return total
@@ -159,7 +159,7 @@ local function inject(inventory)
 
   inventory.getFreeSpaceCount = function()
     local total = 0
-    for _ in inventory.eachEmptySlot()
+    for _ in inventory.eachEmptySlot() do
       total = total + 1
     end
     return total
@@ -280,7 +280,7 @@ local function inject(inventory)
     local total = 0
     inventory.eachSlotWithItemParrallel(itemToCount, function(_, item)
       total = total + item.count
-    end
+    end)
     return total
   end
 
@@ -288,7 +288,7 @@ local function inject(inventory)
     local total = 0
     inventory.eachEmptySlotParrallel(itemToCount, function()
       total = total + 1
-    end
+    end)
     return total
   end
 

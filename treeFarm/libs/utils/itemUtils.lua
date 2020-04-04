@@ -22,7 +22,7 @@ local function itemEqualityComparerWithCount(itemId1, itemId2)
   argValidationUtils.argChecker(2, itemId2, {"table", "nil"})
 
   local function countCheck(pos, item)
-    argValidationUtils.tableChecker("arg["..pos.."]", item, {count = {"number"})
+    argValidationUtils.tableChecker("arg["..pos.."]", item, {count = {"number"}})
   end
 
   if itemId1 then

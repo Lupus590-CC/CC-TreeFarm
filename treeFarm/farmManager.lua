@@ -236,6 +236,7 @@ local function restock()
   if isSaplingChest(c) then -- if this fails then the sapling chest is empty
     if not turtleInv.findItemById(itemIds.sapling) then
       statusUpdater("WARNING", "out of saplings")
+    end
   end
 
   -- grab fuel and refuel aggressivly

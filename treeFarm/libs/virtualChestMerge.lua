@@ -279,7 +279,7 @@ local function wrap(...)
     addbackers(thisVirtualPeripheral, ...)
   end
 
-  local function thisVirtualPeripheral.hasBackers()
+  function thisVirtualPeripheral.hasBackers()
     return thisVirtualPeripheral._backingPeripheralList.n > 0
   end
 
@@ -291,7 +291,7 @@ local function wrap(...)
     return total
   end
 
-  local function thisVirtualPeripheral.translateSlot(virtualSlot) -- returns peripheralWithVirtualSlot, physicalSlotNumber
+  function thisVirtualPeripheral.translateSlot(virtualSlot) -- returns peripheralWithVirtualSlot, physicalSlotNumber
     argChecker(1, virtualSlot, {"number"})
 
     if not thisVirtualPeripheral.hasBackers() then
@@ -356,7 +356,7 @@ local function wrap(...)
 
     local virtualToPeripheral = virtualPeripheralList[virtualToName] or (function()
       -- make a fake virtualPeripheral so that we can unwrap it later, because the item manipulation assumes that the remote peripheral is virtual
-      if !peripheral.isPresent(virtualToName) then
+      if not peripheral.isPresent(virtualToName) then
         return nil
       end
       local realPeripheralName = virtualToName
