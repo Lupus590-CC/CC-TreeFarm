@@ -62,16 +62,6 @@ end){
 Tasks:Task "test" { "clean", "testBuild" }
   :Description "Test build chain task"
 
-Tasks:Task "rename" (function(_, _, file, dest)
-  local fs = require("howl.platform").fs
-  local contents = fs.read(File("build/treefarm.min.lua"))
-
-  fs.write(File("build/treefarm"), contents)
-  end)
-  :Maps("build/treefarm.min.lua", "build/treefarm")
-  :description "Removes .lua extention for Old CC compatability/convinience"
-
-
 
  Tasks:Task "build" { "clean", "mainBuild", "minify", "license", "rename" }
    :Description "Main build chain task"
