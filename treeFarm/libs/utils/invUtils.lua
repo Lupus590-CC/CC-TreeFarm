@@ -18,15 +18,20 @@ local function wrapTurtleInventoryAsPlethoraInv()
   turtleInventoryAsPlethoraInv.size = function()
     return 16
   end
+  turtleInventoryAsPlethoraInv.getItemMeta = function(slot) -- NOTE: not complete implementation
+    argValidationUtils.argChecker(1, slot, {"number"})
+    argValidationUtils.numberRangeChecker(1, slot, 1, turtleInventoryAsPlethoraInv.size())
+    return turtle.getItemDetail(slot)
+  end
   turtleInventoryAsPlethoraInv.getItem = function(slot)
     argValidationUtils.argChecker(1, slot, {"number"})
     argValidationUtils.numberRangeChecker(1, slot, 1, turtleInventoryAsPlethoraInv.size())
-    return { getMetadata = function() return turtle.getItemDetail(slot) end}
+    return { getMetadata = function() return turtleInventoryAsPlethoraInv.getItemMeta(slot) end}
   end
   turtleInventoryAsPlethoraInv.list = function()
     local list = {}
     for i = 1, turtleInventoryAsPlethoraInv.size() do
-      list[i] = turtle.getItemDetail(i)
+      list[i] = turtleInventoryAsPlethoraInv.getItemMeta(i)
     end
     return list
   end
@@ -99,12 +104,13 @@ local function inject(inventory)
     argValidationUtils.itemIdChecker(1, targetItem)
     local eachSlotSkippingEmptyIterator = inventory.eachSlotSkippingEmpty()
     local function iterator()
+      local slot, item
       repeat
-        local slot, item = eachSlotSkippingEmptyIterator()
+         slot, item = eachSlotSkippingEmptyIterator()
         if slot == nil then
           return
         end
-      until itemEqualityComparer(item, targetItem)
+      until itemUtils.itemEqualityComparer(item.getMetadata(), targetItem)
       return slot, item
     end
     return iterator
