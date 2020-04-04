@@ -79,17 +79,13 @@ local function inject(inventory)
   inventory.eachSlotSkippingEmpty = function()
     local eachSlotIterator = inventory.eachSlot()
     local function iterator()
+      local slot, item
       repeat
-        local slot, item = eachSlotIterator()
-        print(slot)
-        print(item)
+        slot, item = eachSlotIterator()
         if slot == nil then
-          print("returning nil")
           return
         end
-      until item
-
-        print("returning stuff")
+      until item.getMetadata() -- nil if no item
       return slot, item
     end
     return iterator
