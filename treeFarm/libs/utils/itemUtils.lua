@@ -7,9 +7,13 @@ local function itemEqualityComparer(itemId1, itemId2)
   argValidationUtils.argChecker(2, itemId2, {"table", "nil"})
   if itemId1 then
     argValidationUtils.itemIdChecker(1, itemId1)
+  else
+    itemId1 = {}
   end
   if itemId2 then
     argValidationUtils.itemIdChecker(2, itemId2)
+  else
+    itemId1 = {}
   end
   if itemId1 == itemId2 or (itemId1.name == itemId2.name and itemId1.damage == itemId2.damage) then
     return true

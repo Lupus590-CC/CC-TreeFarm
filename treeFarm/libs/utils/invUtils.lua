@@ -76,7 +76,7 @@ local function inject(inventory)
       if inventory.allowChangeOfSelectedSlot and inventory.IS_THIS_TURTLE_INV then
         turtle.select(currentSlot)
       end
-      return currentSlot, inventory.getItem(currentSlot) -- if we can then we give the itemMeta (it contains all of the getItem stuff anyways) otherwise we give the normal item details
+      return currentSlot, inventory.getItemMeta(currentSlot)
     end
     return iterator
   end
@@ -90,7 +90,7 @@ local function inject(inventory)
         if slot == nil then
           return
         end
-      until item.getMetadata() -- nil if no item
+      until item
       return slot, item
     end
     return iterator
@@ -110,7 +110,7 @@ local function inject(inventory)
         if slot == nil then
           return
         end
-      until itemUtils.itemEqualityComparer(item.getMetadata(), targetItem)
+      until itemUtils.itemEqualityComparer(item, targetItem)
       return slot, item
     end
     return iterator
@@ -124,11 +124,11 @@ local function inject(inventory)
   end
 
   inventory.slotIsEmpty = function(slot)
-    if turtle and inventory.IS_THIS_TURTLE_INV then
+    if inventory.IS_THIS_TURTLE_INV then
       slot = slot or turtle.getSelectedSlot()
     end
     argValidationUtils.argChecker(1, slot, {"number"})
-    local item = inventory.getItem(slot)
+    local item = inventory.getItemMeta(slot)
     if not item then
       return true
     end
@@ -138,8 +138,9 @@ local function inject(inventory)
   inventory.eachEmptySlot = function()
     local eachSlotIterator = inventory.eachSlot()
     local function iterator()
+      local slot, item
       repeat
-        local slot, item = eachSlotIterator()
+        slot, item = eachSlotIterator()
         if slot == nil then
           return
         end
@@ -156,10 +157,13 @@ local function inject(inventory)
   end
 
   inventory.getTotalItemCount = function(itemToCount)
-    argValidationUtils.itemIdChecker(1, itemToCount)
+    argValidationUtils.argChecker(1, itemToCount, {"table", "nil"})
+    if itemToCount then
+      argValidationUtils.itemIdChecker(1, itemToCount)
+    end
     local total = 0
     for _, item in inventory.eachSlotWithItem(itemToCount) do
-      total = total + item.count
+      total = total + item.getMetadata().count
     end
     return total
   end
@@ -173,17 +177,21 @@ local function inject(inventory)
   end
 
   inventory.compactItemStacks = function()
-    if turtle and inventory.IS_THIS_TURTLE_INV then
+    if inventory.IS_THIS_TURTLE_INV then
       for sourceSlot in inventory.eachSlotWithItem() do
-        turtle.select(sourceSlot)
+        if inventory.allowChangeOfSelectedSlot then
+          turtle.select(sourceSlot)
+        end
         for destinationSlot = 1, sourceSlot do
-          turtle.transferTo(destinationSlot)
+          if turtle.getItemCount() > 0 then
+            turtle.transferTo(destinationSlot)
+          end
         end
       end
     else
       argValidationUtils.tableChecker("self", inventory, {list = {"function"}, PERIPHERAL_NAME = {"string"}, pushItems = {"function"}})
       for slot in pairs(inventory.list()) do
-        chest.pushItems(chest.PERIPHERAL_NAME, slot)
+        inventory.pushItems(inventory.PERIPHERAL_NAME, slot)
       end
     end
   end
@@ -211,7 +219,7 @@ local function inject(inventory)
       end
     end
 
-    parrallel.waitForAll(table.unpack(tasks, 1, inventory.size()))
+    parallel.waitForAll(table.unpack(tasks, 1, inventory.size()))
   end
 
   inventory.eachSlotSkippingEmptyParrallel = function(callback)
@@ -283,7 +291,10 @@ local function inject(inventory)
   end
 
   inventory.getTotalItemCountParrallel = function(itemToCount) -- TODO: test, may not be faster #homeOnly
-    argValidationUtils.itemIdChecker(1, itemToCount)
+    argValidationUtils.argChecker(1, itemToCount, {"table", "nil"})
+    if itemToCount then
+      argValidationUtils.itemIdChecker(1, itemToCount)
+    end
     local total = 0
     inventory.eachSlotWithItemParrallel(itemToCount, function(_, item)
       total = total + item.count
@@ -308,9 +319,9 @@ local function inject(inventory)
       local taskCount = 0
       for slot in pairs(inventory.list()) do
          taskCount = taskCount + 1
-         tasks[taskCount] = function() chest.pushItems(chest.PERIPHERAL_NAME, slot) end
+         tasks[taskCount] = function() inventory.pushItems(inventory.PERIPHERAL_NAME, slot) end
       end
-      parrallel.waitForAll(table.unpack(tasks, 1, taskCount))
+      parallel.waitForAll(table.unpack(tasks, 1, taskCount))
     end
   end
 
