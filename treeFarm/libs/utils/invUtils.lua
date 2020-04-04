@@ -21,12 +21,12 @@ local function wrapTurtleInventoryAsPlethoraInv()
   turtleInventoryAsPlethoraInv.getItem = function(slot)
     argValidationUtils.argChecker(1, slot, {"number"})
     argValidationUtils.numberRangeChecker(1, slot, 1, turtleInventoryAsPlethoraInv.size())
-    return turtle.getItemDetail(slot)
+    return { getMetadata = function() return turtle.getItemDetail(slot) end}
   end
   turtleInventoryAsPlethoraInv.list = function()
     local list = {}
     for i = 1, turtleInventoryAsPlethoraInv.size() do
-      list[i] = turtleInventoryAsPlethoraInv.getItem(i)
+      list[i] = turtle.getItemDetail(i)
     end
     return list
   end
@@ -69,22 +69,27 @@ local function inject(inventory)
         return
       end
       if inventory.allowChangeOfSelectedSlot and inventory.IS_THIS_TURTLE_INV then
-        turtle.select(i)
+        turtle.select(currentSlot)
       end
-      return currentSlot, inventory.getItemMeta and inventory.getItemMeta(currentSlot) or inventory.getItem(currentSlot) -- if we can then we give the itemMeta (it contains all of the getItem stuff anyways) otherwise we give the normal item details
+      return currentSlot, inventory.getItem(currentSlot) -- if we can then we give the itemMeta (it contains all of the getItem stuff anyways) otherwise we give the normal item details
     end
     return iterator
   end
 
-  inventory.eachSlotSkippingEmpty = function() -- TODO: could be optimised on plethora with a call to inventory.list
+  inventory.eachSlotSkippingEmpty = function()
     local eachSlotIterator = inventory.eachSlot()
     local function iterator()
       repeat
         local slot, item = eachSlotIterator()
+        print(slot)
+        print(item)
         if slot == nil then
+          print("returning nil")
           return
         end
       until item
+
+        print("returning stuff")
       return slot, item
     end
     return iterator
@@ -110,7 +115,7 @@ local function inject(inventory)
   end
 
   inventory.findItemById = function(item)
-    itemArgChecker(1, item)
+    argValidationUtils.itemIdChecker(1, item)
     local iterator = inventory.eachSlotWithItem(item)
     local slot, item = iterator()
     return slot, item
@@ -149,7 +154,7 @@ local function inject(inventory)
   end
 
   inventory.getTotalItemCount = function(itemToCount)
-    itemArgChecker(1, itemToCount)
+    argValidationUtils.itemIdChecker(1, itemToCount)
     local total = 0
     for _, item in inventory.eachSlotWithItem(itemToCount) do
       total = total + item.count
