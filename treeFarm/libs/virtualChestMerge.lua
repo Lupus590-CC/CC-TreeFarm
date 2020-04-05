@@ -193,6 +193,7 @@ local function wouldCauseRecursion(virtualPeripheralName, newBackerName)
   end
 end
 
+-- TODO: fix adding backers
 local function addbackers(virtualPeripheral, ...)
   if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
     arg = arg[1]
