@@ -260,7 +260,7 @@ local function inject(inventory)
     end)
   end
 
-  inventory.findItemByIdParrallel = function(item) -- TODO: test, may not be faster but it might depend on which slot the item is in #homeOnly
+  inventory.findItemByIdParrallel = function(item)
     argValidationUtils.itemIdChecker(1, item)
     if inventory.IS_THIS_TURTLE_INV then
       return inventory.findItemById(item)
@@ -290,7 +290,7 @@ local function inject(inventory)
     end)
   end
 
-  inventory.getTotalItemCountParrallel = function(itemToCount) -- TODO: test, may not be faster #homeOnly
+  inventory.getTotalItemCountParrallel = function(itemToCount)
     argValidationUtils.argChecker(1, itemToCount, {"table", "nil"})
     if itemToCount then
       argValidationUtils.itemIdChecker(1, itemToCount)
@@ -302,7 +302,7 @@ local function inject(inventory)
     return total
   end
 
-  inventory.getFreeSpaceCountParrallel = function() -- TODO: test, may not be faster #homeOnly
+  inventory.getFreeSpaceCountParrallel = function()
     local total = 0
     inventory.eachEmptySlotParrallel(itemToCount, function()
       total = total + 1
@@ -310,14 +310,14 @@ local function inject(inventory)
     return total
   end
 
-  inventory.compactItemStacksParrallel = function() -- TODO: test, may not be faster and may not even work #homeOnly
+  inventory.compactItemStacksParrallel = function()
     if inventory.IS_THIS_TURTLE_INV then
       inventory.compactItemStacks()
     else
       argValidationUtils.tableChecker("self", inventory, {list = {"function"}, PERIPHERAL_NAME = {"string"}, pushItems = {"function"}})
       local tasks = {}
       local taskCount = 0
-      for slot in pairs(inventory.list()) do
+      for slot in pairs(inventory.list()) do  -- TODO: check performance on large inventories #homeOnly
          taskCount = taskCount + 1
          tasks[taskCount] = function() inventory.pushItems(inventory.PERIPHERAL_NAME, slot) end
       end
