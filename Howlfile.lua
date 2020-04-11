@@ -64,10 +64,7 @@ Tasks:Task "runTestFile" (function()
 	shell.run("build/treefarm.test")
  end) :Requires { "build/treefarm.test.lua" }
 
-Tasks:Task "test" { "clean", "testBuild" }
-  :Description "Test build chain task"
-
-Tasks:Task "runTest" { "clean", "runTestFile" }
+Tasks:Task "test" { "clean", "runTestFile" }
   :Description "Test build and run chain task"
 
 
