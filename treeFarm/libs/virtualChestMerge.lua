@@ -230,7 +230,7 @@ end
 
 local function lightWrap(peripheralName) -- make a fake virtualPeripheral so that we can unwrap it later, because the item manipulation assumes that the remote peripheral is virtual
 
-  -- TODO: expand so that it does the real peripheral compatability in peripheral.wrap
+  -- TODO: expand so that it does the real peripheral compatability in peripheral.wrap?
   if not peripheral.isPresent(peripheralName) then
     return nil
   end
