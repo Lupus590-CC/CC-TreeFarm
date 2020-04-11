@@ -515,6 +515,7 @@ end
 
 local virtualChestMerge = {
   wrap = wrap,
+  create = wrap,
 }
 
 return virtualChestMerge
