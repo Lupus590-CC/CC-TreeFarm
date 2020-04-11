@@ -228,6 +228,19 @@ local function addbackers(virtualPeripheral, ...)
   return toAddList
 end
 
+local function lightWrap(peripheralName) -- make a fake virtualPeripheral so that we can unwrap it later, because the item manipulation assumes that the remote peripheral is virtual
+
+  -- TODO: expand so that it does the real peripheral compatability in peripheral.wrap
+  if not peripheral.isPresent(peripheralName) then
+    return nil
+  end
+  local realPeripheralName = peripheralName
+  local p = peripheral.wrap(realPeripheralName)
+  p._backingPeripheralsList = {p, n = 1}
+  p.PERIPHERAL_NAME = realPeripheralName
+  return p
+end
+
 -- wrap all
 local function wrap(...)
   -- create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
@@ -351,25 +364,13 @@ local function wrap(...)
     argChecker(3, limit, {"number", "nil"})
     argChecker(4, virtualToSlot, {"number", "nil"})
 
-
-    local virtualToPeripheral = virtualPeripheralList[virtualToName] or (function()
-      -- make a fake virtualPeripheral so that we can unwrap it later, because the item manipulation assumes that the remote peripheral is virtual
-      if not peripheral.isPresent(virtualToName) then
-        return nil
-      end
-      local realPeripheralName = virtualToName
-      local p = peripheral.wrap(realPeripheralName)
-      p._backingPeripheralsList = {p, n = 1} -- circular loop, will this break things?
-      p.PERIPHERAL_NAME = realPeripheralName
-      return p
-    end)()  -- should allow virtual to interact with real peripherals 'directly'
-
+    local virtualToPeripheral = virtualPeripheralList[virtualToName] or lightWrap(virtualToName)
 
     if not virtualToPeripheral then
       error("arg[1] no virtual peripheral with name "..virtualToName,2)
     end
     if virtualToSlot then
-      numberRangeChecker(1, virtualToSlot, 1, thisVirtualPeripheral.size())
+      numberRangeChecker(1, virtualToSlot, 1, virtualToPeripheral.size())
     end
 
     virtualFromSlot = math.floor(virtualFromSlot)
@@ -377,7 +378,7 @@ local function wrap(...)
     limit = limit and math.floor(limit)
     virtualToSlot = virtualToSlot and (function()
       local r = math.floor(virtualToSlot)
-      numberRangeChecker(4, r, 1, virtualToPeripheral.size())
+      numberRangeChecker(4, r, 1, virtualToPeripheral.size(), 2)
       return r
     end)()
 
@@ -427,25 +428,74 @@ local function wrap(...)
     return totalMoved
   end
 
-  function thisVirtualPeripheral.pullItems(virtualFromName, virtualFromSlot, limit, virtualToSlot)  -- TODO: doesn't work with real peripherals, probably something with the temperary wrapping
+  function thisVirtualPeripheral.pullItems(virtualFromName, virtualFromSlot, limit, virtualToSlot)
     argChecker(1, virtualFromName, {"string"})
     argChecker(2, virtualFromSlot, {"number"})
     argChecker(3, limit, {"number", "nil"})
     argChecker(4, virtualToSlot, {"number", "nil"})
 
-    local thatVirtualPeripheral = virtualPeripheralList[virtualFromName] or (function()
-      -- make a fake virtualPeripheral so that we can unwrap it later, because the item manipulation assumes that the remote peripheral is virtual
-      if not peripheral.isPresent(virtualFromName) then
-        return nil
-      end
-      local realPeripheralName = virtualFromName
-      local p = peripheral.wrap(realPeripheralName)
-      p._backingPeripheralsList = {p, n = 1} -- circular loop, will this break things?
-      p.PERIPHERAL_NAME = realPeripheralName
-      return p
-    end)()  -- should allow virtual to interact with real peripherals 'directly'
+    local virtualFromPeripheral = virtualPeripheralList[virtualFromName] or  lightWrap(virtualFromName)
 
-    return thatVirtualPeripheral.pushItems(thisVirtualPeripheral.PERIPHERAL_NAME, virtualToSlot, limit, virtualFromSlot)
+    if not virtualFromPeripheral then
+      error("arg[1] no virtual peripheral with name "..virtualFromName,2)
+    end
+    if virtualToSlot then
+      numberRangeChecker(1, virtualToSlot, 1, thisVirtualPeripheral.size())
+    end
+
+    virtualFromSlot = math.floor(virtualFromSlot)
+    numberRangeChecker(2, virtualFromSlot, 1, virtualFromPeripheral.size())
+    limit = limit and math.floor(limit)
+    virtualToSlot = virtualToSlot and (function()
+      local r = math.floor(virtualToSlot)
+      numberRangeChecker(4, r, 1, virtualFromPeripheral.size(),2)
+      return r
+    end)()
+
+    local realFromPeripheral = thisVirtualPeripheral
+    local realFromSlot = virtualFromSlot
+    repeat
+      realFromPeripheral, realFromSlot = thisVirtualPeripheral.translateSlot(realFromSlot)
+    until not realFromPeripheral.IS_VIRTUAL
+
+    if not limit then
+      local item = realFromPeripheral.getItemMeta(realFromSlot)
+      if item then
+        limit = item.count
+      else
+        return 0 -- nothing to move
+      end
+    end
+    if limit < 1 then
+      error("arg[3] limit must be 1 or greater")
+    end
+
+    if virtualToSlot then
+      local realToPeripheral = virtualFromPeripheral
+      local realToSlot = virtualToSlot
+      while realToPeripheral.IS_VIRTUAL do
+        realToPeripheral, realToSlot = realToPeripheral.translateSlot(realToSlot)
+      end
+
+      return realFromPeripheral.pushItems(realToPeripheral.PERIPHERAL_NAME, realFromSlot, limit, realToSlot)
+    end
+
+    local targets = virtualFromPeripheral._backingPeripheralsList
+    local totalMoved = 0
+    for i = 1, #targets do
+      local moved = 0
+      if targets[i].IS_VIRTUAL then
+        moved = thisVirtualPeripheral.pushItems(targets[i].PERIPHERAL_NAME, virtualFromSlot, limit)
+      else
+        moved = realFromPeripheral.pushItems(targets[i].PERIPHERAL_NAME, realFromSlot, limit)
+      end
+      totalMoved = totalMoved + moved
+      limit = limit - moved
+      if limit == 0 then
+        break
+      end
+    end
+    return totalMoved
   end
 
   thisVirtualPeripheral.PERIPHERAL_NAME = "virtualItemHandler_"..string.format("%08x", math.random(1, 2147483647))
