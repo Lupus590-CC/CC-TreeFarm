@@ -317,7 +317,7 @@ local function wrap(...)
     numberRangeChecker(1, slot, 1, thisVirtualPeripheral.size())
 
     -- locate backer with this slot
-    local backer, trueSlot = translateSlot(thisVirtualPeripheral, slot)
+    local backer, trueSlot = thisVirtualPeripheral.translateSlot(slot)
     return backer.getItem(trueSlot)
   end
 
@@ -326,7 +326,7 @@ local function wrap(...)
     numberRangeChecker(1, slot, 1, thisVirtualPeripheral.size())
 
     -- locate backer with this slot
-    local backer, trueSlot = translateSlot(thisVirtualPeripheral, slot)
+    local backer, trueSlot = thisVirtualPeripheral.translateSlot(slot)
     return backer.getItemMeta(trueSlot)
   end
 
@@ -385,7 +385,7 @@ local function wrap(...)
     local realFromPeripheral = thisVirtualPeripheral
     local realFromSlot = virtualFromSlot
     repeat
-      realFromPeripheral, realFromSlot= translateSlot(realFromPeripheral, realFromSlot)
+      realFromPeripheral, realFromSlot = thisVirtualPeripheral.translateSlot(realFromSlot)
     until not realFromPeripheral.IS_VIRTUAL
 
     if not limit then
@@ -404,7 +404,7 @@ local function wrap(...)
       local realToPeripheral = virtualToPeripheral
       local realToSlot = virtualToSlot
       repeat
-        realToPeripheral, realToSlot= translateSlot(realToPeripheral, realToSlot)
+        realToPeripheral, realToSlot = realToPeripheral.translateSlot(realToSlot)
       until not realToPeripheral.IS_VIRTUAL
 
       return realFromPeripheral.pushItems(realToPeripheral.PERIPHERAL_NAME, realFromSlot, limit, realToSlot)
@@ -456,7 +456,7 @@ local function wrap(...)
     local realFromPeripheral = virtualFromPeripheral
     local realFromSlot = virtualFromSlot
     repeat
-      realFromPeripheral, realFromSlot= translateSlot(realFromPeripheral, realFromSlot)
+      realFromPeripheral, realFromSlot = realFromPeripheral.translateSlot(realFromSlot)
     until not realFromPeripheral.IS_VIRTUAL
 
     if not limit then
@@ -475,7 +475,7 @@ local function wrap(...)
       local realToPeripheral = thisVirtualPeripheral
       local realToSlot = virtualToSlot
       repeat
-        realToPeripheral, realToSlot= translateSlot(realToPeripheral, realToSlot)
+        realToPeripheral, realToSlot = realToPeripheral.translateSlot(realToSlot)
       until not realToPeripheral.IS_VIRTUAL
 
       return realToPeripheral.pullItems(realFromPeripheral.PERIPHERAL_NAME, realFromSlot, limit, realToSlot)
