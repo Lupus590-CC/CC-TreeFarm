@@ -179,7 +179,7 @@ local virtualPeripheralList = {}
 local function wouldCauseRecursion(virtualPeripheralName, newBackerName)
   local newBacker = virtualPeripheralList[newBackerName]
   if newBacker then
-    for _, v in ipairs(newBacker._backingPeripheralList) do
+    for _, v in ipairs(newBacker._backingPeripheralsList) do
       if v.PERIPHERAL_NAME == virtualPeripheralName then
         return true -- we found what will become recursion
       end
@@ -193,20 +193,19 @@ local function wouldCauseRecursion(virtualPeripheralName, newBackerName)
   end
 end
 
--- TODO: fix adding backers
 local function addbackers(virtualPeripheral, ...)
   if type(arg[1]) == "table" then -- allow users to give one table argument instead of multiple arguments
     arg = arg[1]
   end
   local toAddList = {}
   local n = 0
-  for k, v in pairs(arg) do
+  for k, v in ipairs(arg) do
     argChecker(k, v, {"string"}, 3)
     if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
       error("arg["..k.."] not a valid peripheral side/name, got"..v, 3)
     end
 
-    if not virtualPeripheral._backingPeripheralList.backerIndex[v] then
+    if not virtualPeripheral._backingPeripheralsList.backerIndex[v] then
       if wouldCauseRecursion(virtualPeripheral.PERIPHERAL_NAME, v) then
         error("arg["..k.."] would cause the virtual peripheral to be it's own backer", 3)
       end
@@ -219,19 +218,19 @@ local function addbackers(virtualPeripheral, ...)
   end
   toAddList.n = n
 
-  local n = virtualPeripheral._backingPeripheralList.n
+  local n = virtualPeripheral._backingPeripheralsList.n
   for k, v in ipairs(toAddList) do
-    virtualPeripheral._backingPeripheralList[n+k] = peripheral.wrap(v) or virtualPeripheralList[v]
-    virtualPeripheral._backingPeripheralList.backerIndex[v] = n+k
+    virtualPeripheral._backingPeripheralsList[n+k] = peripheral.wrap(v) or virtualPeripheralList[v]
+    virtualPeripheral._backingPeripheralsList.backerIndex[v] = n+k
   end
-  virtualPeripheral._backingPeripheralList.n = n + toAddList.n
+  virtualPeripheral._backingPeripheralsList.n = n + toAddList.n
   return toAddList
 end
 
 -- wrap all
 local function wrap(...)
   -- create new virtual peripheral which links all of the arg peripherals together and translates the vitual names
-  local thisVirtualPeripheral = {_backingPeripheralsList = {n = 0}}
+  local thisVirtualPeripheral = {_backingPeripheralsList = {backerIndex = {}, n = 0}}
 
   function thisVirtualPeripheral._backingPeripheralsList.add(...)
     addbackers(thisVirtualPeripheral, ...)
@@ -276,12 +275,8 @@ local function wrap(...)
   thisVirtualPeripheral.addBackingPeripheral = thisVirtualPeripheral._backingPeripheralsList.add
   thisVirtualPeripheral.removeBackingPeripheral = thisVirtualPeripheral._backingPeripheralsList.remove
 
-  if arg then -- allow creation with no backers
-    addbackers(thisVirtualPeripheral, ...)
-  end
-
   function thisVirtualPeripheral.hasBackers()
-    return thisVirtualPeripheral._backingPeripheralList.n > 0
+    return thisVirtualPeripheral._backingPeripheralsList.n > 0
   end
 
   function thisVirtualPeripheral.size() -- NOTE: can parallel
@@ -304,11 +299,11 @@ local function wrap(...)
     end
 
     local scannedSize = 0
-    for k, v in ipairs(thisVirtualPeripheral._backingPeripheralList) do
-      local currentBackerSize = thisVirtualPeripheral._backingPeripheralList[k].size()
+    for k, v in ipairs(thisVirtualPeripheral._backingPeripheralsList) do
+      local currentBackerSize = thisVirtualPeripheral._backingPeripheralsList[k].size()
       if virtualSlot <= scannedSize + currentBackerSize then
         -- this is our backer peripheral
-        return thisVirtualPeripheral._backingPeripheralList[k], virtualSlot-scannedSize -- peripheralWithVirtualSlot, physicalSlotNumber
+        return thisVirtualPeripheral._backingPeripheralsList[k], virtualSlot-scannedSize -- peripheralWithVirtualSlot, physicalSlotNumber
       end
       scannedSize = scannedSize + currentBackerSize
     end
@@ -362,7 +357,7 @@ local function wrap(...)
       end
       local realPeripheralName = virtualToName
       local p = peripheral.wrap(realPeripheralName)
-      p._backingPeripheralList = {p, n = 1} -- circular loop, will this break things?
+      p._backingPeripheralsList = {p, n = 1} -- circular loop, will this break things?
       p.PERIPHERAL_NAME = realPeripheralName
       return p
     end)() -- TODO: test this then copy to pullItems #homeOnly
@@ -413,7 +408,7 @@ local function wrap(...)
       return realFromPeripheral.pushItems(realToPeripheral.PERIPHERAL_NAME, realFromSlot, limit, realToSlot)
     end
 
-    local targets = virtualToPeripheral._backingPeripheralList
+    local targets = virtualToPeripheral._backingPeripheralsList
     local totalMoved = 0
     for i = 1, #targets do
       local moved = 0
@@ -484,7 +479,7 @@ local function wrap(...)
       return realToPeripheral.pullItems(realFromPeripheral.PERIPHERAL_NAME, realFromSlot, limit, realToSlot)
     end
 
-    local targets = thisVirtualPeripheral._backingPeripheralList
+    local targets = thisVirtualPeripheral._backingPeripheralsList
     local totalMoved = 0
     for i = 1, #targets do
       local moved = 0
@@ -507,6 +502,10 @@ local function wrap(...)
   thisVirtualPeripheral.IS_VIRTUAL = true
 
   virtualPeripheralList[thisVirtualPeripheral.PERIPHERAL_NAME] = thisVirtualPeripheral
+
+  if ... then -- allow creation with no backers
+    thisVirtualPeripheral.addBackingPeripheral(...)
+  end
 
   return thisVirtualPeripheral
 end
