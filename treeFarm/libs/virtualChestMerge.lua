@@ -506,7 +506,7 @@ local function wrap(...)
   virtualPeripheralList[thisVirtualPeripheral.PERIPHERAL_NAME] = thisVirtualPeripheral
 
   if ... then -- allow creation with no backers
-    thisVirtualPeripheral.addBackingPeripheral(...)
+    addbackers(thisVirtualPeripheral, ...)
   end
 
   return thisVirtualPeripheral
