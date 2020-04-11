@@ -362,8 +362,7 @@ local function wrap(...)
       p._backingPeripheralsList = {p, n = 1} -- circular loop, will this break things?
       p.PERIPHERAL_NAME = realPeripheralName
       return p
-    end)() -- TODO: test this then copy to pullItems #homeOnly
-    -- should allow virtual to interact with real peripherals 'directly'
+    end)()  -- should allow virtual to interact with real peripherals 'directly'
 
 
     if not virtualToPeripheral then
@@ -403,9 +402,9 @@ local function wrap(...)
     if virtualToSlot then
       local realToPeripheral = virtualToPeripheral
       local realToSlot = virtualToSlot
-      repeat
+      while realToPeripheral.IS_VIRTUAL do
         realToPeripheral, realToSlot = realToPeripheral.translateSlot(realToSlot)
-      until not realToPeripheral.IS_VIRTUAL
+      end
 
       return realFromPeripheral.pushItems(realToPeripheral.PERIPHERAL_NAME, realFromSlot, limit, realToSlot)
     end
