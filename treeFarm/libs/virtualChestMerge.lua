@@ -221,6 +221,7 @@ local function addbackers(virtualPeripheral, ...)
   local n = virtualPeripheral._backingPeripheralsList.n
   for k, v in ipairs(toAddList) do
     virtualPeripheral._backingPeripheralsList[n+k] = peripheral.wrap(v) or virtualPeripheralList[v]
+    virtualPeripheral._backingPeripheralsList[n+k].PERIPHERAL_NAME = v
     virtualPeripheral._backingPeripheralsList.backerIndex[v] = n+k
   end
   virtualPeripheral._backingPeripheralsList.n = n + toAddList.n
@@ -240,7 +241,7 @@ local function wrap(...)
       arg = arg[1]
     end
     local toRemove = {}
-    for k, v in pairs(arg) do
+    for k, v in ipairs(arg) do
       argChecker(k, v, {"string"}, 3)
       if not (peripheral.isPresent(v) or virtualPeripheralList[v]) then
         error("arg["..k.."] not a valid peripheral side/name, got"..v, 3)
@@ -258,8 +259,9 @@ local function wrap(...)
     local n = 0
     local removed = {}
     for _, v in ipairs(currentList) do
-      if toRemove[v] then
-        removed[v] = true
+      print(v.PERIPHERAL_NAME)
+      if toRemove[v.PERIPHERAL_NAME] then
+        removed[v.PERIPHERAL_NAME] = true
       else
         n = n + 1
         newList[n] = v
