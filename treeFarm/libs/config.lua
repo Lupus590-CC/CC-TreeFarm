@@ -23,10 +23,22 @@
 
 
 -- TODO: validate arguments use argValidationUtils?
-local function load(filename)
+local function tableMerge(...)
+  local args = table.pack(...)
+  local merged = {}
+  for _, arg in ipairs(args) do
+    for k, v in pairs(arg) do
+      merged[k] = v
+    end
+  end
+  return merged
+end
+
+local function load(filename, defaultConfig)
   local function unsafeload()
     local file = fs.open(filename, "r")
     local data = textutils.unserialize(file.readAll())
+    data = tableMerge(defaultConfig or {}, data)
     file.close()
     return data
   end
@@ -34,7 +46,6 @@ local function load(filename)
   if (not fs.exists(filename)) or fs.isDir(filename) then
     return false, "not a file"
   end
-
 
   return pcall(unsafeload)
 end
