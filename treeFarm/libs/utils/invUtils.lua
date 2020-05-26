@@ -65,6 +65,7 @@ local function inject(inventory)
     argValidationUtils.tableChecker("arg[1]", inventory, {size = {"function"}, getItem = {"function"}, list = {"function"}})
   end
 
+  -- TODO: conform to lua iterators better, see how `pairs` works
   inventory.eachSlot = function()
     local currentSlot = 0
     local invSize = inventory.size()
