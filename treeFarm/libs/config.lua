@@ -50,7 +50,7 @@ local function load(filename, defaultConfig)
   return pcall(unsafeload)
 end
 
-local function save(filename, data)
+local function save(filename, data) -- TODO: save with comments
   local function unsafeSave()
     local file = fs.open(filename, "w")
     file.write(textutils.serialize(data))
