@@ -337,9 +337,9 @@ local function wrapTurtleInv()
 end
 
 local invUtils = {
-  wrapTurtleInventoryAsPlethoraInv = wrapTurtleInventoryAsPlethoraInv,
+  wrapTurtleInventoryAsPlethoraInv = turtle and wrapTurtleInventoryAsPlethoraInv,
   inject = inject,
   wrap = inject,
-  wrapTurtleInv = wrapTurtleInv,
+  wrapTurtleInv = turtle and wrapTurtleInv,
 }
 return invUtils
