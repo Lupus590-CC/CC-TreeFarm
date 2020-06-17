@@ -15,7 +15,7 @@ local function itemEqualityComparer(itemId1, itemId2)
   else
     itemId1 = {}
   end
-  if itemId1 == itemId2 or (itemId1.name == itemId2.name and itemId1.damage == itemId2.damage) then
+  if itemId1 == itemId2 or (itemId1.name == itemId2.name and (itemId1.damage and itemId2.damage and itemId1.damage == itemId2.damage or true)) then
     return true
   end
   return false
