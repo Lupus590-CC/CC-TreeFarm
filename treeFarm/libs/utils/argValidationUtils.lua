@@ -104,8 +104,17 @@ local function tableChecker(positionInfo, tableToCheck, templateTable, rejectExt
     end
   end
 
-  for k, v in pairs(templateTable) do
-    if not tableToCheck[k] then
+  local function acceptsNil(template)
+    for _, v in ipairs(template) do
+      if v == "nil" then
+        return true
+      end
+    end
+    return false
+  end
+
+  for k in pairs(templateTable) do
+    if (not acceptsNil(templateTable[k])) and tableToCheck[k] == nil then
       error(positionInfo.." table is missing key: "..tostring(k),  level)
     end
   end
