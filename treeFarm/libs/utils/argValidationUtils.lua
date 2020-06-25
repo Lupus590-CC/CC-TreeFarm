@@ -144,7 +144,7 @@ local function itemIdChecker(argPosition, itemIdArg)
 
   argChecker(argPosition, itemIdArg, {"table"}, 3)
   --argChecker(position, value, validTypesList, level)
-  tableChecker("arg["..argPosition.."]", itemIdArg, {name = {"string"}, damage = {"number"}}, nil, 3)
+  tableChecker("arg["..argPosition.."]", itemIdArg, {name = {"string"}, damage = {"number", "nil"}}, nil, 3)
 end
 
 
