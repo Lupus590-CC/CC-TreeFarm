@@ -1,6 +1,3 @@
--- build from master branch source
--- built on copy cat on 24/06/2019
-
 local preload = type(package) == "table" and type(package.preload) == "table" and package.preload or {}
 
 local require = require
