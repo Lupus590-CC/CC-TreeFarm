@@ -137,7 +137,7 @@ local function placeTreePodium() -- TODO: fuel checks
   turtle.place()
 
   turtle.up()
-  invUtils.selectItemById(itemIds.jackOLantern)
+  invUtils.selectItemById(itemIds.jackOLantern) --TODO: glowstone is cheaper now
   turtle.place()
 
   turtle.up()

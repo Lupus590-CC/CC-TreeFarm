@@ -206,7 +206,7 @@ end
 function checkpoint.run(defaultLabel, fileName, stackTracing) -- returns whatever the last callback returns (xpcall stuff stripped if used)
   argChecker(1, defaultLabel, {"string"})
   argChecker(2, fileName, {"string", "nil"})
-  argChecker(3, label, {"boolean", "nil"})
+  argChecker(3, stackTracing, {"boolean", "nil"})
   if not checkpoints[defaultLabel] then
     error("Bad arg[1], no known checkpoint with label "
     ..tostring(defaultLabel), 2)
