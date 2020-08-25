@@ -27,7 +27,7 @@ local function tableMerge(...)
   local args = table.pack(...)
   local merged = {}
   for _, arg in ipairs(args) do
-    for k, v in pairs(arg) do
+    for k, v in pairs(arg) do -- errors if defaultConfig was not a table
       merged[k] = v
     end
   end
@@ -44,8 +44,12 @@ local function load(filename, defaultConfig)
   end
 
   if (not fs.exists(filename)) or fs.isDir(filename) then
-    return false, "not a file"
-  end
+    if defaultConfig ~= nil then
+        return true, defaultConfig
+    else
+        return false, "not a file"
+    end
+end
 
   return pcall(unsafeload)
 end
